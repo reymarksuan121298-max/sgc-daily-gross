@@ -1,0 +1,104 @@
+import React from 'react';
+import SharedTable from './SharedTable';
+
+export default function MonthlyTab({ apiData, selectedEndDate }) {
+  const rawData = apiData?.data || [];
+  const spvrMap = {};
+  if (Array.isArray(apiData?.supervisors)) {
+    apiData.supervisors.forEach(s => spvrMap[s.id] = s.username?.toUpperCase() || s.fullName);
+  }
+
+  let refDate = selectedEndDate ? new Date(selectedEndDate) : new Date();
+  if (isNaN(refDate.getTime())) refDate = new Date();
+
+  const currentYear = refDate.getFullYear();
+  const currentMonth = refDate.getMonth() + 1; // 1-12
+
+  let prevDate = new Date(refDate);
+  prevDate.setMonth(refDate.getMonth() - 1);
+  const prevYear = prevDate.getFullYear();
+  const prevMonth = prevDate.getMonth() + 1;
+
+  let prevTotal = 0;
+  let currTotal = 0;
+  const groups = {};
+
+  rawData.forEach(item => {
+    const amount = item.TotalOverAllGross || 0;
+    const groupName = spvrMap[item.supervisor] || item.location || 'UNKNOWN AREA';
+
+    if (!groups[groupName]) {
+      groups[groupName] = { area: groupName, prev: 0, curr: 0 };
+    }
+
+    if (item.drawYear === currentYear && item.drawMonth === currentMonth) {
+      groups[groupName].curr += amount;
+      currTotal += amount;
+    } else if (item.drawYear === prevYear && item.drawMonth === prevMonth) {
+      groups[groupName].prev += amount;
+      prevTotal += amount;
+    }
+  });
+
+  const shiftPercent = prevTotal === 0 ? (currTotal > 0 ? 100 : 0) : ((currTotal - prevTotal) / prevTotal) * 100;
+
+  const tableData = Object.values(groups).map(g => ({
+    area: g.area,
+    prev: g.prev,
+    curr: g.curr,
+    change: g.curr - g.prev,
+    trend: g.prev === 0 ? (g.curr > 0 ? 100 : 0) : ((g.curr - g.prev) / g.prev) * 100
+  })).sort((a, b) => b.curr - a.curr);
+
+  const getDaysInMonth = (year, month) => new Date(year, month, 0).getDate();
+  const formatPaddedDate = (y, m, d) => `${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}-${String(y).slice(-2)}`;
+  
+  const currLabel = `${formatPaddedDate(currentYear, currentMonth, 1)} TO ${formatPaddedDate(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth))}`;
+  const prevLabel = `${formatPaddedDate(prevYear, prevMonth, 1)} TO ${formatPaddedDate(prevYear, prevMonth, getDaysInMonth(prevYear, prevMonth))}`;
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-300">
+      
+      <div className="bg-[#111827] rounded-3xl p-10 py-12 border border-slate-800 shadow-xl mb-6 relative">
+        <h3 className="text-[17px] font-extrabold tracking-wide text-white text-center mb-14">Monthly Performance Comparison</h3>
+
+        <div className="flex justify-between items-start w-full relative z-10">
+          <div className="text-left w-1/3">
+            <p className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mb-1.5">PREVIOUS MONTH</p>
+            <p className="text-[11px] text-indigo-300/80 font-extrabold mb-3">{prevLabel}</p>
+            <p className="text-[32px] font-extrabold text-white">₱{prevTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+          </div>
+
+          <div className="w-1/3 flex justify-center pt-8">
+            <span className="text-[10px] font-bold text-slate-500/70 tracking-widest">VS</span>
+          </div>
+
+          <div className="text-right w-1/3">
+            <p className="text-[9px] font-extrabold text-indigo-500/90 uppercase tracking-widest mb-1.5">CURRENT MONTH</p>
+            <p className="text-[11px] text-indigo-300/80 font-extrabold mb-3">{currLabel}</p>
+            <p className="text-[32px] font-extrabold text-white">₱{currTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+          </div>
+        </div>
+
+        <div className="flex justify-center mt-12 mb-2">
+          <div className={`px-12 py-5 rounded-[20px] flex flex-col items-center justify-center min-w-[220px]
+            ${shiftPercent >= 0 ? 'bg-[#00b87c]/10' : 'bg-[#2a131c]'}
+          `}>
+            <p className={`text-[32px] font-extrabold leading-none mb-2 tracking-tight ${shiftPercent >= 0 ? 'text-[#00b87c]' : 'text-[#ff4e50]'}`}>
+              {shiftPercent > 0 ? "+" : ""}{shiftPercent.toFixed(1)}%
+            </p>
+            <p className={`text-[9px] font-extrabold tracking-widest uppercase ${shiftPercent >= 0 ? 'text-[#00b87c]' : 'text-[#ff4e50]'}`}>
+              NET PERFORMANCE SHIFT
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <SharedTable 
+        title="Full Monthly Unit Shift" 
+        exportFilename="Monthly_Analysis.xlsx"
+        data={tableData} 
+      />
+    </div>
+  );
+}
