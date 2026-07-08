@@ -66,7 +66,7 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
       } else {
         authHeader = { headers: { 'Authorization': 'Bearer 142375|bgm3cNBv4knCMImS9OLYFiMr7mIV7aDirkb0msqH' } };
       }
-      
+
       const endDate = selectedEndDate ? new Date(selectedEndDate) : new Date();
       const pastDate = new Date(endDate);
       pastDate.setDate(endDate.getDate() - 30); // fetch last 30 days of unclaimed tickets
@@ -91,7 +91,7 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
       } else {
         url = `https://stl-mag-api.com/api/accountant/UnclaimedReceipts?isClaim=0&id=2&from=${fromStr}&to=${toStr}`;
       }
-        
+
       const response = await axios.get(url, authHeader);
 
       if (response.data && response.data.data) {
@@ -115,6 +115,132 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
   useEffect(() => {
     setPage(1);
   }, [searchTerm, selectedUnits, selectedTellers]);
+
+  // --- AUTOMATED GDRIVE SYNC (CRON JOB ALTERNATIVE FOR BROWSER) ---
+  const ticketsRef = React.useRef(tickets);
+  const currentPageRef = React.useRef(currentPage);
+  const spvrMapRef = React.useRef(spvrMap);
+  const lastSyncRef = React.useRef(null);
+
+  useEffect(() => {
+    ticketsRef.current = tickets;
+    currentPageRef.current = currentPage;
+    spvrMapRef.current = spvrMap;
+  }, [tickets, currentPage, spvrMap]);
+
+  useEffect(() => {
+    const checkAndSync = async () => {
+      try {
+        const now = new Date();
+        const options = { timeZone: 'Asia/Manila', day: 'numeric', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' };
+        const parts = new Intl.DateTimeFormat('en-US', options).formatToParts(now);
+
+        const day = parseInt(parts.find(p => p.type === 'day')?.value || '0', 10);
+        const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0', 10);
+        const minute = parseInt(parts.find(p => p.type === 'minute')?.value || '0', 10);
+
+        // Check if it's the 1st of the month at 10:00 PM (22:00) PHT
+        if (day === 1 && hour === 22 && minute === 0) {
+          const currentMonth = now.getMonth();
+
+          // Prevent multiple syncs in the same minute
+          if (lastSyncRef.current === currentMonth) return;
+          lastSyncRef.current = currentMonth;
+
+          console.log(`Cron: Fetching exact previous month data for GDrive sync...`);
+
+          // Calculate exact start and end of previous month
+          const prevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          const prevMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+          const formatDate = (d) => {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const dayStr = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${dayStr}`;
+          };
+
+          const fromStr = formatDate(prevMonthStart);
+          const toStr = formatDate(prevMonthEnd);
+
+          // Format month name (e.g. "June 2026")
+          const monthName = prevMonthStart.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+          let authHeader, url;
+          let branchTabName = 'maguindanao';
+
+          if (currentPageRef.current === 'unclaimed_ldn') {
+            branchTabName = 'LDN';
+            authHeader = { headers: { 'Authorization': 'Bearer 52382|TbvbjynEw9xiusXbvQ1ZG7iTZyQPdK0vCaZvhdN2' } };
+            url = `https://stl-ldn-api.com/api/accountant/UnclaimedReceipts?isClaim=0&from=${fromStr}&to=${toStr}`;
+          } else if (currentPageRef.current === 'unclaimed_lds') {
+            branchTabName = 'LDS';
+            authHeader = { headers: { 'Authorization': 'Bearer 111012|Ag4bzY0DBPYHbQsl8QxhqpdURrT6LYmsWnQsLEif' } };
+            url = `https://stl-lds-api.com/api/accountant/UnclaimedReceipts?isClaim=0&from=${fromStr}&to=${toStr}`;
+          } else if (currentPageRef.current === 'unclaimed_imp') {
+            branchTabName = 'imperial';
+            authHeader = { headers: { 'Authorization': 'Bearer 56406|I3jbYEequ4SjZPy4c3JI8QxQ7riFti5CdfKI1xN1' } };
+            url = `https://stl-cotabato-api.com/api/accountant/UnclaimedReceipts?isClaim=0&from=${fromStr}&to=${toStr}`;
+          } else {
+            branchTabName = 'maguindanao';
+            authHeader = { headers: { 'Authorization': 'Bearer 142375|bgm3cNBv4knCMImS9OLYFiMr7mIV7aDirkb0msqH' } };
+            url = `https://stl-mag-api.com/api/accountant/UnclaimedReceipts?isClaim=0&id=2&from=${fromStr}&to=${toStr}`;
+          }
+
+          const response = await axios.get(url, authHeader);
+          let monthTickets = (response.data && response.data.data) ? response.data.data : [];
+
+          if (monthTickets.length === 0) {
+            console.log("Cron: No unclaimed tickets for previous month to sync.");
+            return;
+          }
+
+          // Map supervisor names for grouped layout in GDrive
+          monthTickets = monthTickets.map(t => {
+            const spvrId = String(t.supervisor);
+            const spvrObj = (spvrMapRef.current || []).find(s => String(s.id) === spvrId);
+            const spvrName = (spvrObj ? (spvrObj.username || spvrObj.fullName) : t.username)?.toUpperCase() || 'UNKNOWN UNIT';
+            return { ...t, mappedSupervisor: spvrName };
+          });
+
+          console.log(`Cron: Triggering GDrive sync for ${currentPageRef.current} unclaimed tickets (${monthName}) at 10 PM PHT.`);
+
+          // IMPORTANT: Replace this URL with your actual Google Apps Script Web App URL
+          const G_DRIVE_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbx6aIvit432Pnh4yENjg50JkMTILQP8D1BEnI3l-wBO8B3iJb8kBQI_6X0amW5dECRPGA/exec';
+
+          if (G_DRIVE_WEBHOOK_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+            console.warn("Cron: Please provide your Google Apps Script Webhook URL to enable GDrive syncing.");
+            return;
+          }
+
+          const payload = {
+            action: 'saveData',
+            tabName: branchTabName,
+            monthName: monthName,
+            branch: currentPageRef.current,
+            timestamp: new Date().toISOString(),
+            tickets: monthTickets
+          };
+
+          // Use text/plain for Google Apps Script to avoid CORS preflight issues
+          await axios.post(G_DRIVE_WEBHOOK_URL, JSON.stringify(payload), {
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+          });
+          console.log(`Cron: Successfully synced ${monthName} unclaimed tickets to GDrive.`);
+        }
+      } catch (err) {
+        console.error("Cron Error: Failed to sync unclaimed tickets to GDrive:", err);
+      }
+    };
+
+    // Check every 60 seconds
+    const intervalId = setInterval(checkAndSync, 60000);
+    // Initial check on mount
+    checkAndSync();
+
+    return () => clearInterval(intervalId);
+  }, []);
+
 
   const { filteredTickets, groupedTickets, sortedSpvrs } = useMemo(() => {
     const filtered = tickets.filter(t => {
