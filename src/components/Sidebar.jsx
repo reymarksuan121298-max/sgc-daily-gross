@@ -24,6 +24,15 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     localStorage.setItem('sidebar_unclaimed_open', JSON.stringify(isUnclaimedOpen));
   }, [isUnclaimedOpen]);
 
+  const [isActiveTellersOpen, setIsActiveTellersOpen] = useState(() => {
+    const saved = localStorage.getItem('sidebar_active_tellers_open');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sidebar_active_tellers_open', JSON.stringify(isActiveTellersOpen));
+  }, [isActiveTellersOpen]);
+
   let dashboardItems = [
     { id: 'mag', label: 'Mag Dashboard' },
     { id: 'imp', label: 'Imp Dashboard' },
@@ -55,8 +64,13 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     { id: 'unclaimed_imp', label: 'Imp Unclaimed Tickets' },
   ];
 
+  const activeTellersItems = [
+    { id: 'active_tellers_mag', label: 'Mag Active Tellers' },
+  ];
+
   const isAnyDashboardActive = dashboardItems.some(item => item.id === currentPage);
   const isAnyUnclaimedActive = unclaimedItems.some(item => item.id === currentPage);
+  const isAnyActiveTellersActive = activeTellersItems.some(item => item.id === currentPage);
 
   return (
     <>
@@ -160,6 +174,50 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                       )}
                     >
                       <TicketSlash className="w-4 h-4" />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Active Tellers Section */}
+        {user?.username !== 'unclaimed' && (
+          <div>
+            <button
+              onClick={() => setIsActiveTellersOpen(!isActiveTellersOpen)}
+              className={clsx(
+                "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors mt-2",
+                isAnyActiveTellersActive && !isActiveTellersOpen
+                  ? "bg-emerald-900/30 text-emerald-400"
+                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <UserCheck className="w-5 h-5" />
+                <span>Active Tellers</span>
+              </div>
+              {isActiveTellersOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </button>
+            
+            {isActiveTellersOpen && (
+              <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
+                {activeTellersItems.map((item) => {
+                  const isActive = currentPage === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setCurrentPage(item.id)}
+                      className={clsx(
+                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20"
+                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                      )}
+                    >
+                      <UserCheck className="w-4 h-4" />
                       {item.label}
                     </button>
                   );

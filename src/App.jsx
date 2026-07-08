@@ -13,6 +13,7 @@ import SpvrWeeklyTab from './components/SpvrWeeklyTab';
 import FilterDropdown from './components/FilterDropdown';
 import Sidebar from './components/Sidebar';
 import UnclaimedTickets from './components/UnclaimedTickets';
+import ActiveTellers from './components/ActiveTellers';
 import { useAuth } from './context/AuthContext';
 import Login from './components/Login';
 
@@ -56,7 +57,14 @@ function App() {
           'imperial': 'imp'
         };
         const allowedPage = usernameMap[user.username] || user.username;
-        if (currentPage !== allowedPage) {
+        const validPages = [allowedPage];
+        
+        // Maguindanao users are also allowed to see their Active Tellers
+        if (allowedPage === 'mag') {
+          validPages.push('active_tellers_mag');
+        }
+        
+        if (!validPages.includes(currentPage)) {
           setCurrentPage(allowedPage);
         }
       }
@@ -75,6 +83,12 @@ function App() {
   });
 
   const fetchRealData = async (endDateStr, page) => {
+    if (page === 'active_tellers_mag') {
+      setApiData(null);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -273,7 +287,15 @@ function App() {
             </div>
             <div>
               <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-textPrimary">
-                {currentPage === 'imp' ? 'Imperial' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'Iligan' : currentPage === 'lanao' ? 'Lanao' : currentPage === 'lotto' ? 'Lotto' : currentPage === 'baloi' ? 'Baloi' : currentPage === 'lds' ? 'LDS' : 'Mag'} Dashboard
+                {currentPage === 'imp' ? 'Imperial' : 
+                 currentPage === 'setb' ? 'SETB' : 
+                 currentPage === 'iligan' ? 'Iligan' : 
+                 currentPage === 'lanao' ? 'Lanao' : 
+                 currentPage === 'lotto' ? 'Lotto' : 
+                 currentPage === 'baloi' ? 'Baloi' : 
+                 currentPage === 'lds' ? 'LDS' : 
+                 currentPage === 'active_tellers_mag' ? 'Mag Active Tellers' : 
+                 'Mag'} Dashboard
               </h1>
               <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
                 <span>Daily Gross Tracking Control</span>
@@ -363,6 +385,8 @@ function App() {
                 {activeTab === 'monthly' && <MonthlyTab apiData={filteredApiData} selectedEndDate={selectedEndDate} />}
               </>
             )
+          ) : currentPage === 'active_tellers_mag' ? (
+            <ActiveTellers currentPage={currentPage} />
           ) : (
             <UnclaimedTickets
               selectedEndDate={selectedEndDate}
