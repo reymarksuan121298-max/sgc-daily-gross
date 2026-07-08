@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, Filter, Users, LayoutDashboard, List, BarChart2, CalendarDays, CalendarRange, Crown } from 'lucide-react';
+import { Calendar, Filter, Users, LayoutDashboard, List, BarChart2, CalendarDays, CalendarRange, Crown, Menu } from 'lucide-react';
 import { clsx } from 'clsx';
 import axios from 'axios';
 
@@ -30,6 +30,7 @@ function App() {
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('app_active_tab') || 'overview';
   });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   React.useEffect(() => {
     localStorage.setItem('app_active_tab', activeTab);
@@ -244,20 +245,34 @@ function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-appBg text-textPrimary font-sans selection:bg-indigo-500/30">
-      <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+    <div className="flex min-h-screen bg-appBg text-textPrimary font-sans selection:bg-indigo-500/30 overflow-x-hidden">
+      <Sidebar 
+        currentPage={currentPage} 
+        setCurrentPage={(page) => {
+          setCurrentPage(page);
+          setIsMobileMenuOpen(false);
+        }} 
+        isOpen={isMobileMenuOpen}
+        setIsOpen={setIsMobileMenuOpen}
+      />
 
       <div className="flex-1 p-4 md:p-6 h-screen overflow-y-auto relative">
         {/* Global Header Section */}
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-8">
 
           {/* Logo and Title */}
-          <div className="flex items-center gap-4 group cursor-pointer">
-            <div className="bg-white rounded-full p-2 h-14 w-14 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-shadow">
-              <Crown className="text-yellow-600 h-8 w-8" />
+          <div className="flex items-center gap-2 group cursor-pointer">
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="lg:hidden p-2 rounded-md hover:bg-[#253247] text-slate-300 transition-colors"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="bg-white rounded-full p-2 h-10 w-10 md:h-14 md:w-14 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-shadow">
+              <Crown className="text-yellow-600 h-5 w-5 md:h-8 md:w-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-textPrimary">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-textPrimary">
                 {currentPage === 'imp' ? 'Imperial' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'Iligan' : currentPage === 'lanao' ? 'Lanao' : currentPage === 'lotto' ? 'Lotto' : currentPage === 'baloi' ? 'Baloi' : currentPage === 'lds' ? 'LDS' : 'Mag'} Dashboard
               </h1>
               <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">

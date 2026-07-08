@@ -170,7 +170,7 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
 
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight">
             {currentPage === 'unclaimed_ldn' ? 'LDN' : currentPage === 'unclaimed_lds' ? 'LDS' : currentPage === 'unclaimed_imp' ? 'Imp' : 'Mag'} Unclaimed Winning Tickets
           </h1>
           <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
@@ -187,7 +187,7 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
               placeholder="Search ID, Teller, Bet No, or Code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-appBg border border-slate-700/50 rounded-lg pl-9 pr-4 py-2.5 text-sm w-64 focus:outline-none focus:border-blue-500 transition-colors"
+              className="bg-appBg border border-slate-700/50 rounded-lg pl-9 pr-4 py-2.5 text-sm w-full md:w-64 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           <button

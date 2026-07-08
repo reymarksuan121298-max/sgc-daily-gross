@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Ticket, TicketSlash, UserCheck, ChevronDown, ChevronRight, BarChart3, LogOut } from 'lucide-react';
+import { LayoutDashboard, Ticket, TicketSlash, UserCheck, ChevronDown, ChevronRight, BarChart3, LogOut, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuth } from '../context/AuthContext';
 
-export default function Sidebar({ currentPage, setCurrentPage }) {
+export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen }) {
   const { user, logout } = useAuth();
   
   const [isDashboardsOpen, setIsDashboardsOpen] = useState(() => {
@@ -59,10 +59,28 @@ export default function Sidebar({ currentPage, setCurrentPage }) {
   const isAnyUnclaimedActive = unclaimedItems.some(item => item.id === currentPage);
 
   return (
-    <div className="w-64 bg-[#111827] border-r border-slate-800 min-h-screen p-4 flex flex-col hidden lg:flex">
-      <div className="mb-8 px-2">
-        <h2 className="text-xl font-bold text-white tracking-wide">STL<span className="text-blue-500">CONTROL</span></h2>
-      </div>
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+      
+      <div className={clsx(
+        "fixed inset-y-0 left-0 z-50 w-64 bg-[#111827] border-r border-slate-800 p-4 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="mb-8 px-2 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white tracking-wide">STL<span className="text-blue-500">CONTROL</span></h2>
+          <button 
+            onClick={() => setIsOpen(false)}
+            className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-md hover:bg-slate-800 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
       <nav className="flex-1 space-y-2">
         {dashboardItems.length > 0 && (
@@ -173,5 +191,6 @@ export default function Sidebar({ currentPage, setCurrentPage }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
