@@ -198,7 +198,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
         )}
 
         {/* Active Tellers Section */}
-        {user?.username !== 'unclaimed' && (
+        {user?.username === 'admin' && (
           <div>
             <button
               onClick={() => setIsActiveTellersOpen(!isActiveTellersOpen)}

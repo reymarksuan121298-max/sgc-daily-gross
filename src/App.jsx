@@ -59,13 +59,6 @@ function App() {
         const allowedPage = usernameMap[user.username] || user.username;
         const validPages = [allowedPage];
         
-        // Maguindanao and Imperial users are also allowed to see their Active Tellers
-        if (allowedPage === 'mag') {
-          validPages.push('active_tellers_mag');
-        } else if (allowedPage === 'imp') {
-          validPages.push('active_tellers_imp');
-        }
-        
         if (!validPages.includes(currentPage)) {
           setCurrentPage(allowedPage);
         }
