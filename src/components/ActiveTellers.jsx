@@ -11,7 +11,12 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Default to today for the bets date range
+  // Modal State
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [transactionDetails, setTransactionDetails] = useState([]);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+
+  // Default to today to show daily transactions
   const [fromDate, setFromDate] = useState(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -22,6 +27,14 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
   });
 
   const getApiConfig = () => {
+    if (currentPage === 'active_tellers_imp') {
+      return {
+        authHeader: { headers: { 'Authorization': 'Bearer 56420|m5oBfQqTl33XWmt33FzjLfYWoWEK6w3jPcOWlfz5' } },
+        baseUrl: 'https://stl-cotabato-api.com/api',
+        idParam: '2'
+      };
+    }
+    // Default to Maguindanao
     return {
       authHeader: { headers: { 'Authorization': 'Bearer 142725|tF7k4j0Gy0FMkJJnv43H8nkONO6E3BELhnAPANjM' } },
       baseUrl: 'https://stl-mag-api.com/api',
@@ -80,6 +93,32 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
       t.outlet?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [tellers, searchQuery]);
+
+  const fetchTransactionDetails = async (transactionId) => {
+    setSelectedTransaction(transactionId);
+    setLoadingDetails(true);
+    setTransactionDetails([]);
+    try {
+      const { authHeader, baseUrl } = getApiConfig();
+      const response = await axios.get(`${baseUrl}/teller/bet/${transactionId}`, authHeader);
+      if (response.data && response.data.data) {
+        setTransactionDetails(response.data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch transaction details:', err);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const formatDrawTime = (timeStr) => {
+    if (!timeStr) return '';
+    const hour = parseInt(timeStr, 10);
+    if (isNaN(hour)) return timeStr;
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}${ampm}`;
+  };
 
   return (
     <div className="flex h-[calc(100vh-140px)] gap-6">
@@ -190,34 +229,47 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
                   <p>No bets found for this date range.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {bets.map((bet, idx) => (
-                    <div key={idx} className="bg-[#111827] border border-slate-700 p-4 rounded-lg hover:border-indigo-500/30 transition-colors">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="text-xs font-mono text-indigo-300 bg-indigo-500/10 px-2 py-1 rounded">
-                          {bet.transactionId}
-                        </div>
-                        {bet.isVoid === 1 ? (
-                          <span className="text-xs font-medium text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded">VOID</span>
-                        ) : (
-                          <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">ACTIVE</span>
-                        )}
-                      </div>
-                      
-                      <div className="flex justify-between items-end mt-4">
-                        <div>
-                          <p className="text-xs text-slate-400 mb-1 flex items-center gap-1">
-                            <Clock className="w-3 h-3" /> Draw: {bet.drawTime}
-                          </p>
-                          <p className="text-[10px] text-slate-500">{bet.created_at}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-slate-400">Amount</p>
-                          <p className="text-lg font-bold text-white">₱{Number(bet.totalBetAmount).toLocaleString()}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="overflow-x-auto rounded-lg border border-slate-700/50">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-800/50 border-b border-slate-700/50">
+                        <th className="py-3 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Transaction ID</th>
+                        <th className="py-3 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Draw</th>
+                        <th className="py-3 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Time</th>
+                        <th className="py-3 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider text-right">Amount</th>
+                        <th className="py-3 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/50">
+                      {bets.map((bet, idx) => (
+                        <tr 
+                          key={idx} 
+                          onClick={() => fetchTransactionDetails(bet.transactionId)}
+                          className="hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                        >
+                          <td className="py-3 px-4">
+                            <div className="font-mono text-sm text-indigo-400 font-medium group-hover:text-indigo-300 transition-colors">{bet.transactionId}</div>
+                          </td>
+                          <td className="py-3 px-4 text-sm text-slate-300">
+                            {formatDrawTime(bet.drawTime)}
+                          </td>
+                          <td className="py-3 px-4 text-xs text-slate-400">
+                            {bet.created_at}
+                          </td>
+                          <td className="py-3 px-4 text-right font-bold text-white">
+                            ₱{Number(bet.totalBetAmount).toLocaleString()}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            {bet.isVoid === 1 ? (
+                              <span className="text-xs font-medium text-rose-400 bg-rose-500/10 px-2 py-1 rounded-full border border-rose-500/20">VOID</span>
+                            ) : (
+                              <span className="text-xs font-medium text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">ACTIVE</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
@@ -238,6 +290,73 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
           </div>
         )}
       </div>
+
+      {/* Bet Information Modal */}
+      {selectedTransaction && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setSelectedTransaction(null)}
+        >
+          <div 
+            className="bg-[#1e293b] border border-slate-700/50 rounded-xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center p-5 border-b border-slate-700/50 bg-slate-800/50">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <ReceiptText className="w-5 h-5 text-indigo-400" />
+                Bet Information
+              </h3>
+              <button 
+                onClick={() => setSelectedTransaction(null)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <AlertCircle className="w-5 h-5 opacity-0 absolute" /> {/* Hidden icon for spacing hack if needed */}
+                <span className="text-2xl leading-none">&times;</span>
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {loadingDetails ? (
+                <div className="flex justify-center py-12">
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-4 mb-6 bg-[#111827] p-4 rounded-lg border border-slate-700/50 text-sm">
+                    <p><span className="text-slate-500 block mb-1">Trans. ID:</span> <span className="font-mono text-indigo-400 font-medium text-base">{selectedTransaction}</span></p>
+                    <p><span className="text-slate-500 block mb-1">Total Amount:</span> <span className="text-emerald-400 font-bold text-base">₱{transactionDetails.reduce((sum, item) => sum + Number(item.betAmount), 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
+                    <p><span className="text-slate-500 block mb-1">Draw Time:</span> <span className="text-slate-200">{transactionDetails.length > 0 ? formatDrawTime(transactionDetails[0].drawTime) : ''}</span></p>
+                    <p><span className="text-slate-500 block mb-1">Bet Time:</span> <span className="text-slate-200">{transactionDetails.length > 0 ? transactionDetails[0].created_at : ''}</span></p>
+                  </div>
+                  
+                  <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                    <table className="w-full text-left text-sm border-collapse">
+                      <thead>
+                        <tr className="border-b border-slate-700/50">
+                          <th className="pb-3 text-slate-400 font-semibold uppercase tracking-wider text-xs">Bet Code</th>
+                          <th className="pb-3 text-slate-400 font-semibold uppercase tracking-wider text-xs">Bet Number</th>
+                          <th className="pb-3 text-slate-400 font-semibold uppercase tracking-wider text-xs text-right">Bet Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/50">
+                        {transactionDetails.map((item, i) => (
+                          <tr key={i} className="hover:bg-slate-800/30 transition-colors">
+                            <td className="py-3 text-slate-300 font-medium">
+                              <span className="bg-slate-800 px-2 py-1 rounded text-xs">{item.betCode}</span>
+                            </td>
+                            <td className="py-3 text-white font-bold">{item.betNo}</td>
+                            <td className="py-3 text-emerald-400 font-medium text-right">₱{Number(item.betAmount).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

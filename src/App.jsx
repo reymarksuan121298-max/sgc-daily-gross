@@ -59,9 +59,11 @@ function App() {
         const allowedPage = usernameMap[user.username] || user.username;
         const validPages = [allowedPage];
         
-        // Maguindanao users are also allowed to see their Active Tellers
+        // Maguindanao and Imperial users are also allowed to see their Active Tellers
         if (allowedPage === 'mag') {
           validPages.push('active_tellers_mag');
+        } else if (allowedPage === 'imp') {
+          validPages.push('active_tellers_imp');
         }
         
         if (!validPages.includes(currentPage)) {
@@ -83,7 +85,7 @@ function App() {
   });
 
   const fetchRealData = async (endDateStr, page) => {
-    if (page === 'active_tellers_mag') {
+    if (page === 'active_tellers_mag' || page === 'active_tellers_imp') {
       setApiData(null);
       setLoading(false);
       return;
@@ -295,6 +297,7 @@ function App() {
                  currentPage === 'baloi' ? 'Baloi' : 
                  currentPage === 'lds' ? 'LDS' : 
                  currentPage === 'active_tellers_mag' ? 'Mag Active Tellers' : 
+                 currentPage === 'active_tellers_imp' ? 'Imperial Active Tellers' : 
                  'Mag'} Dashboard
               </h1>
               <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
@@ -385,7 +388,7 @@ function App() {
                 {activeTab === 'monthly' && <MonthlyTab apiData={filteredApiData} selectedEndDate={selectedEndDate} />}
               </>
             )
-          ) : currentPage === 'active_tellers_mag' ? (
+          ) : (currentPage === 'active_tellers_mag' || currentPage === 'active_tellers_imp') ? (
             <ActiveTellers currentPage={currentPage} />
           ) : (
             <UnclaimedTickets

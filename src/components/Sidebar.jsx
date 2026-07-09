@@ -64,9 +64,23 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     { id: 'unclaimed_imp', label: 'Imp Unclaimed Tickets' },
   ];
 
-  const activeTellersItems = [
+  let activeTellersItems = [
     { id: 'active_tellers_mag', label: 'Mag Active Tellers' },
+    { id: 'active_tellers_imp', label: 'Imp Active Tellers' },
   ];
+
+  if (user && user.username !== 'admin') {
+    const activeMap = {
+      'maguindanao': 'active_tellers_mag',
+      'imperial': 'active_tellers_imp'
+    };
+    const allowed = activeMap[user.username];
+    if (allowed) {
+      activeTellersItems = activeTellersItems.filter(i => i.id === allowed);
+    } else {
+      activeTellersItems = [];
+    }
+  }
 
   const isAnyDashboardActive = dashboardItems.some(item => item.id === currentPage);
   const isAnyUnclaimedActive = unclaimedItems.some(item => item.id === currentPage);
