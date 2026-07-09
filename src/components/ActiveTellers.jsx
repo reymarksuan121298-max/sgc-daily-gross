@@ -16,9 +16,10 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
   const [transactionDetails, setTransactionDetails] = useState([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
-  // Default to today to show daily transactions
+  // Default to 7 days ago to show recent transactions
   const [fromDate, setFromDate] = useState(() => {
     const d = new Date();
+    d.setDate(d.getDate() - 7);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
   const [toDate, setToDate] = useState(() => {
@@ -32,6 +33,41 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
         authHeader: { headers: { 'Authorization': 'Bearer 56420|m5oBfQqTl33XWmt33FzjLfYWoWEK6w3jPcOWlfz5' } },
         baseUrl: 'https://stl-cotabato-api.com/api',
         idParam: '2'
+      };
+    }
+    if (currentPage === 'active_tellers_iligan') {
+      return {
+        authHeader: { headers: { 'Authorization': 'Bearer 52592|A0dFlRzQkQe6Nno0TzpMBiBfjoCX0JyYP3O0MbvL' } },
+        baseUrl: 'https://stl-ldn-api.com/api',
+        idParam: '5'
+      };
+    }
+    if (currentPage === 'active_tellers_lanao') {
+      return {
+        authHeader: { headers: { 'Authorization': 'Bearer 52595|w2qteJaZwkEX8tkJ2apN4dzBXlrfROnrg1nJEIQ2' } },
+        baseUrl: 'https://stl-ldn-api.com/api',
+        idParam: '2'
+      };
+    }
+    if (currentPage === 'active_tellers_setb') {
+      return {
+        authHeader: { headers: { 'Authorization': 'Bearer 52597|wJvojGigncVY82vD7OVxy8W848zuQp3FtDSpyuYP' } },
+        baseUrl: 'https://stl-ldn-api.com/api',
+        idParam: '7'
+      };
+    }
+    if (currentPage === 'active_tellers_lotto') {
+      return {
+        authHeader: { headers: { 'Authorization': 'Bearer 52599|QHNKr2h8XzotCiuKy3Zyd45droST6l0ztjCENu66' } },
+        baseUrl: 'https://stl-ldn-api.com/api',
+        idParam: '8'
+      };
+    }
+    if (currentPage === 'active_tellers_baloi') {
+      return {
+        authHeader: { headers: { 'Authorization': 'Bearer 52603|xOudfD7LJE5QEvxHmB8Pj4IlXWnrHIQwU1ovmOaH' } },
+        baseUrl: 'https://stl-ldn-api.com/api',
+        idParam: '6'
       };
     }
     // Default to Maguindanao
@@ -127,7 +163,7 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
         <div className="p-4 border-b border-slate-700/50">
           <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
             <User className="w-5 h-5 text-blue-400" />
-            Active Tellers
+            Teller Transactions
             <span className="ml-auto text-xs font-normal bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">
               {tellers.length}
             </span>

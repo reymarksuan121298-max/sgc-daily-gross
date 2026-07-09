@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen }) {
   const { user, logout } = useAuth();
-  
+
   const [isDashboardsOpen, setIsDashboardsOpen] = useState(() => {
     const saved = localStorage.getItem('sidebar_dashboards_open');
     return saved !== null ? JSON.parse(saved) : true;
@@ -65,8 +65,13 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
   ];
 
   let activeTellersItems = [
-    { id: 'active_tellers_mag', label: 'Mag Active Tellers' },
-    { id: 'active_tellers_imp', label: 'Imp Active Tellers' },
+    { id: 'active_tellers_mag', label: 'Mag Teller Transactions' },
+    { id: 'active_tellers_imp', label: 'Imp Teller Transactions' },
+    { id: 'active_tellers_iligan', label: 'Iligan Teller Transactions' },
+    { id: 'active_tellers_lanao', label: 'Lanao Teller Transactions' },
+    { id: 'active_tellers_setb', label: 'SETB Teller Transactions' },
+    { id: 'active_tellers_lotto', label: 'Lotto Teller Transactions' },
+    { id: 'active_tellers_baloi', label: 'Baloi Teller Transactions' },
   ];
 
   if (user && user.username !== 'admin') {
@@ -90,19 +95,19 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
-      
+
       <div className={clsx(
         "fixed inset-y-0 left-0 z-50 w-64 bg-[#111827] border-r border-slate-800 p-4 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="mb-8 px-2 flex items-center justify-between">
           <h2 className="text-xl font-bold text-white tracking-wide">STL<span className="text-blue-500">CONTROL</span></h2>
-          <button 
+          <button
             onClick={() => setIsOpen(false)}
             className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-md hover:bg-slate-800 transition-colors"
           >
@@ -110,159 +115,159 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
           </button>
         </div>
 
-      <nav className="flex-1 space-y-2">
-        {dashboardItems.length > 0 && (
-          <div>
-            <button
-            onClick={() => setIsDashboardsOpen(!isDashboardsOpen)}
-            className={clsx(
-              "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors",
-              isAnyDashboardActive && !isDashboardsOpen
-                ? "bg-blue-900/30 text-blue-400"
-                : "text-slate-300 hover:bg-slate-800 hover:text-white"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <LayoutDashboard className="w-5 h-5" />
-              <span>Dashboards</span>
-            </div>
-            {isDashboardsOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-          </button>
+        <nav className="flex-1 space-y-2">
+          {dashboardItems.length > 0 && (
+            <div>
+              <button
+                onClick={() => setIsDashboardsOpen(!isDashboardsOpen)}
+                className={clsx(
+                  "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors",
+                  isAnyDashboardActive && !isDashboardsOpen
+                    ? "bg-blue-900/30 text-blue-400"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <LayoutDashboard className="w-5 h-5" />
+                  <span>Dashboards</span>
+                </div>
+                {isDashboardsOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
 
-          {isDashboardsOpen && (
-            <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
-              {dashboardItems.map((item) => {
-                const isActive = currentPage === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setCurrentPage(item.id)}
-                    className={clsx(
-                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20"
-                        : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                    )}
-                  >
-                    <BarChart3 className="w-4 h-4" />
-                    {item.label}
-                  </button>
-                );
-              })}
+              {isDashboardsOpen && (
+                <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
+                  {dashboardItems.map((item) => {
+                    const isActive = currentPage === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setCurrentPage(item.id)}
+                        className={clsx(
+                          "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                          isActive
+                            ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20"
+                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                        )}
+                      >
+                        <BarChart3 className="w-4 h-4" />
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
-        </div>
-        )}
 
-        {(user?.username === 'admin' || user?.username === 'unclaimed') && (
-          <div>
-            <button
-              onClick={() => setIsUnclaimedOpen(!isUnclaimedOpen)}
-              className={clsx(
-                "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors",
-                isAnyUnclaimedActive && !isUnclaimedOpen
-                  ? "bg-rose-900/30 text-rose-400"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+          {(user?.username === 'admin' || user?.username === 'unclaimed') && (
+            <div>
+              <button
+                onClick={() => setIsUnclaimedOpen(!isUnclaimedOpen)}
+                className={clsx(
+                  "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors",
+                  isAnyUnclaimedActive && !isUnclaimedOpen
+                    ? "bg-rose-900/30 text-rose-400"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <Ticket className="w-5 h-5" />
+                  <span>Unclaimed Tickets</span>
+                </div>
+                {isUnclaimedOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
+
+              {isUnclaimedOpen && (
+                <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
+                  {unclaimedItems.map((item) => {
+                    const isActive = currentPage === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setCurrentPage(item.id)}
+                        className={clsx(
+                          "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                          isActive
+                            ? "bg-rose-600 text-white shadow-lg shadow-rose-900/20"
+                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                        )}
+                      >
+                        <TicketSlash className="w-4 h-4" />
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
-            >
-              <div className="flex items-center gap-3">
-                <Ticket className="w-5 h-5" />
-                <span>Unclaimed Tickets</span>
-              </div>
-              {isUnclaimedOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-            </button>
-            
-            {isUnclaimedOpen && (
-              <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
-                {unclaimedItems.map((item) => {
-                  const isActive = currentPage === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setCurrentPage(item.id)}
-                      className={clsx(
-                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                        isActive
-                          ? "bg-rose-600 text-white shadow-lg shadow-rose-900/20"
-                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                      )}
-                    >
-                      <TicketSlash className="w-4 h-4" />
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Active Tellers Section */}
-        {user?.username === 'admin' && (
-          <div>
-            <button
-              onClick={() => setIsActiveTellersOpen(!isActiveTellersOpen)}
-              className={clsx(
-                "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors mt-2",
-                isAnyActiveTellersActive && !isActiveTellersOpen
-                  ? "bg-emerald-900/30 text-emerald-400"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+          {/* Active Tellers Section */}
+          {user?.username === 'admin' && (
+            <div>
+              <button
+                onClick={() => setIsActiveTellersOpen(!isActiveTellersOpen)}
+                className={clsx(
+                  "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors mt-2",
+                  isAnyActiveTellersActive && !isActiveTellersOpen
+                    ? "bg-emerald-900/30 text-emerald-400"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <UserCheck className="w-5 h-5" />
+                  <span>Teller Transactions</span>
+                </div>
+                {isActiveTellersOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
+
+              {isActiveTellersOpen && (
+                <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
+                  {activeTellersItems.map((item) => {
+                    const isActive = currentPage === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setCurrentPage(item.id)}
+                        className={clsx(
+                          "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                          isActive
+                            ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20"
+                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                        )}
+                      >
+                        <UserCheck className="w-4 h-4" />
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
-            >
-              <div className="flex items-center gap-3">
-                <UserCheck className="w-5 h-5" />
-                <span>Active Tellers</span>
-              </div>
-              {isActiveTellersOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-            </button>
-            
-            {isActiveTellersOpen && (
-              <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
-                {activeTellersItems.map((item) => {
-                  const isActive = currentPage === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setCurrentPage(item.id)}
-                      className={clsx(
-                        "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                        isActive
-                          ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20"
-                          : "text-slate-400 hover:bg-slate-800 hover:text-white"
-                      )}
-                    >
-                      <UserCheck className="w-4 h-4" />
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </nav>
+            </div>
+          )}
+        </nav>
 
-      <div className="mt-auto px-2 pt-4 border-t border-slate-800">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-              <UserCheck className="w-4 h-4 text-slate-300" />
+        <div className="mt-auto px-2 pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
+                <UserCheck className="w-4 h-4 text-slate-300" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-medium text-white capitalize">{user?.username || 'Admin User'}</p>
+                <p className="text-xs text-slate-400">STL System</p>
+              </div>
             </div>
-            <div className="text-left">
-              <p className="text-sm font-medium text-white capitalize">{user?.username || 'Admin User'}</p>
-              <p className="text-xs text-slate-400">STL System</p>
-            </div>
+            <button
+              onClick={logout}
+              className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
+              title="Log Out"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
-          <button 
-            onClick={logout}
-            className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
-            title="Log Out"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
         </div>
       </div>
-    </div>
     </>
   );
 }
