@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import { Search, Calendar, CheckSquare, Square, CheckCircle, Check, Clock, AlertCircle, RefreshCw, XCircle } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -116,6 +116,75 @@ export default function VoidRequests({ currentPage }) {
     
     return filtered;
   }, [voidRequests, searchQuery, activeTab]);
+
+  const [amounts, setAmounts] = useState({});
+  const fetchingAmountsRef = useRef(new Set());
+  const requestQueue = useRef([]);
+  const isFetchingRef = useRef(false);
+  const unmountedRef = useRef(false);
+
+  useEffect(() => {
+    unmountedRef.current = false;
+    return () => { unmountedRef.current = true; };
+  }, []);
+
+  const processQueue = async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+
+    const { authHeader, baseUrl } = getApiConfig();
+    
+    while (requestQueue.current.length > 0) {
+      if (unmountedRef.current) break;
+      const batch = requestQueue.current.splice(0, 20);
+      
+      const batchResults = await Promise.all(batch.map(async (req) => {
+        try {
+          const response = await axios.get(`${baseUrl}/teller/bet/${req.transactionId}`, authHeader);
+          if (response.data && response.data.data) {
+            const totalAmount = response.data.data.reduce((sum, item) => sum + Number(item.betAmount), 0);
+            return { id: req.transactionId, amount: totalAmount };
+          }
+          return { id: req.transactionId, amount: 0 };
+        } catch (err) {
+          return { id: req.transactionId, amount: null };
+        }
+      }));
+
+      if (unmountedRef.current) break;
+
+      setAmounts(prev => {
+        const next = { ...prev };
+        let hasChanges = false;
+        batchResults.forEach(res => {
+          if (res) {
+            next[res.id] = res.amount;
+            hasChanges = true;
+          }
+        });
+        return hasChanges ? next : prev;
+      });
+    }
+
+    isFetchingRef.current = false;
+  };
+
+  useEffect(() => {
+    if (activeTab !== 'pending') return;
+
+    const newRequests = filteredRequests.filter(req => 
+      amounts[req.transactionId] === undefined && 
+      !fetchingAmountsRef.current.has(req.transactionId)
+    );
+
+    if (newRequests.length > 0) {
+      newRequests.forEach(req => {
+        fetchingAmountsRef.current.add(req.transactionId);
+        requestQueue.current.push(req);
+      });
+      processQueue();
+    }
+  }, [filteredRequests, activeTab]);
 
   const handleBulkApprove = async () => {
     if (filteredRequests.length === 0) return;
@@ -407,6 +476,9 @@ export default function VoidRequests({ currentPage }) {
                 <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Teller</th>
                 <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Draw Time</th>
                 <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Reason</th>
+                {activeTab === 'pending' && (
+                  <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Amount</th>
+                )}
                 <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Date/Time</th>
                 <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider text-center">Status</th>
                 <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider text-center">Action</th>
@@ -438,6 +510,15 @@ export default function VoidRequests({ currentPage }) {
                         {req.reason || '-'}
                       </p>
                     </td>
+                    {activeTab === 'pending' && (
+                      <td className="py-3 px-4">
+                        <div className="text-sm font-medium text-emerald-400">
+                          {amounts[req.transactionId] !== undefined && amounts[req.transactionId] !== null ? 
+                            `₱${Number(amounts[req.transactionId]).toLocaleString(undefined, { minimumFractionDigits: 2 })}` 
+                            : (amounts[req.transactionId] === null ? '-' : '')}
+                        </div>
+                      </td>
+                    )}
                     <td className="py-3 px-4">
                       <div className="text-sm text-slate-300">{req.created_at?.split(' ')[0]}</div>
                       <div className="text-xs text-slate-500">{req.created_at?.split(' ')[1]}</div>
