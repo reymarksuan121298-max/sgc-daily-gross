@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { Search, User, Calendar, ReceiptText, Clock, AlertCircle } from 'lucide-react';
+import { Search, User, Calendar, ReceiptText, Clock, AlertCircle, Download } from 'lucide-react';
+import * as ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 export default function ActiveTellers({ currentPage, selectedEndDate }) {
   const [tellers, setTellers] = useState([]);
@@ -15,6 +17,8 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [transactionDetails, setTransactionDetails] = useState([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
+
+
 
   const [fromDate, setFromDate] = useState(() => {
     const d = new Date();
@@ -128,6 +132,8 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
     );
   }, [tellers, searchQuery]);
 
+
+
   const fetchTransactionDetails = async (transactionId) => {
     setSelectedTransaction(transactionId);
     setLoadingDetails(true);
@@ -154,6 +160,8 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
     return `${hour12}${ampm}`;
   };
 
+
+
   return (
     <div className="flex h-[calc(100vh-140px)] gap-6">
       {/* Tellers List Sidebar */}
@@ -167,15 +175,43 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
             </span>
           </h2>
           
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search tellers..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#111827] text-sm text-slate-200 rounded-lg pl-9 pr-4 py-2 border border-slate-700 focus:outline-none focus:border-blue-500 transition-colors"
-            />
+
+          
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 w-full justify-between">
+              <div className="flex items-center bg-[#111827] border border-slate-700 rounded-lg px-2 py-1.5 flex-1 min-w-0">
+                <Calendar className="w-3.5 h-3.5 text-slate-400 mr-1 shrink-0" />
+                <input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="bg-transparent text-xs text-slate-200 outline-none w-full"
+                />
+              </div>
+              <span className="text-slate-500 text-xs shrink-0">to</span>
+              <div className="flex items-center bg-[#111827] border border-slate-700 rounded-lg px-2 py-1.5 flex-1 min-w-0">
+                <Calendar className="w-3.5 h-3.5 text-slate-400 mr-1 shrink-0" />
+                <input
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  className="bg-transparent text-xs text-slate-200 outline-none w-full"
+                />
+              </div>
+            </div>
+
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search tellers..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#111827] text-sm text-slate-200 rounded-lg pl-9 pr-4 py-2 border border-slate-700 focus:outline-none focus:border-blue-500 transition-colors"
+              />
+            </div>
+
+
           </div>
         </div>
 
@@ -226,28 +262,6 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
                   Bets for {selectedTeller.fullName || selectedTeller.username}
                 </h2>
                 <p className="text-sm text-slate-400 mt-1">Outlet: {selectedTeller.outlet} | ID: {selectedTeller.id}</p>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="flex items-center bg-[#111827] border border-slate-700 rounded-lg px-3 py-1.5">
-                  <Calendar className="w-4 h-4 text-slate-400 mr-2" />
-                  <input
-                    type="date"
-                    value={fromDate}
-                    onChange={(e) => setFromDate(e.target.value)}
-                    className="bg-transparent text-sm text-slate-200 outline-none w-[110px]"
-                  />
-                </div>
-                <span className="text-slate-500">to</span>
-                <div className="flex items-center bg-[#111827] border border-slate-700 rounded-lg px-3 py-1.5">
-                  <Calendar className="w-4 h-4 text-slate-400 mr-2" />
-                  <input
-                    type="date"
-                    value={toDate}
-                    onChange={(e) => setToDate(e.target.value)}
-                    className="bg-transparent text-sm text-slate-200 outline-none w-[110px]"
-                  />
-                </div>
               </div>
             </div>
 

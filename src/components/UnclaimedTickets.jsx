@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { RefreshCw, Search, Filter } from 'lucide-react';
+import { RefreshCw, Search, Filter, Copy, Check } from 'lucide-react';
 import FilterDropdown from './FilterDropdown';
 
 export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selectedTellers, spvrMap, currentPage }) {
@@ -47,6 +47,7 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isCopying, setIsCopying] = useState(false);
 
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
@@ -165,6 +166,36 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
     return { filteredTickets: filtered, groupedTickets: grouped, sortedSpvrs: sorted };
   }, [tickets, searchTerm, selectedUnits, selectedTellers, spvrMap]);
 
+  const handleBulkCopy = () => {
+    let copyText = '';
+    
+    sortedSpvrs.forEach(spvrName => {
+      copyText += `${spvrName}\n`;
+      copyText += `Teller\tDraw\tBet No.\tBet Code\tBet Amount\tWin Amount\n`;
+      
+      const spvrTickets = groupedTickets[spvrName].sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
+      spvrTickets.forEach(ticket => {
+        const teller = ticket.fullName || 'N/A';
+        const draw = `${formatDrawTime(ticket.drawTime)} ${ticket.drawDate ? ticket.drawDate.split(' ')[0] : 'N/A'}`;
+        const betNo = ticket.betNo || '';
+        const betCode = ticket.betCode || '';
+        const betAmount = ticket.betAmount || 0;
+        const winAmount = ticket.winAmount || 0;
+        
+        copyText += `${teller}\t${draw}\t${betNo}\t${betCode}\t${betAmount}\t${winAmount}\n`;
+      });
+      copyText += `\n`;
+    });
+
+    navigator.clipboard.writeText(copyText.trimEnd()).then(() => {
+      setIsCopying(true);
+      setTimeout(() => setIsCopying(false), 2000);
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      alert("Failed to copy data");
+    });
+  };
+
   const totalPages = Math.ceil(sortedSpvrs.length / itemsPerPage);
   const paginatedSpvrs = sortedSpvrs.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
@@ -193,6 +224,24 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
               className="bg-appBg border border-slate-700/50 rounded-lg pl-9 pr-4 py-2.5 text-sm w-full md:w-64 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
+          <button
+            onClick={handleBulkCopy}
+            disabled={loading || filteredTickets.length === 0}
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-blue-600 border border-blue-500 hover:bg-blue-700 transition-colors disabled:opacity-50 text-white text-sm font-medium"
+            title="Bulk Copy"
+          >
+            {isCopying ? (
+              <>
+                <Check className="w-4 h-4" />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                Copy Data
+              </>
+            )}
+          </button>
           <button
             onClick={fetchTickets}
             disabled={loading}
