@@ -253,6 +253,28 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
               </div>
             </div>
 
+            {/* Summary Cards */}
+            {!loadingBets && bets.length > 0 && (
+              <div className="grid grid-cols-4 gap-4 p-4 border-b border-slate-700/50 bg-slate-800/20">
+                <div className="bg-[#111827] border border-slate-700 rounded-lg p-3 shadow-sm">
+                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Total Amount</p>
+                  <p className="text-xl font-bold text-emerald-400">₱{bets.reduce((acc, curr) => acc + (curr.isVoid ? 0 : Number(curr.totalBetAmount)), 0).toLocaleString()}</p>
+                </div>
+                <div className="bg-[#111827] border border-slate-700 rounded-lg p-3 shadow-sm">
+                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Total Bets</p>
+                  <p className="text-xl font-bold text-white">{bets.length}</p>
+                </div>
+                <div className="bg-[#111827] border border-slate-700 rounded-lg p-3 shadow-sm">
+                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Active Bets</p>
+                  <p className="text-xl font-bold text-blue-400">{bets.filter(b => !b.isVoid).length}</p>
+                </div>
+                <div className="bg-[#111827] border border-slate-700 rounded-lg p-3 shadow-sm">
+                  <p className="text-xs text-slate-400 uppercase tracking-wider mb-1">Void Bets</p>
+                  <p className="text-xl font-bold text-rose-400">{bets.filter(b => b.isVoid).length}</p>
+                </div>
+              </div>
+            )}
+
             <div className="flex-1 overflow-auto p-4 custom-scrollbar">
               {loadingBets ? (
                 <div className="flex flex-col items-center justify-center h-full text-slate-400">

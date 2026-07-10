@@ -1,5 +1,6 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { DollarSign, Users, LayoutGrid } from 'lucide-react';
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -70,8 +71,66 @@ export default function OverviewTab({ apiData, currentPage }) {
   chartData = chartData || [];
   cardsData = cardsData || [];
 
+  let totalGross = 0;
+  let totalTellersCount = 0;
+  let totalUnitsCount = 0;
+
+  if (Array.isArray(apiData?.data)) {
+    totalGross = apiData.data.reduce((acc, curr) => acc + (curr.TotalOverAllGross || 0), 0);
+    const uniqueTellers = new Set();
+    const uniqueUnits = new Set();
+    apiData.data.forEach(item => {
+      if (item.username || item.fullName) uniqueTellers.add(item.username || item.fullName);
+      if (item.supervisor) uniqueUnits.add(item.supervisor);
+    });
+    totalTellersCount = uniqueTellers.size;
+    totalUnitsCount = uniqueUnits.size;
+  }
+
   return (
     <div className="space-y-6">
+      {/* Summary Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-cardBg border border-slate-700/50 rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5 text-emerald-400">
+            <DollarSign className="w-20 h-20" />
+          </div>
+          <div className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+            <DollarSign className="w-8 h-8 text-emerald-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">Total Gross Sales</p>
+            <p className="text-3xl font-bold text-white">₱{totalGross.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+          </div>
+        </div>
+
+        <div className="bg-cardBg border border-slate-700/50 rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5 text-blue-400">
+            <Users className="w-20 h-20" />
+          </div>
+          <div className="p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
+            <Users className="w-8 h-8 text-blue-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">Active Tellers</p>
+            <p className="text-3xl font-bold text-white">{totalTellersCount}</p>
+          </div>
+        </div>
+
+        <div className="bg-cardBg border border-slate-700/50 rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-5 text-purple-400">
+            <LayoutGrid className="w-20 h-20" />
+          </div>
+          <div className="p-4 bg-purple-500/10 rounded-xl border border-purple-500/20">
+            <LayoutGrid className="w-8 h-8 text-purple-400" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">Active Units</p>
+            <p className="text-3xl font-bold text-white">{totalUnitsCount}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Chart Section */}
       <div className="bg-cardBg rounded-2xl p-6 border border-slate-700/50 shadow-lg relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accentGreen/5 rounded-full blur-3xl pointer-events-none"></div>

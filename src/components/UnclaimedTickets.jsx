@@ -204,6 +204,32 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
         </div>
       </div>
 
+      {!loading && !error && filteredTickets.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-cardBg border border-slate-800/50 rounded-2xl p-6 shadow-xl flex flex-col justify-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <RefreshCw className="w-16 h-16 text-emerald-400" />
+            </div>
+            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-1">Total Unclaimed Win Amount</p>
+            <p className="text-3xl font-bold text-emerald-400">₱{filteredTickets.reduce((acc, curr) => acc + parseFloat(curr.winAmount || 0), 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+          </div>
+          <div className="bg-cardBg border border-slate-800/50 rounded-2xl p-6 shadow-xl flex flex-col justify-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Filter className="w-16 h-16 text-white" />
+            </div>
+            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-1">Total Pending Tickets</p>
+            <p className="text-3xl font-bold text-white">{filteredTickets.length}</p>
+          </div>
+          <div className="bg-cardBg border border-slate-800/50 rounded-2xl p-6 shadow-xl flex flex-col justify-center relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Search className="w-16 h-16 text-blue-400" />
+            </div>
+            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-1">Affected Supervisors</p>
+            <p className="text-3xl font-bold text-blue-400">{sortedSpvrs.length}</p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-cardBg border border-slate-800/50 rounded-2xl shadow-xl overflow-hidden">
         {loading ? (
           <div className="flex justify-center items-center h-64 text-slate-400">
