@@ -16,10 +16,8 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
   const [transactionDetails, setTransactionDetails] = useState([]);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
-  // Default to 7 days ago to show recent transactions
   const [fromDate, setFromDate] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() - 7);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
   const [toDate, setToDate] = useState(() => {
@@ -332,14 +330,6 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
               )}
             </div>
             
-            {bets.length > 0 && !loadingBets && (
-              <div className="p-4 border-t border-slate-700/50 bg-slate-800/30 flex justify-between items-center">
-                <span className="text-sm text-slate-400">Total Bets: <strong className="text-white">{bets.length}</strong></span>
-                <span className="text-sm text-slate-400">
-                  Total Amount: <strong className="text-emerald-400 text-lg">₱{bets.reduce((acc, curr) => acc + (curr.isVoid ? 0 : Number(curr.totalBetAmount)), 0).toLocaleString()}</strong>
-                </span>
-              </div>
-            )}
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full text-slate-500">

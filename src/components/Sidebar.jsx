@@ -16,6 +16,11 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     return saved !== null ? JSON.parse(saved) : true;
   });
 
+  const [isVoidRequestsOpen, setIsVoidRequestsOpen] = useState(() => {
+    const saved = localStorage.getItem('sidebar_void_requests_open');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
   useEffect(() => {
     localStorage.setItem('sidebar_dashboards_open', JSON.stringify(isDashboardsOpen));
   }, [isDashboardsOpen]);
@@ -23,6 +28,10 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
   useEffect(() => {
     localStorage.setItem('sidebar_unclaimed_open', JSON.stringify(isUnclaimedOpen));
   }, [isUnclaimedOpen]);
+
+  useEffect(() => {
+    localStorage.setItem('sidebar_void_requests_open', JSON.stringify(isVoidRequestsOpen));
+  }, [isVoidRequestsOpen]);
 
   const [isActiveTellersOpen, setIsActiveTellersOpen] = useState(() => {
     const saved = localStorage.getItem('sidebar_active_tellers_open');
@@ -64,6 +73,24 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     { id: 'unclaimed_imp', label: 'Imp Unclaimed Tickets' },
   ];
 
+  let voidRequestItems = [
+    { id: 'void_req_mag', label: 'Mag Void Requests' },
+    { id: 'void_req_imp', label: 'Imp Void Requests' },
+  ];
+
+  if (user && user.username !== 'admin') {
+    const voidMap = {
+      'maguindanao': 'void_req_mag',
+      'imperial': 'void_req_imp'
+    };
+    const allowedVoid = voidMap[user.username];
+    if (allowedVoid) {
+      voidRequestItems = voidRequestItems.filter(i => i.id === allowedVoid);
+    } else {
+      voidRequestItems = [];
+    }
+  }
+
   let activeTellersItems = [
     { id: 'active_tellers_mag', label: 'Mag Teller Transactions' },
     { id: 'active_tellers_imp', label: 'Imp Teller Transactions' },
@@ -90,6 +117,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
   const isAnyDashboardActive = dashboardItems.some(item => item.id === currentPage);
   const isAnyUnclaimedActive = unclaimedItems.some(item => item.id === currentPage);
   const isAnyActiveTellersActive = activeTellersItems.some(item => item.id === currentPage);
+  const isAnyVoidRequestsActive = voidRequestItems.some(item => item.id === currentPage);
 
   return (
     <>
@@ -189,6 +217,50 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                           "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                           isActive
                             ? "bg-rose-600 text-white shadow-lg shadow-rose-900/20"
+                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                        )}
+                      >
+                        <TicketSlash className="w-4 h-4" />
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Void Requests Section */}
+          {user?.username === 'admin' && (
+            <div>
+              <button
+                onClick={() => setIsVoidRequestsOpen(!isVoidRequestsOpen)}
+                className={clsx(
+                  "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors mt-2",
+                  isAnyVoidRequestsActive && !isVoidRequestsOpen
+                    ? "bg-amber-900/30 text-amber-400"
+                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <TicketSlash className="w-5 h-5" />
+                  <span>Void Requests</span>
+                </div>
+                {isVoidRequestsOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
+
+              {isVoidRequestsOpen && (
+                <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
+                  {voidRequestItems.map((item) => {
+                    const isActive = currentPage === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => setCurrentPage(item.id)}
+                        className={clsx(
+                          "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                          isActive
+                            ? "bg-amber-600 text-white shadow-lg shadow-amber-900/20"
                             : "text-slate-400 hover:bg-slate-800 hover:text-white"
                         )}
                       >

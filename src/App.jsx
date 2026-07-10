@@ -16,6 +16,7 @@ import UnclaimedTickets from './components/UnclaimedTickets';
 import ActiveTellers from './components/ActiveTellers';
 import { useAuth } from './context/AuthContext';
 import Login from './components/Login';
+import VoidRequests from './components/VoidRequests';
 
 const TABS = [
   { id: 'overview', label: 'OVERVIEW', icon: LayoutDashboard },
@@ -78,7 +79,7 @@ function App() {
   });
 
   const fetchRealData = async (endDateStr, page) => {
-    if (page === 'active_tellers_mag' || page === 'active_tellers_imp' || page === 'active_tellers_iligan' || page === 'active_tellers_lanao' || page === 'active_tellers_setb' || page === 'active_tellers_lotto' || page === 'active_tellers_baloi') {
+    if (page === 'active_tellers_mag' || page === 'active_tellers_imp' || page === 'active_tellers_iligan' || page === 'active_tellers_lanao' || page === 'active_tellers_setb' || page === 'active_tellers_lotto' || page === 'active_tellers_baloi' || page === 'void_req_mag' || page === 'void_req_imp') {
       setApiData(null);
       setLoading(false);
       return;
@@ -296,6 +297,8 @@ function App() {
                  currentPage === 'active_tellers_setb' ? 'SETB Teller Transactions' : 
                  currentPage === 'active_tellers_lotto' ? 'Lotto Teller Transactions' : 
                  currentPage === 'active_tellers_baloi' ? 'Baloi Teller Transactions' : 
+                 currentPage === 'void_req_mag' ? 'Mag Void Requests' :
+                 currentPage === 'void_req_imp' ? 'Imperial Void Requests' :
                  'Mag'} Dashboard
               </h1>
               <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
@@ -306,7 +309,7 @@ function App() {
           </div>
 
           {/* Controls */}
-          {!currentPage.startsWith('active_tellers_') && (
+          {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && (
             <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
               <div className="relative flex items-center bg-cardBg hover:bg-[#253247] border border-slate-700/50 rounded-md transition-all focus-within:ring-2 focus-within:ring-indigo-500/50 cursor-pointer">
                 <Calendar className="w-4 h-4 ml-4 text-textSecondary" />
@@ -390,6 +393,8 @@ function App() {
             )
           ) : (currentPage === 'active_tellers_mag' || currentPage === 'active_tellers_imp' || currentPage === 'active_tellers_iligan' || currentPage === 'active_tellers_lanao' || currentPage === 'active_tellers_setb' || currentPage === 'active_tellers_lotto' || currentPage === 'active_tellers_baloi') ? (
             <ActiveTellers currentPage={currentPage} />
+          ) : (currentPage === 'void_req_mag' || currentPage === 'void_req_imp') ? (
+            <VoidRequests currentPage={currentPage} />
           ) : (
             <UnclaimedTickets
               selectedEndDate={selectedEndDate}
