@@ -92,11 +92,6 @@ export default function VoidRequests({ currentPage }) {
   const isFetchingRef = useRef(false);
   const unmountedRef = useRef(false);
 
-  const isDisregarded = (req) => {
-    const isVoidOnly = req.reason && req.reason.trim().toLowerCase() === 'void';
-    const amount = amounts[req.transactionId];
-    return isVoidOnly && amount !== undefined && amount >= 1000;
-  };
 
   const pendingCount = voidRequests.filter(req => req.is_approve === 0).length;
   const approvedCount = voidRequests.filter(req => req.is_approve === 1).length;
@@ -202,20 +197,12 @@ export default function VoidRequests({ currentPage }) {
   const handleBulkApprove = async () => {
     if (filteredRequests.length === 0) return;
     
-    // Filter out requests that should be disregarded
-    const requestsToApprove = filteredRequests.filter(req => !isDisregarded(req));
-
-    if (requestsToApprove.length === 0) {
-      showToast('No eligible requests for bulk approval. Disregarded requests were skipped.', 'error');
-      return;
-    }
-
     setIsApproving(true);
     const { authHeader, baseUrl } = getApiConfig();
     
     try {
-      // Loop through eligible IDs and send individual PUT requests
-      const promises = requestsToApprove.map(async (req) => {
+      // Loop through filtered IDs and send individual PUT requests
+      const promises = filteredRequests.map(async (req) => {
         // Approve the void request
         await axios.put(`${baseUrl}/teller/void_request/${req.id}`, { status: 1, is_approve: 1 }, authHeader);
         // Automatically void the transaction ticket
