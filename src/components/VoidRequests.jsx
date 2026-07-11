@@ -300,7 +300,7 @@ export default function VoidRequests({ currentPage }) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] bg-cardBg border border-slate-700/50 rounded-xl overflow-hidden shadow-2xl relative">
+    <div className="flex flex-col h-auto lg:h-[calc(100vh-140px)] min-h-[calc(100vh-140px)] bg-cardBg border border-slate-700/50 rounded-xl overflow-hidden shadow-2xl relative">
       
       {/* Toast Notification */}
       <div className={`fixed top-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 border transition-all duration-300 transform ${
