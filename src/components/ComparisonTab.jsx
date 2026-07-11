@@ -169,9 +169,13 @@ export default function ComparisonTab({ apiData, selectedEndDate }) {
           </div>
           
           <div className="flex justify-center">
-            <div className="bg-[#0e2920] border border-accentGreen/20 px-8 py-4 rounded-xl text-center">
-              <p className="text-3xl font-bold text-accentGreen mb-1">{summary.shiftPercent > 0 ? "+" : ""}{summary.shiftPercent}%</p>
-              <p className="text-[10px] text-accentGreen font-bold tracking-widest uppercase">NET PERFORMANCE SHIFT</p>
+            <div className={`border px-8 py-4 rounded-xl text-center ${summary.shiftPercent >= 0 ? 'bg-[#0e2920] border-accentGreen/20' : 'bg-rose-500/10 border-rose-500/20'}`}>
+              <p className={`text-3xl font-bold mb-1 ${summary.shiftPercent >= 0 ? 'text-accentGreen' : 'text-rose-500'}`}>
+                {summary.shiftPercent > 0 ? "+" : ""}{summary.shiftPercent}%
+              </p>
+              <p className={`text-[10px] font-bold tracking-widest uppercase ${summary.shiftPercent >= 0 ? 'text-accentGreen' : 'text-rose-500'}`}>
+                NET PERFORMANCE SHIFT
+              </p>
             </div>
           </div>
         </div>

@@ -86,6 +86,18 @@ export default function VoidRequests({ currentPage }) {
     return () => clearInterval(intervalId);
   }, [fromDate, toDate, drawTimeFilter, currentPage]);
 
+  const [amounts, setAmounts] = useState({});
+  const fetchingAmountsRef = useRef(new Set());
+  const requestQueue = useRef([]);
+  const isFetchingRef = useRef(false);
+  const unmountedRef = useRef(false);
+
+  const isDisregarded = (req) => {
+    const isVoidOnly = req.reason && req.reason.trim().toLowerCase() === 'void';
+    const amount = amounts[req.transactionId];
+    return isVoidOnly && amount !== undefined && amount >= 1000;
+  };
+
   const pendingCount = voidRequests.filter(req => req.is_approve === 0).length;
   const approvedCount = voidRequests.filter(req => req.is_approve === 1).length;
   const rejectedCount = voidRequests.filter(req => req.is_approve === 2).length;
@@ -115,13 +127,7 @@ export default function VoidRequests({ currentPage }) {
     });
     
     return filtered;
-  }, [voidRequests, searchQuery, activeTab]);
-
-  const [amounts, setAmounts] = useState({});
-  const fetchingAmountsRef = useRef(new Set());
-  const requestQueue = useRef([]);
-  const isFetchingRef = useRef(false);
-  const unmountedRef = useRef(false);
+  }, [voidRequests, searchQuery, activeTab, amounts]);
 
   useEffect(() => {
     unmountedRef.current = false;
@@ -141,8 +147,15 @@ export default function VoidRequests({ currentPage }) {
       const batchResults = await Promise.all(batch.map(async (req) => {
         try {
           const response = await axios.get(`${baseUrl}/teller/bet/${req.transactionId}`, authHeader);
-          if (response.data && response.data.data) {
-            const totalAmount = response.data.data.reduce((sum, item) => sum + Number(item.betAmount), 0);
+          let betItems = [];
+          if (response.data && Array.isArray(response.data.data)) {
+            betItems = response.data.data;
+          } else if (response.data && Array.isArray(response.data)) {
+            betItems = response.data;
+          }
+          
+          if (betItems.length > 0) {
+            const totalAmount = betItems.reduce((sum, item) => sum + Number(item.betAmount || 0), 0);
             return { id: req.transactionId, amount: totalAmount };
           }
           return { id: req.transactionId, amount: 0 };
@@ -189,12 +202,20 @@ export default function VoidRequests({ currentPage }) {
   const handleBulkApprove = async () => {
     if (filteredRequests.length === 0) return;
     
+    // Filter out requests that should be disregarded
+    const requestsToApprove = filteredRequests.filter(req => !isDisregarded(req));
+
+    if (requestsToApprove.length === 0) {
+      showToast('No eligible requests for bulk approval. Disregarded requests were skipped.', 'error');
+      return;
+    }
+
     setIsApproving(true);
     const { authHeader, baseUrl } = getApiConfig();
     
     try {
-      // Loop through filtered IDs and send individual PUT requests
-      const promises = filteredRequests.map(async (req) => {
+      // Loop through eligible IDs and send individual PUT requests
+      const promises = requestsToApprove.map(async (req) => {
         // Approve the void request
         await axios.put(`${baseUrl}/teller/void_request/${req.id}`, { status: 1, is_approve: 1 }, authHeader);
         // Automatically void the transaction ticket
@@ -225,8 +246,10 @@ export default function VoidRequests({ currentPage }) {
     try {
       const { authHeader, baseUrl } = getApiConfig();
       const response = await axios.get(`${baseUrl}/teller/bet/${req.transactionId}`, authHeader);
-      if (response.data && response.data.data) {
+      if (response.data && Array.isArray(response.data.data)) {
         setReviewDetails(response.data.data);
+      } else if (response.data && Array.isArray(response.data)) {
+        setReviewDetails(response.data);
       }
     } catch (err) {
       console.error('Failed to fetch transaction details:', err);
