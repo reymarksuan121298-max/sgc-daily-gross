@@ -201,23 +201,27 @@ export default function VoidRequests({ currentPage }) {
     const { authHeader, baseUrl } = getApiConfig();
     
     try {
-      // Loop through filtered IDs and send individual PUT requests
-      const promises = filteredRequests.map(async (req) => {
-        // Approve the void request
-        await axios.put(`${baseUrl}/teller/void_request/${req.id}`, { status: 1, is_approve: 1 }, authHeader);
-        // Automatically void the transaction ticket
-        try {
-          await axios.put(`${baseUrl}/admin/void/${req.transactionId}`, { isVoid: 1 }, authHeader);
-        } catch (voidErr) {
-          console.error(`Failed to void ticket ${req.transactionId}:`, voidErr);
-        }
-      });
-      
-      await Promise.all(promises);
+      // Process in batches of 15 to avoid overloading the server and browser
+      const BATCH_SIZE = 15;
+      for (let i = 0; i < filteredRequests.length; i += BATCH_SIZE) {
+        const batch = filteredRequests.slice(i, i + BATCH_SIZE);
+        const promises = batch.map(async (req) => {
+          // Approve the void request
+          await axios.put(`${baseUrl}/teller/void_request/${req.id}`, { status: 1, is_approve: 1 }, authHeader);
+          // Automatically void the transaction ticket
+          try {
+            await axios.put(`${baseUrl}/admin/void/${req.transactionId}`, { isVoid: 1 }, authHeader);
+          } catch (voidErr) {
+            console.error(`Failed to void ticket ${req.transactionId}:`, voidErr);
+          }
+        });
+        
+        await Promise.all(promises);
+      }
       
       // Refresh the data after approval
       await fetchVoidRequests();
-      showToast(`Successfully bulk approved ${promises.length} void requests!`);
+      showToast(`Successfully bulk approved ${filteredRequests.length} void requests!`);
     } catch (err) {
       console.error('Error during bulk approval:', err);
       showToast('An error occurred during bulk approval.', 'error');
