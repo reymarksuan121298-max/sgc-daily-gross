@@ -188,5 +188,5 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
   // Write file
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `Daily_Report_${currentDatesTitle.replace(/ /g, '_')}.xlsx`);
+  saveAs(blob, `${regionName.replace(/ /g, '_')}_Weekly_Gross_Sales_${currentDatesTitle.replace(/ /g, '_')}.xlsx`);
 };

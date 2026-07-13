@@ -1,7 +1,8 @@
 import React from 'react';
 import SharedTable from './SharedTable';
 
-export default function MonthlyTab({ apiData, selectedEndDate }) {
+export default function MonthlyTab({ apiData, selectedEndDate, currentPage }) {
+  const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
   const rawData = apiData?.data || [];
   const spvrMap = {};
   if (Array.isArray(apiData?.supervisors)) {
@@ -96,7 +97,7 @@ export default function MonthlyTab({ apiData, selectedEndDate }) {
 
       <SharedTable 
         title="Full Monthly Unit Shift" 
-        exportFilename="Monthly_Analysis.xlsx"
+        exportFilename={`${regionName}_Monthly_Analysis.xlsx`}
         data={tableData} 
       />
     </div>

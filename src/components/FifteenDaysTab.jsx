@@ -1,7 +1,8 @@
 import React from 'react';
 import SharedTable from './SharedTable';
 
-export default function FifteenDaysTab({ apiData, selectedEndDate }) {
+export default function FifteenDaysTab({ apiData, selectedEndDate, currentPage }) {
+  const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
   const rawData = apiData?.data || [];
   const spvrMap = {};
   if (Array.isArray(apiData?.supervisors)) {
@@ -102,7 +103,7 @@ export default function FifteenDaysTab({ apiData, selectedEndDate }) {
 
       <SharedTable 
         title="15 Days Unit Shift (1st-15th)" 
-        exportFilename="15_Days_Analysis.xlsx"
+        exportFilename={`${regionName}_15_Days_Analysis.xlsx`}
         data={tableData} 
       />
     </div>

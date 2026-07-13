@@ -19,7 +19,8 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-export default function ComparisonTab({ apiData, selectedEndDate }) {
+export default function ComparisonTab({ apiData, selectedEndDate, currentPage }) {
+  const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
   let barData = apiData?.comparisonData?.barData;
   let tableData = apiData?.comparisonData?.tableData;
   let summary = apiData?.comparisonData?.summary;
@@ -205,6 +206,7 @@ export default function ComparisonTab({ apiData, selectedEndDate }) {
         col1Header={summary.prevDate} 
         col2Header={summary.currDate} 
         data={tableData} 
+        exportFilename={`${regionName}_Weekly_Gross_Sales.xlsx`}
       />
 
     </div>

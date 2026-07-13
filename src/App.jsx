@@ -57,11 +57,15 @@ function App() {
           'maguindanao': 'mag',
           'imperial': 'imp'
         };
-        const allowedPage = usernameMap[user.username] || user.username;
-        const validPages = [allowedPage];
+        let validPages = [];
+        if (user.username === 'iligan_lotto') {
+          validPages = ['iligan', 'lotto'];
+        } else {
+          validPages = [usernameMap[user.username] || user.username];
+        }
         
         if (!validPages.includes(currentPage)) {
-          setCurrentPage(allowedPage);
+          setCurrentPage(validPages[0]);
         }
       }
     }
@@ -387,8 +391,8 @@ function App() {
                 {activeTab === 'details' && <DetailsTab apiData={filteredApiData} currentPage={currentPage} />}
                 {activeTab === 'spvrweekly' && <SpvrWeeklyTab apiData={filteredApiData} currentPage={currentPage} />}
                 {activeTab === 'comparison' && <ComparisonTab apiData={filteredApiData} currentPage={currentPage} selectedEndDate={selectedEndDate} />}
-                {activeTab === '15days' && <FifteenDaysTab apiData={filteredApiData} selectedEndDate={selectedEndDate} />}
-                {activeTab === 'monthly' && <MonthlyTab apiData={filteredApiData} selectedEndDate={selectedEndDate} />}
+                {activeTab === '15days' && <FifteenDaysTab apiData={filteredApiData} selectedEndDate={selectedEndDate} currentPage={currentPage} />}
+                {activeTab === 'monthly' && <MonthlyTab apiData={filteredApiData} selectedEndDate={selectedEndDate} currentPage={currentPage} />}
               </>
             )
           ) : (currentPage === 'active_tellers_mag' || currentPage === 'active_tellers_imp' || currentPage === 'active_tellers_iligan' || currentPage === 'active_tellers_lanao' || currentPage === 'active_tellers_setb' || currentPage === 'active_tellers_lotto' || currentPage === 'active_tellers_baloi') ? (

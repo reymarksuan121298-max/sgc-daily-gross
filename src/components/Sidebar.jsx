@@ -56,6 +56,8 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
   if (user && user.username !== 'admin') {
     if (user.username === 'unclaimed') {
       dashboardItems = [];
+    } else if (user.username === 'iligan_lotto') {
+      dashboardItems = dashboardItems.filter(item => ['iligan', 'lotto'].includes(item.id));
     } else {
       const usernameMap = {
         'maguindanao': 'mag',
