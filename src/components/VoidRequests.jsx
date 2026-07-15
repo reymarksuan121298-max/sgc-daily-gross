@@ -341,43 +341,6 @@ export default function VoidRequests({ currentPage }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            {/* Draw Time Filter */}
-            <div className="flex items-center bg-[#111827] border border-slate-700 rounded-lg px-3 py-2">
-              <Clock className="w-4 h-4 text-slate-400 mr-2" />
-              <select 
-                value={drawTimeFilter}
-                onChange={(e) => setDrawTimeFilter(e.target.value)}
-                className="bg-transparent text-sm text-slate-200 outline-none appearance-none pr-4 cursor-pointer"
-              >
-                <option value="ALL" className="bg-[#111827]">All Draws</option>
-                <option value="10:30" className="bg-[#111827]">10:30 AM</option>
-                <option value="14" className="bg-[#111827]">2:00 PM</option>
-                <option value="17" className="bg-[#111827]">5:00 PM</option>
-                <option value="20" className="bg-[#111827]">8:00 PM</option>
-              </select>
-            </div>
-
-            {/* Date Range */}
-            <div className="flex items-center bg-[#111827] border border-slate-700 rounded-lg px-3 py-2">
-              <Calendar className="w-4 h-4 text-slate-400 mr-2" />
-              <input
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="bg-transparent text-sm text-slate-200 outline-none w-[110px] cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
-              />
-            </div>
-            <span className="text-slate-500 font-medium">to</span>
-            <div className="flex items-center bg-[#111827] border border-slate-700 rounded-lg px-3 py-2">
-              <Calendar className="w-4 h-4 text-slate-400 mr-2" />
-              <input
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="bg-transparent text-sm text-slate-200 outline-none w-[110px] cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert"
-              />
-            </div>
-
             {/* Refresh Button */}
             <button 
               onClick={() => fetchVoidRequests(false)}
