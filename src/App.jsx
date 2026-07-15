@@ -35,8 +35,12 @@ function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   React.useEffect(() => {
-    localStorage.setItem('app_active_tab', activeTab);
-  }, [activeTab]);
+    if (user?.username === 'striketeam' && activeTab !== 'details') {
+      setActiveTab('details');
+    } else {
+      localStorage.setItem('app_active_tab', activeTab);
+    }
+  }, [activeTab, user]);
   const [currentPage, setCurrentPage] = useState(() => {
     return localStorage.getItem('app_current_page') || 'mag';
   });
@@ -60,6 +64,8 @@ function App() {
         let validPages = [];
         if (user.username === 'iligan_lotto') {
           validPages = ['iligan', 'lotto'];
+        } else if (user.username === 'striketeam') {
+          validPages = ['mag'];
         } else {
           validPages = [usernameMap[user.username] || user.username];
         }
@@ -354,7 +360,7 @@ function App() {
           {/* Tabs */}
           {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') && (
             <div className="flex bg-cardBg p-1 rounded-md border border-slate-700/50 overflow-x-auto w-full xl:w-auto shadow-inner">
-              {TABS.map(tab => (
+              {TABS.filter(tab => user?.username !== 'striketeam' || tab.id === 'details').map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}

@@ -201,11 +201,10 @@ export default function VoidRequests({ currentPage }) {
     const { authHeader, baseUrl } = getApiConfig();
     
     try {
-      // Process in batches of 15 to avoid overloading the server and browser
-      const BATCH_SIZE = 15;
-      for (let i = 0; i < filteredRequests.length; i += BATCH_SIZE) {
-        const batch = filteredRequests.slice(i, i + BATCH_SIZE);
-        const promises = batch.map(async (req) => {
+      let successCount = 0;
+      // Process sequentially to completely avoid overwhelming the server
+      for (const req of filteredRequests) {
+        try {
           // Approve the void request
           await axios.put(`${baseUrl}/teller/void_request/${req.id}`, { status: 1, is_approve: 1 }, authHeader);
           // Automatically void the transaction ticket
@@ -214,14 +213,25 @@ export default function VoidRequests({ currentPage }) {
           } catch (voidErr) {
             console.error(`Failed to void ticket ${req.transactionId}:`, voidErr);
           }
-        });
-        
-        await Promise.all(promises);
+          successCount++;
+          // Small delay between requests to prevent rate limiting/server overload
+          await new Promise(resolve => setTimeout(resolve, 250));
+        } catch (reqErr) {
+          console.error(`Failed to approve request ${req.id}:`, reqErr);
+        }
       }
+      
+      // Additional small delay before fetching fresh data to let the server recover
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Refresh the data after approval
       await fetchVoidRequests();
-      showToast(`Successfully bulk approved ${filteredRequests.length} void requests!`);
+      
+      if (successCount > 0) {
+        showToast(`Successfully bulk approved ${successCount} void requests!`);
+      } else {
+        showToast('Failed to approve requests. Please try again.', 'error');
+      }
     } catch (err) {
       console.error('Error during bulk approval:', err);
       showToast('An error occurred during bulk approval.', 'error');

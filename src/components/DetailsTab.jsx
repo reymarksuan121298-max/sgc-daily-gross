@@ -2,8 +2,10 @@ import React from 'react';
 import { Download } from 'lucide-react';
 import { clsx } from 'clsx';
 import { generateExcelReport } from '../utils/exportToExcel';
+import { useAuth } from '../context/AuthContext';
 
 export default function DetailsTab({ apiData, currentPage }) {
+  const { user } = useAuth();
   let detailsData = apiData?.detailsData;
   let dates = apiData?.comparisonData?.dates;
   let current7Dates = apiData?.comparisonData?.current7Dates || [];
@@ -73,7 +75,7 @@ export default function DetailsTab({ apiData, currentPage }) {
       let subCurrent = 0;
       let subPrevious = 0;
 
-      const tellers = Object.values(groups[groupName]).map(t => {
+      let tellers = Object.values(groups[groupName]).map(t => {
         const days = current7Dates.map(d => t.daysMap[d] || 0);
         
         // Add to subtotals
@@ -91,6 +93,21 @@ export default function DetailsTab({ apiData, currentPage }) {
         };
       }).sort((a, b) => b.current - a.current);
 
+      // Filter for striketeam (low grossers: daily average <= 1500, which means 7-day total <= 10500)
+      if (user?.username === 'striketeam') {
+        tellers = tellers.filter(t => (t.current / 7) <= 1500);
+        
+        // Recalculate subtotals for the filtered tellers
+        subDays = Array(7).fill(0);
+        subCurrent = 0;
+        subPrevious = 0;
+        tellers.forEach(t => {
+          t.days.forEach((val, i) => subDays[i] += val);
+          subCurrent += t.current;
+          subPrevious += t.previous;
+        });
+      }
+
       return {
         supervisor: groupName,
         tellers: tellers,
@@ -101,7 +118,7 @@ export default function DetailsTab({ apiData, currentPage }) {
           shift: subCurrent - subPrevious
         }
       };
-    });
+    }).filter(group => group.tellers.length > 0);
   }
 
   dates = dates || ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
