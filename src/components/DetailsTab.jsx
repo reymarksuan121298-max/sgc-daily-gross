@@ -144,14 +144,78 @@ export default function DetailsTab({ apiData, currentPage }) {
     await generateExcelReport(excelData, current7Dates, previous7Dates, regionName);
   };
 
+  const handleDownloadLowGrossers = async () => {
+    const excelData = detailsData.map(group => {
+      const lowTellers = group.tellers.filter(t => (t.current / 7) <= 1500);
+      if (lowTellers.length === 0) return null;
+      return {
+        spvrName: group.supervisor,
+        tellers: lowTellers.map(t => {
+          const daily = {};
+          current7Dates.forEach((d, i) => daily[d] = t.days[i]);
+          return {
+            name: t.name,
+            daily: daily,
+            totalCurr: t.current,
+            totalPrev: t.previous,
+            difference: t.shift
+          };
+        })
+      };
+    }).filter(Boolean);
+
+    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+    await generateExcelReport(excelData, current7Dates, previous7Dates, regionName + ' - LOW GROSSERS');
+  };
+
+  const handleDownloadHighGrossers = async () => {
+    const todayIndex = current7Dates.length - 1;
+    const excelData = detailsData.map(group => {
+      // Filter based on TODAY's gross being high (e.g. > 1500)
+      const highTellers = group.tellers.filter(t => t.days[todayIndex] > 1500);
+      
+      // Optional: Sort them from highest today's gross to lowest
+      highTellers.sort((a, b) => b.days[todayIndex] - a.days[todayIndex]);
+
+      if (highTellers.length === 0) return null;
+      return {
+        spvrName: group.supervisor,
+        tellers: highTellers.map(t => {
+          const daily = {};
+          current7Dates.forEach((d, i) => daily[d] = t.days[i]);
+          return {
+            name: t.name,
+            daily: daily,
+            totalCurr: t.current,
+            totalPrev: t.previous,
+            difference: t.shift
+          };
+        })
+      };
+    }).filter(Boolean);
+
+    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+    await generateExcelReport(excelData, current7Dates, previous7Dates, regionName + ' - HIGH GROSSERS (TODAY)');
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       
       {/* Action Bar */}
       <div className="flex flex-wrap items-center justify-end gap-3">
-        <button className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(225,29,72,0.3)] text-sm">
+        <button 
+          onClick={handleDownloadLowGrossers}
+          className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(225,29,72,0.3)] text-sm"
+        >
           <Download className="w-4 h-4" />
           Low Grossers per SPVR
+        </button>
+        <button 
+          onClick={handleDownloadHighGrossers}
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)] text-sm"
+        >
+          <Download className="w-4 h-4" />
+          High Grossers Day by Day
         </button>
         <button 
           onClick={handleDownload}

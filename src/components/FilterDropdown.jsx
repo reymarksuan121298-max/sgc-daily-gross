@@ -65,6 +65,22 @@ export default function FilterDropdown({ icon: Icon, label, options, selectedVal
             />
           </div>
           <div className="max-h-60 overflow-y-auto space-y-1.5 pr-1">
+            <button 
+              onClick={() => onSelect([])}
+              className={clsx(
+                "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 text-left cursor-pointer font-bold text-[11px] tracking-wide",
+                selectedValues.length === 0 
+                  ? "bg-[#6366f1] text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]" 
+                  : "bg-[#111827] text-slate-300 hover:bg-[#1e293b] border border-slate-800/50 hover:border-slate-700"
+              )}
+            >
+              <span className="truncate pr-2">ALL {displayLabel.toUpperCase()}</span>
+              {selectedValues.length === 0 && (
+                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </button>
             {filteredOptions.map(opt => {
               const isOptSelected = selectedValues.includes(opt.id);
               return (
