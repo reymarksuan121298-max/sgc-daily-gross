@@ -5,7 +5,7 @@ import { DollarSign, Users, LayoutGrid } from 'lucide-react';
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-cardBg p-3 border border-slate-700 rounded shadow-lg">
+      <div className="bg-cardBg p-3 border border-border-divider rounded shadow-lg">
         <p className="text-textPrimary font-semibold mb-1">{label}</p>
         <p className="text-accentGreen">
           Gross: P{payload[0].value.toLocaleString()}
@@ -91,7 +91,7 @@ export default function OverviewTab({ apiData, currentPage }) {
     <div className="space-y-6">
       {/* Summary Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-cardBg border border-slate-700/50 rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
+        <div className="bg-cardBg border border-border-divider rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-5 text-emerald-400">
             <DollarSign className="w-20 h-20" />
           </div>
@@ -99,12 +99,12 @@ export default function OverviewTab({ apiData, currentPage }) {
             <DollarSign className="w-8 h-8 text-emerald-400" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">Total Gross Sales</p>
-            <p className="text-3xl font-bold text-white">₱{totalGross.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+            <p className="text-sm font-medium text-textSecondary uppercase tracking-wider">Total Gross Sales</p>
+            <p className="text-3xl font-bold text-textPrimary">₱{totalGross.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
           </div>
         </div>
 
-        <div className="bg-cardBg border border-slate-700/50 rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
+        <div className="bg-cardBg border border-border-divider rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-5 text-blue-400">
             <Users className="w-20 h-20" />
           </div>
@@ -112,12 +112,12 @@ export default function OverviewTab({ apiData, currentPage }) {
             <Users className="w-8 h-8 text-blue-400" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">Active Tellers</p>
-            <p className="text-3xl font-bold text-white">{totalTellersCount}</p>
+            <p className="text-sm font-medium text-textSecondary uppercase tracking-wider">Active Tellers</p>
+            <p className="text-3xl font-bold text-textPrimary">{totalTellersCount}</p>
           </div>
         </div>
 
-        <div className="bg-cardBg border border-slate-700/50 rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
+        <div className="bg-cardBg border border-border-divider rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-5 text-purple-400">
             <LayoutGrid className="w-20 h-20" />
           </div>
@@ -125,14 +125,14 @@ export default function OverviewTab({ apiData, currentPage }) {
             <LayoutGrid className="w-8 h-8 text-purple-400" />
           </div>
           <div>
-            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider">Active Units</p>
-            <p className="text-3xl font-bold text-white">{totalUnitsCount}</p>
+            <p className="text-sm font-medium text-textSecondary uppercase tracking-wider">Active Units</p>
+            <p className="text-3xl font-bold text-textPrimary">{totalUnitsCount}</p>
           </div>
         </div>
       </div>
 
       {/* Chart Section */}
-      <div className="bg-cardBg rounded-2xl p-6 border border-slate-700/50 shadow-lg relative overflow-hidden">
+      <div className="bg-cardBg rounded-2xl p-6 border border-border-divider shadow-lg relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accentGreen/5 rounded-full blur-3xl pointer-events-none"></div>
         
         <div className="flex justify-between items-center mb-8 relative z-10">
@@ -141,7 +141,7 @@ export default function OverviewTab({ apiData, currentPage }) {
             <h2 className="text-xl font-bold tracking-wide">DAILY PERFORMANCE TREND</h2>
           </div>
           
-          <div className="flex items-center gap-2 text-sm text-slate-400">
+          <div className="flex items-center gap-2 text-sm text-textSecondary">
             <span className="w-3 h-3 rounded-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
             {currentPage === 'imp' ? 'Imperial' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'Iligan' : currentPage === 'lanao' ? 'Lanao' : currentPage === 'lotto' ? 'Lotto' : currentPage === 'baloi' ? 'Baloi' : currentPage === 'lds' ? 'LDS' : 'Mag'} Aggregate Trend
           </div>
@@ -184,24 +184,24 @@ export default function OverviewTab({ apiData, currentPage }) {
       {/* Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {cardsData.map((card, idx) => (
-          <div key={idx} className="bg-[#111827] rounded-xl p-6 border border-slate-800 shadow-xl flex flex-col h-full hover:border-slate-700 transition-colors">
+          <div key={idx} className="bg-surface rounded-xl p-6 border border-border-divider shadow-xl flex flex-col h-full hover:border-border-divider transition-colors">
             <div className="flex justify-between items-start mb-8">
-              <h3 className="text-[11px] font-extrabold text-white uppercase tracking-wider w-3/5 leading-tight">{card.title}</h3>
+              <h3 className="text-[11px] font-extrabold text-textPrimary uppercase tracking-wider w-3/5 leading-tight">{card.title}</h3>
               <span className="text-[#00b87c] font-extrabold text-[13px]">{card.total.replace('₱', 'P')}</span>
             </div>
             
             <div className="flex-1 space-y-4">
               {card.tellers.map((teller, tIdx) => (
                 <div key={tIdx} className="flex justify-between items-center text-[10px]">
-                  <span className="text-slate-400 font-bold uppercase tracking-wide truncate pr-2" title={teller.name}>{teller.name}</span>
-                  <span className="text-white font-extrabold">{teller.amount}</span>
+                  <span className="text-textSecondary font-bold uppercase tracking-wide truncate pr-2" title={teller.name}>{teller.name}</span>
+                  <span className="text-textPrimary font-extrabold">{teller.amount}</span>
                 </div>
               ))}
             </div>
 
             {card.moreCount > 0 && (
               <div className="mt-6 text-center">
-                <button className="text-[10px] text-slate-500 hover:text-slate-300 font-extrabold tracking-widest uppercase transition-colors">
+                <button className="text-[10px] text-textSecondary hover:text-textPrimary font-extrabold tracking-widest uppercase transition-colors">
                   + {card.moreCount} MORE TELLERS
                 </button>
               </div>

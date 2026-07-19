@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, Filter, Users, LayoutDashboard, List, BarChart2, CalendarDays, CalendarRange, Crown, Menu } from 'lucide-react';
+import { Calendar, Filter, Users, LayoutDashboard, List, BarChart2, CalendarDays, CalendarRange, Crown, Menu, Sun, Moon } from 'lucide-react';
 import { clsx } from 'clsx';
 import axios from 'axios';
 
@@ -15,6 +15,7 @@ import Sidebar from './components/Sidebar';
 import UnclaimedTickets from './components/UnclaimedTickets';
 import ActiveTellers from './components/ActiveTellers';
 import { useAuth } from './context/AuthContext';
+import { useTheme } from './context/ThemeContext';
 import Login from './components/Login';
 import VoidRequests from './components/VoidRequests';
 
@@ -29,6 +30,7 @@ const TABS = [
 
 function App() {
   const { user } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState(() => {
     return localStorage.getItem('app_active_tab') || 'overview';
   });
@@ -284,11 +286,11 @@ function App() {
           <div className="flex items-center gap-2 group cursor-pointer">
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
-              className="lg:hidden p-2 rounded-md hover:bg-[#253247] text-slate-300 transition-colors"
+              className="lg:hidden p-2 rounded-md hover:bg-surface-hover text-textSecondary transition-colors"
             >
               <Menu className="w-6 h-6" />
             </button>
-            <div className="bg-white rounded-full p-2 h-10 w-10 md:h-14 md:w-14 flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,0.1)] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-shadow">
+            <div className="bg-surface rounded-full p-2 h-10 w-10 md:h-14 md:w-14 flex items-center justify-center shadow-lg border border-border-divider transition-shadow">
               <Crown className="text-yellow-600 h-5 w-5 md:h-8 md:w-8" />
             </div>
             <div>
@@ -319,15 +321,24 @@ function App() {
           </div>
 
           {/* Controls */}
-          {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && (
-            <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
-              <div className="relative flex items-center bg-cardBg hover:bg-[#253247] border border-slate-700/50 rounded-md transition-all focus-within:ring-2 focus-within:ring-indigo-500/50 cursor-pointer">
+          <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+            <button
+              onClick={toggleTheme}
+              className="p-2.5 rounded-xl bg-cardBg hover:bg-surface-hover border border-border-divider transition-all text-textSecondary hover:text-textPrimary mr-2"
+              title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
+            {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && (
+              <>
+                <div className="relative flex items-center bg-cardBg hover:bg-surface-hover border border-border-divider rounded-md transition-all focus-within:ring-2 focus-within:ring-indigo-500/50 cursor-pointer">
                 <Calendar className="w-4 h-4 ml-4 text-textSecondary" />
                 <input
                   type="date"
                   value={selectedEndDate}
                   onChange={(e) => setSelectedEndDate(e.target.value)}
-                  className="bg-transparent text-textSecondary hover:text-white px-3 py-2.5 text-sm outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert opacity-80 hover:opacity-100 transition-opacity"
+                  className="bg-transparent text-textSecondary hover:text-textPrimary px-3 py-2.5 text-sm outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:invert opacity-80 hover:opacity-100 transition-opacity"
                   title="Select End Date (Calculates 14 days prior)"
                 />
               </div>
@@ -354,12 +365,13 @@ function App() {
                 placeholder="Search teller list..."
                 align="right"
               />
-            </div>
-          )}
+              </>
+            )}
+          </div>
 
           {/* Tabs */}
           {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') && (
-            <div className="flex bg-cardBg p-1 rounded-md border border-slate-700/50 overflow-x-auto w-full xl:w-auto shadow-inner">
+            <div className="flex bg-cardBg p-1 rounded-md border border-border-divider overflow-x-auto w-full xl:w-auto shadow-inner">
               {TABS.filter(tab => user?.username !== 'striketeam' || tab.id === 'details').map(tab => (
                 <button
                   key={tab.id}
@@ -368,7 +380,7 @@ function App() {
                     "flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all whitespace-nowrap outline-none",
                     activeTab === tab.id
                       ? "bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]"
-                      : "text-textSecondary hover:text-white hover:bg-[#253247]"
+                      : "text-textSecondary hover:text-textPrimary hover:bg-surface-hover"
                   )}
                 >
                   <tab.icon className="w-4 h-4" />

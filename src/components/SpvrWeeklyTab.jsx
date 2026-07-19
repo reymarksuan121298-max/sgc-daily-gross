@@ -101,40 +101,40 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
       <div className="flex flex-wrap items-center justify-end gap-3">
         <button 
           onClick={handleDownload}
-          className="flex items-center gap-2 bg-white hover:bg-slate-200 text-slate-900 font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] text-sm"
+          className="flex items-center gap-2 bg-white hover:bg-surface-hover text-textPrimary font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] text-sm"
         >
           <Download className="w-4 h-4" />
           Download Analysis
         </button>
       </div>
 
-      <div className="bg-[#111827] rounded-3xl border border-slate-800 shadow-xl overflow-hidden mt-6">
-        <div className="px-8 py-6 border-b border-slate-800 flex justify-between items-center bg-[#111827]">
-          <h3 className="text-[15px] font-extrabold tracking-wide text-white">SPVR WEEKLY SHIFT</h3>
+      <div className="bg-surface rounded-3xl border border-border-divider shadow-xl overflow-hidden mt-6">
+        <div className="px-8 py-6 border-b border-border-divider flex justify-between items-center bg-surface">
+          <h3 className="text-[15px] font-extrabold tracking-wide text-textPrimary">SPVR WEEKLY SHIFT</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
-              <tr className="bg-[#111827] border-b border-slate-800">
-                <th className="py-5 px-8 font-extrabold text-[10px] text-slate-500 uppercase tracking-widest">SPVR IDENTITY</th>
+              <tr className="bg-surface border-b border-border-divider">
+                <th className="py-5 px-8 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest">SPVR IDENTITY</th>
                 {dates.map((date, i) => (
-                  <th key={i} className="py-5 px-4 font-extrabold text-[10px] text-slate-500 uppercase tracking-widest text-center">{date}</th>
+                  <th key={i} className="py-5 px-4 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center">{date}</th>
                 ))}
-                <th className="py-5 px-6 font-extrabold text-[10px] text-indigo-500 uppercase tracking-widest text-center bg-[#0a0f18] border-l border-slate-800">TOTAL CURRENT<br/><span className="text-[9px] text-slate-600">(7D)</span></th>
-                <th className="py-5 px-6 font-extrabold text-[10px] text-slate-500 uppercase tracking-widest text-center bg-[#0a0f18]">TOTAL PREVIOUS<br/><span className="text-[9px] text-slate-600">(7D)</span></th>
-                <th className="py-5 px-8 font-extrabold text-[10px] text-slate-500 uppercase tracking-widest text-right bg-[#0a0f18]">SHIFT ANALYSIS</th>
+                <th className="py-5 px-6 font-extrabold text-[10px] text-indigo-500 uppercase tracking-widest text-center bg-surface-header border-l border-border-divider">TOTAL CURRENT<br/><span className="text-[9px] text-textSecondary">(7D)</span></th>
+                <th className="py-5 px-6 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center bg-surface-header">TOTAL PREVIOUS<br/><span className="text-[9px] text-textSecondary">(7D)</span></th>
+                <th className="py-5 px-8 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-right bg-surface-header">SHIFT ANALYSIS</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 bg-[#111827]">
+            <tbody className="divide-y divide-border-divider bg-surface">
               {spvrData.map((row, i) => (
-                <tr key={i} className="hover:bg-slate-800/30 transition-colors">
-                  <td className="py-5 px-8 text-xs font-extrabold text-white tracking-wide">{row.name}</td>
+                <tr key={i} className="hover:bg-surface-hover transition-colors">
+                  <td className="py-5 px-8 text-xs font-extrabold text-textPrimary tracking-wide">{row.name}</td>
                   {row.days.map((val, i) => (
-                    <td key={i} className="py-5 px-4 text-[11px] text-slate-400 text-center font-bold">₱{val?.toLocaleString()}</td>
+                    <td key={i} className="py-5 px-4 text-[11px] text-textSecondary text-center font-bold">₱{val?.toLocaleString()}</td>
                   ))}
-                  <td className="py-5 px-6 text-[13px] text-white text-center font-extrabold bg-[#0a0f18]/30 border-l border-slate-800">₱{row.current?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                  <td className="py-5 px-6 text-[13px] text-slate-500 text-center font-semibold bg-[#0a0f18]/30">₱{row.previous?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                  <td className="py-5 px-8 text-[13px] text-right bg-[#0a0f18]/30">
+                  <td className="py-5 px-6 text-[13px] text-textPrimary text-center font-extrabold bg-surface-header/30 border-l border-border-divider">₱{row.current?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                  <td className="py-5 px-6 text-[13px] text-textSecondary text-center font-semibold bg-surface-header/30">₱{row.previous?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                  <td className="py-5 px-8 text-[13px] text-right bg-surface-header/30">
                     <div className="flex items-center justify-end gap-3 min-w-[140px]">
                       {row.shift > 0 ? (
                         <span className="text-[9px] font-extrabold tracking-widest text-[#00b87c] uppercase">INCREASED</span>
@@ -153,7 +153,7 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
               ))}
               {spvrData.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="py-12 text-center text-slate-500 text-sm font-semibold">No data available for comparison</td>
+                  <td colSpan={11} className="py-12 text-center text-textSecondary text-sm font-semibold">No data available for comparison</td>
                 </tr>
               )}
             </tbody>

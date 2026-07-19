@@ -35,12 +35,12 @@ export default function SharedTable({ title, col1Header, col2Header, data, expor
   };
 
   return (
-    <div className="bg-[#111827] rounded-3xl border border-slate-800 shadow-xl overflow-hidden mt-6 animate-in fade-in duration-300">
-      <div className="px-8 py-6 border-b border-slate-800 flex justify-between items-center bg-[#111827]">
-        <h3 className="text-[15px] font-extrabold tracking-wide text-white">{title}</h3>
+    <div className="bg-surface rounded-3xl border border-border-divider shadow-xl overflow-hidden mt-6 animate-in fade-in duration-300">
+      <div className="px-8 py-6 border-b border-border-divider flex justify-between items-center bg-surface">
+        <h3 className="text-[15px] font-extrabold tracking-wide text-textPrimary">{title}</h3>
         <button 
           onClick={handleExport}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#00b87c] text-white rounded-lg hover:bg-[#00a36d] transition-colors text-[10px] font-extrabold tracking-widest uppercase shadow-[0_0_15px_rgba(0,184,124,0.3)]"
+          className="flex items-center gap-2 px-5 py-2.5 bg-[#00b87c] text-textPrimary rounded-lg hover:bg-[#00a36d] transition-colors text-[10px] font-extrabold tracking-widest uppercase shadow-[0_0_15px_rgba(0,184,124,0.3)]"
         >
           <Download className="w-3.5 h-3.5" />
           Export Analysis
@@ -49,20 +49,20 @@ export default function SharedTable({ title, col1Header, col2Header, data, expor
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-[#111827] border-b border-slate-800">
-              <th className="py-5 px-8 font-extrabold text-[10px] text-slate-500 uppercase tracking-widest">Supervising Area</th>
-              <th className="py-5 px-8 font-extrabold text-[10px] text-slate-500 uppercase tracking-widest text-center">Previous Month</th>
+            <tr className="bg-surface border-b border-border-divider">
+              <th className="py-5 px-8 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest">Supervising Area</th>
+              <th className="py-5 px-8 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center">Previous Month</th>
               <th className="py-5 px-8 font-extrabold text-[10px] text-indigo-500 uppercase tracking-widest text-center">Current Month</th>
-              <th className="py-5 px-8 font-extrabold text-[10px] text-slate-500 uppercase tracking-widest text-center">Net Change</th>
-              <th className="py-5 px-8 font-extrabold text-[10px] text-slate-500 uppercase tracking-widest text-right">Trend Analysis</th>
+              <th className="py-5 px-8 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center">Net Change</th>
+              <th className="py-5 px-8 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-right">Trend Analysis</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/80 bg-[#111827]">
+          <tbody className="divide-y divide-border-divider bg-surface">
             {data.map((row, i) => (
-              <tr key={i} className="hover:bg-slate-800/30 transition-colors">
-                <td className="py-5 px-8 text-xs font-extrabold text-white tracking-wide">{row.area}</td>
-                <td className="py-5 px-8 text-[13px] text-slate-500 text-center font-semibold">₱{row.prev?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                <td className="py-5 px-8 text-[13px] text-white text-center font-extrabold">₱{row.curr?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+              <tr key={i} className="hover:bg-surface-hover transition-colors">
+                <td className="py-5 px-8 text-xs font-extrabold text-textPrimary tracking-wide">{row.area}</td>
+                <td className="py-5 px-8 text-[13px] text-textSecondary text-center font-semibold">₱{row.prev?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td className="py-5 px-8 text-[13px] text-textPrimary text-center font-extrabold">₱{row.curr?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
                 <td className="py-5 px-8 text-[13px] text-center font-extrabold">
                   <span className={row.change >= 0 ? "text-[#00b87c]" : "text-[#ff4e50]"}>
                     {row.change > 0 ? "+" : ""}{row.change < 0 ? "-" : ""}₱{Math.abs(row.change)?.toLocaleString(undefined, {minimumFractionDigits: 2})}
@@ -79,7 +79,7 @@ export default function SharedTable({ title, col1Header, col2Header, data, expor
             ))}
             {data.length === 0 && (
               <tr>
-                <td colSpan="5" className="py-12 text-center text-slate-500 text-sm font-semibold">No data available for comparison</td>
+                <td colSpan="5" className="py-12 text-center text-textSecondary text-sm font-semibold">No data available for comparison</td>
               </tr>
             )}
           </tbody>

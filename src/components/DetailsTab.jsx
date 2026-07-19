@@ -205,67 +205,67 @@ export default function DetailsTab({ apiData, currentPage }) {
       <div className="flex flex-wrap items-center justify-end gap-3">
         <button 
           onClick={handleDownloadLowGrossers}
-          className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(225,29,72,0.3)] text-sm"
+          className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-textPrimary font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(225,29,72,0.3)] text-sm"
         >
           <Download className="w-4 h-4" />
           Low Grossers per SPVR
         </button>
         <button 
           onClick={handleDownloadHighGrossers}
-          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)] text-sm"
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-textPrimary font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)] text-sm"
         >
           <Download className="w-4 h-4" />
           High Grossers Day by Day
         </button>
         <button 
           onClick={handleDownload}
-          className="flex items-center gap-2 bg-white hover:bg-slate-200 text-slate-900 font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] text-sm"
+          className="flex items-center gap-2 bg-white hover:bg-surface-hover text-textPrimary font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] text-sm"
         >
           <Download className="w-4 h-4" />
           Download Analysis
         </button>
-        <button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)] text-sm">
+        <button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-textPrimary font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)] text-sm">
           <Download className="w-4 h-4" />
           Download with Address
         </button>
       </div>
 
       {/* Table Section */}
-      <div className="bg-cardBg rounded-xl border border-slate-700/50 shadow-lg overflow-hidden">
+      <div className="bg-cardBg rounded-xl border border-border-divider shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left whitespace-nowrap">
-            <thead className="text-xs text-textSecondary uppercase bg-[#172033] border-b border-slate-700/50">
+            <thead className="text-xs text-textSecondary uppercase bg-surface-header border-b border-border-divider">
               <tr>
                 <th className="px-6 py-4 font-bold tracking-wider">TELLER IDENTITY</th>
                 <th className="px-6 py-4 font-bold tracking-wider">ADDRESS</th>
                 {dates.map((date, i) => (
                   <th key={i} className="px-4 py-4 text-center font-bold tracking-wider">{date}</th>
                 ))}
-                <th className="px-4 py-4 text-center font-bold tracking-wider bg-[#131b2c] border-l border-slate-700/50">TOTAL CURRENT<br/><span className="text-[10px] text-slate-500">(7D)</span></th>
-                <th className="px-4 py-4 text-center font-bold tracking-wider bg-[#131b2c]">TOTAL PREVIOUS<br/><span className="text-[10px] text-slate-500">(7D)</span></th>
-                <th className="px-6 py-4 text-center font-bold tracking-wider bg-[#131b2c] text-blue-400">SHIFT ANALYSIS</th>
+                <th className="px-4 py-4 text-center font-bold tracking-wider bg-surface-header border-l border-border-divider">TOTAL CURRENT<br/><span className="text-[10px] text-textSecondary">(7D)</span></th>
+                <th className="px-4 py-4 text-center font-bold tracking-wider bg-surface-header">TOTAL PREVIOUS<br/><span className="text-[10px] text-textSecondary">(7D)</span></th>
+                <th className="px-6 py-4 text-center font-bold tracking-wider bg-surface-header text-blue-400">SHIFT ANALYSIS</th>
               </tr>
             </thead>
             <tbody>
               {detailsData?.map((section, sIdx) => (
                 <React.Fragment key={sIdx}>
                   {/* Section Header */}
-                  <tr className="border-b border-slate-700/50 bg-[#1e293b]/50">
+                  <tr className="border-b border-border-divider bg-surface-hover">
                     <td colSpan={12} className="px-6 py-3 font-bold text-indigo-400 text-xs tracking-wider uppercase">
                       {section.supervisor}
                     </td>
                   </tr>
                   {/* Rows */}
                   {section.tellers?.map((teller, tIdx) => (
-                    <tr key={tIdx} className="border-b border-slate-700/50 hover:bg-[#253247] transition-colors">
+                    <tr key={tIdx} className="border-b border-border-divider hover:bg-surface-hover transition-colors">
                       <td className="px-6 py-4 font-semibold text-xs tracking-wide">{teller.name}</td>
                       <td className="px-6 py-4 text-xs text-textSecondary uppercase">{teller.address}</td>
                       {teller.days?.map((val, i) => (
                         <td key={i} className="px-4 py-4 text-center text-textSecondary text-xs">{val?.toLocaleString()}</td>
                       ))}
-                      <td className="px-4 py-4 text-center font-bold bg-[#131b2c]/30 border-l border-slate-700/50 text-white">{teller.current?.toLocaleString()}</td>
-                      <td className="px-4 py-4 text-center text-textSecondary bg-[#131b2c]/30 text-xs">{teller.previous?.toLocaleString()}</td>
-                      <td className="px-6 py-4 bg-[#131b2c]/30 flex items-center justify-end gap-4 min-w-[150px]">
+                      <td className="px-4 py-4 text-center font-bold bg-surface-header/30 border-l border-border-divider text-textPrimary">{teller.current?.toLocaleString()}</td>
+                      <td className="px-4 py-4 text-center text-textSecondary bg-surface-header/30 text-xs">{teller.previous?.toLocaleString()}</td>
+                      <td className="px-6 py-4 bg-surface-header/30 flex items-center justify-end gap-4 min-w-[150px]">
                         {teller.shift > 0 ? (
                           <span className="text-[10px] font-bold tracking-widest text-accentGreen uppercase">INCREASED</span>
                         ) : (
@@ -281,16 +281,16 @@ export default function DetailsTab({ apiData, currentPage }) {
                     </tr>
                   ))}
                   {/* Subtotal Row */}
-                  <tr className="border-b border-slate-700/50 bg-[#1a2333]">
+                  <tr className="border-b border-border-divider bg-surface-header">
                     <td colSpan={2} className="px-6 py-4 font-bold text-yellow-500 text-xs tracking-wider uppercase">
                       SUBTOTAL : {section.supervisor}
                     </td>
                     {section.subtotals?.days.map((val, i) => (
                       <td key={i} className="px-4 py-4 text-center font-bold text-yellow-500 text-xs">{val?.toLocaleString()}</td>
                     ))}
-                    <td className="px-4 py-4 text-center font-bold bg-[#131b2c]/30 border-l border-slate-700/50 text-yellow-500">{section.subtotals?.current?.toLocaleString()}</td>
-                    <td className="px-4 py-4 text-center font-bold bg-[#131b2c]/30 text-yellow-500">{section.subtotals?.previous?.toLocaleString()}</td>
-                    <td className="px-6 py-4 bg-[#131b2c]/30 flex items-center justify-end gap-4 min-w-[150px]">
+                    <td className="px-4 py-4 text-center font-bold bg-surface-header/30 border-l border-border-divider text-yellow-500">{section.subtotals?.current?.toLocaleString()}</td>
+                    <td className="px-4 py-4 text-center font-bold bg-surface-header/30 text-yellow-500">{section.subtotals?.previous?.toLocaleString()}</td>
+                    <td className="px-6 py-4 bg-surface-header/30 flex items-center justify-end gap-4 min-w-[150px]">
                       <span className="text-[10px] font-bold tracking-widest text-textSecondary uppercase">COMBINED SHIFT</span>
                       <span className={clsx(
                         "font-bold text-sm w-16 text-right",

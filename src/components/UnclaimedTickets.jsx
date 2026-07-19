@@ -215,19 +215,19 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
 
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-textSecondary" />
             <input
               type="text"
               placeholder="Search ID, Teller, Bet No, or Code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-appBg border border-slate-700/50 rounded-lg pl-9 pr-4 py-2.5 text-sm w-full md:w-64 focus:outline-none focus:border-blue-500 transition-colors"
+              className="bg-appBg border border-border-divider rounded-lg pl-9 pr-4 py-2.5 text-sm w-full md:w-64 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
           <button
             onClick={handleBulkCopy}
             disabled={loading || filteredTickets.length === 0}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-blue-600 border border-blue-500 hover:bg-blue-700 transition-colors disabled:opacity-50 text-white text-sm font-medium"
+            className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-blue-600 border border-blue-500 hover:bg-blue-700 transition-colors disabled:opacity-50 text-textPrimary text-sm font-medium"
             title="Bulk Copy"
           >
             {isCopying ? (
@@ -245,96 +245,96 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
           <button
             onClick={fetchTickets}
             disabled={loading}
-            className="flex items-center justify-center p-2.5 rounded-lg bg-slate-800 border border-slate-700/50 hover:bg-slate-700 transition-colors disabled:opacity-50"
+            className="flex items-center justify-center p-2.5 rounded-lg bg-surface-header border border-border-divider hover:bg-surface-hover transition-colors disabled:opacity-50"
             title="Refresh Data"
           >
-            <RefreshCw className={`w-5 h-5 text-slate-300 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-5 h-5 text-textSecondary ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
 
       {!loading && !error && filteredTickets.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-cardBg border border-slate-800/50 rounded-2xl p-6 shadow-xl flex flex-col justify-center relative overflow-hidden">
+          <div className="bg-cardBg border border-border-divider/50 rounded-2xl p-6 shadow-xl flex flex-col justify-center relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <RefreshCw className="w-16 h-16 text-emerald-400" />
             </div>
-            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-1">Total Unclaimed Win Amount</p>
+            <p className="text-sm font-medium text-textSecondary uppercase tracking-wider mb-1">Total Unclaimed Win Amount</p>
             <p className="text-3xl font-bold text-emerald-400">₱{filteredTickets.reduce((acc, curr) => acc + parseFloat(curr.winAmount || 0), 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
           </div>
-          <div className="bg-cardBg border border-slate-800/50 rounded-2xl p-6 shadow-xl flex flex-col justify-center relative overflow-hidden">
+          <div className="bg-cardBg border border-border-divider/50 rounded-2xl p-6 shadow-xl flex flex-col justify-center relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Filter className="w-16 h-16 text-white" />
+              <Filter className="w-16 h-16 text-textPrimary" />
             </div>
-            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-1">Total Pending Tickets</p>
-            <p className="text-3xl font-bold text-white">{filteredTickets.length}</p>
+            <p className="text-sm font-medium text-textSecondary uppercase tracking-wider mb-1">Total Pending Tickets</p>
+            <p className="text-3xl font-bold text-textPrimary">{filteredTickets.length}</p>
           </div>
-          <div className="bg-cardBg border border-slate-800/50 rounded-2xl p-6 shadow-xl flex flex-col justify-center relative overflow-hidden">
+          <div className="bg-cardBg border border-border-divider/50 rounded-2xl p-6 shadow-xl flex flex-col justify-center relative overflow-hidden">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Search className="w-16 h-16 text-blue-400" />
             </div>
-            <p className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-1">Affected Supervisors</p>
+            <p className="text-sm font-medium text-textSecondary uppercase tracking-wider mb-1">Affected Supervisors</p>
             <p className="text-3xl font-bold text-blue-400">{sortedSpvrs.length}</p>
           </div>
         </div>
       )}
 
-      <div className="bg-cardBg border border-slate-800/50 rounded-2xl shadow-xl overflow-hidden">
+      <div className="bg-cardBg border border-border-divider/50 rounded-2xl shadow-xl overflow-hidden">
         {loading ? (
-          <div className="flex justify-center items-center h-64 text-slate-400">
+          <div className="flex justify-center items-center h-64 text-textSecondary">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#10b981] mr-3"></div>
             Loading Data...
           </div>
         ) : error ? (
           <div className="p-12 text-center text-red-500">{error}</div>
         ) : filteredTickets.length === 0 ? (
-          <div className="p-12 text-center text-slate-400">No unclaimed tickets found.</div>
+          <div className="p-12 text-center text-textSecondary">No unclaimed tickets found.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-800/50 border-b border-slate-700">
-                  <th className="py-4 px-6 font-semibold text-xs text-slate-400 uppercase tracking-wider">Teller</th>
-                  <th className="py-4 px-6 font-semibold text-xs text-slate-400 uppercase tracking-wider">Transaction ID</th>
-                  <th className="py-4 px-6 font-semibold text-xs text-slate-400 uppercase tracking-wider">Draw</th>
-                  <th className="py-4 px-6 font-semibold text-xs text-slate-400 uppercase tracking-wider">Game Code</th>
-                  <th className="py-4 px-6 font-semibold text-xs text-slate-400 uppercase tracking-wider">Bet No</th>
-                  <th className="py-4 px-6 font-semibold text-xs text-slate-400 uppercase tracking-wider text-right">Bet Amt</th>
-                  <th className="py-4 px-6 font-semibold text-xs text-slate-400 uppercase tracking-wider text-right">Win Amt</th>
-                  <th className="py-4 px-6 font-semibold text-xs text-slate-400 uppercase tracking-wider text-center">Status</th>
+                <tr className="bg-surface-header/50 border-b border-border-divider">
+                  <th className="py-4 px-6 font-semibold text-xs text-textSecondary uppercase tracking-wider">Teller</th>
+                  <th className="py-4 px-6 font-semibold text-xs text-textSecondary uppercase tracking-wider">Transaction ID</th>
+                  <th className="py-4 px-6 font-semibold text-xs text-textSecondary uppercase tracking-wider">Draw</th>
+                  <th className="py-4 px-6 font-semibold text-xs text-textSecondary uppercase tracking-wider">Game Code</th>
+                  <th className="py-4 px-6 font-semibold text-xs text-textSecondary uppercase tracking-wider">Bet No</th>
+                  <th className="py-4 px-6 font-semibold text-xs text-textSecondary uppercase tracking-wider text-right">Bet Amt</th>
+                  <th className="py-4 px-6 font-semibold text-xs text-textSecondary uppercase tracking-wider text-right">Win Amt</th>
+                  <th className="py-4 px-6 font-semibold text-xs text-textSecondary uppercase tracking-wider text-center">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/50">
+              <tbody className="divide-y divide-border-divider/50">
                 {paginatedSpvrs.map((spvrName) => (
                   <React.Fragment key={spvrName}>
                     {/* Supervisor Header Row */}
-                    <tr className="bg-[#1e293b]/80">
-                      <td colSpan="8" className="py-3 px-6 font-bold text-blue-400 text-sm tracking-wider uppercase border-y border-slate-700/50">
+                    <tr className="bg-surface-hover/80">
+                      <td colSpan="8" className="py-3 px-6 font-bold text-blue-400 text-sm tracking-wider uppercase border-y border-border-divider">
                         {spvrName}
                       </td>
                     </tr>
 
                     {/* Tickets for this Supervisor */}
                     {groupedTickets[spvrName].sort((a, b) => (a.fullName || '').localeCompare(b.fullName || '')).map((ticket) => (
-                      <tr key={ticket.id} className="hover:bg-slate-800/20 transition-colors">
+                      <tr key={ticket.id} className="hover:bg-surface-hover/20 transition-colors">
                         <td className="py-4 px-6 pl-10 text-sm">
-                          <div className="font-medium text-slate-200">{ticket.fullName || 'N/A'}</div>
+                          <div className="font-medium text-textPrimary">{ticket.fullName || 'N/A'}</div>
                         </td>
                         <td className="py-4 px-6">
                           <div className="font-mono text-sm text-blue-400 font-medium">{ticket.transactionId}</div>
                         </td>
                         <td className="py-4 px-6 text-sm">
-                          <span className="text-slate-300">
+                          <span className="text-textSecondary">
                             {formatDrawTime(ticket.drawTime)} {ticket.drawDate ? ticket.drawDate.split(' ')[0] : 'N/A'}
                           </span>
                         </td>
                         <td className="py-4 px-6 text-sm">
-                          <span className="bg-slate-800 px-2 py-0.5 rounded text-xs font-bold text-slate-300">{ticket.betCode}</span>
+                          <span className="bg-surface-header px-2 py-0.5 rounded text-xs font-bold text-textSecondary">{ticket.betCode}</span>
                         </td>
                         <td className="py-4 px-6 text-sm">
-                          <span className="text-white font-bold">{ticket.betNo}</span>
+                          <span className="text-textPrimary font-bold">{ticket.betNo}</span>
                         </td>
-                        <td className="py-4 px-6 text-right font-medium text-slate-300">
+                        <td className="py-4 px-6 text-right font-medium text-textSecondary">
                           ₱{parseFloat(ticket.betAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </td>
                         <td className="py-4 px-6 text-right">
@@ -356,25 +356,25 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between px-6 py-4 border-t border-slate-700/50 bg-[#1e293b]/50">
-                <div className="text-sm text-slate-400">
-                  Showing <span className="font-medium text-white">{(page - 1) * itemsPerPage + 1}</span> to <span className="font-medium text-white">{Math.min(page * itemsPerPage, sortedSpvrs.length)}</span> of <span className="font-medium text-white">{sortedSpvrs.length}</span> Supervisors
+              <div className="flex items-center justify-between px-6 py-4 border-t border-border-divider bg-surface-hover">
+                <div className="text-sm text-textSecondary">
+                  Showing <span className="font-medium text-textPrimary">{(page - 1) * itemsPerPage + 1}</span> to <span className="font-medium text-textPrimary">{Math.min(page * itemsPerPage, sortedSpvrs.length)}</span> of <span className="font-medium text-textPrimary">{sortedSpvrs.length}</span> Supervisors
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="px-3 py-1.5 text-sm font-medium rounded bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-1.5 text-sm font-medium rounded bg-surface-header border border-border-divider text-textSecondary hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     Previous
                   </button>
-                  <div className="text-sm font-medium text-slate-400 px-2">
+                  <div className="text-sm font-medium text-textSecondary px-2">
                     Page {page} of {totalPages}
                   </div>
                   <button
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="px-3 py-1.5 text-sm font-medium rounded bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-1.5 text-sm font-medium rounded bg-surface-header border border-border-divider text-textSecondary hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     Next
                   </button>

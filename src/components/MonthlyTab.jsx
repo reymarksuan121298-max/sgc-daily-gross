@@ -60,24 +60,24 @@ export default function MonthlyTab({ apiData, selectedEndDate, currentPage }) {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       
-      <div className="bg-[#111827] rounded-3xl p-10 py-12 border border-slate-800 shadow-xl mb-6 relative">
-        <h3 className="text-[17px] font-extrabold tracking-wide text-white text-center mb-14">Monthly Performance Comparison</h3>
+      <div className="bg-surface rounded-3xl p-10 py-12 border border-border-divider shadow-xl mb-6 relative">
+        <h3 className="text-[17px] font-extrabold tracking-wide text-textPrimary text-center mb-14">Monthly Performance Comparison</h3>
 
         <div className="flex justify-between items-start w-full relative z-10">
           <div className="text-left w-1/3">
-            <p className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest mb-1.5">PREVIOUS MONTH</p>
+            <p className="text-[9px] font-extrabold text-textSecondary uppercase tracking-widest mb-1.5">PREVIOUS MONTH</p>
             <p className="text-[11px] text-indigo-300/80 font-extrabold mb-3">{prevLabel}</p>
-            <p className="text-[32px] font-extrabold text-white">₱{prevTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+            <p className="text-[32px] font-extrabold text-textPrimary">₱{prevTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
           </div>
 
           <div className="w-1/3 flex justify-center pt-8">
-            <span className="text-[10px] font-bold text-slate-500/70 tracking-widest">VS</span>
+            <span className="text-[10px] font-bold text-textSecondary/70 tracking-widest">VS</span>
           </div>
 
           <div className="text-right w-1/3">
             <p className="text-[9px] font-extrabold text-indigo-500/90 uppercase tracking-widest mb-1.5">CURRENT MONTH</p>
             <p className="text-[11px] text-indigo-300/80 font-extrabold mb-3">{currLabel}</p>
-            <p className="text-[32px] font-extrabold text-white">₱{currTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+            <p className="text-[32px] font-extrabold text-textPrimary">₱{currTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
           </div>
         </div>
 

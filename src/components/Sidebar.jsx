@@ -134,14 +134,14 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
       )}
 
       <div className={clsx(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-[#111827] border-r border-slate-800 p-4 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
+        "fixed inset-y-0 left-0 z-50 w-64 bg-surface border-r border-border-divider p-4 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="mb-8 px-2 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white tracking-wide">STL<span className="text-blue-500">CONTROL</span></h2>
+          <h2 className="text-xl font-bold text-textPrimary tracking-wide">STL<span className="text-blue-500">CONTROL</span></h2>
           <button
             onClick={() => setIsOpen(false)}
-            className="lg:hidden p-1.5 text-slate-400 hover:text-white rounded-md hover:bg-slate-800 transition-colors"
+            className="lg:hidden p-1.5 text-textSecondary hover:text-textPrimary rounded-md hover:bg-surface-hover transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -156,7 +156,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                   "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors",
                   isAnyDashboardActive && !isDashboardsOpen
                     ? "bg-blue-900/30 text-blue-400"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    : "text-textSecondary hover:bg-surface-hover hover:text-textPrimary"
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -167,7 +167,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
               </button>
 
               {isDashboardsOpen && (
-                <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
+                <div className="mt-1 ml-4 pl-4 border-l border-border-divider space-y-1">
                   {dashboardItems.map((item) => {
                     const isActive = currentPage === item.id;
                     return (
@@ -177,8 +177,8 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                         className={clsx(
                           "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                           isActive
-                            ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20"
-                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            ? "bg-blue-600 text-textPrimary shadow-lg shadow-blue-900/20"
+                            : "text-textSecondary hover:bg-surface-hover hover:text-textPrimary"
                         )}
                       >
                         <BarChart3 className="w-4 h-4" />
@@ -199,7 +199,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                   "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors",
                   isAnyUnclaimedActive && !isUnclaimedOpen
                     ? "bg-rose-900/30 text-rose-400"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    : "text-textSecondary hover:bg-surface-hover hover:text-textPrimary"
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -210,7 +210,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
               </button>
 
               {isUnclaimedOpen && (
-                <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
+                <div className="mt-1 ml-4 pl-4 border-l border-border-divider space-y-1">
                   {unclaimedItems.map((item) => {
                     const isActive = currentPage === item.id;
                     return (
@@ -220,8 +220,8 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                         className={clsx(
                           "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                           isActive
-                            ? "bg-rose-600 text-white shadow-lg shadow-rose-900/20"
-                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            ? "bg-rose-600 text-textPrimary shadow-lg shadow-rose-900/20"
+                            : "text-textSecondary hover:bg-surface-hover hover:text-textPrimary"
                         )}
                       >
                         <TicketSlash className="w-4 h-4" />
@@ -243,7 +243,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                   "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors mt-2",
                   isAnyVoidRequestsActive && !isVoidRequestsOpen
                     ? "bg-amber-900/30 text-amber-400"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    : "text-textSecondary hover:bg-surface-hover hover:text-textPrimary"
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -254,7 +254,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
               </button>
 
               {isVoidRequestsOpen && (
-                <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
+                <div className="mt-1 ml-4 pl-4 border-l border-border-divider space-y-1">
                   {voidRequestItems.map((item) => {
                     const isActive = currentPage === item.id;
                     return (
@@ -264,8 +264,8 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                         className={clsx(
                           "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                           isActive
-                            ? "bg-amber-600 text-white shadow-lg shadow-amber-900/20"
-                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            ? "bg-amber-600 text-textPrimary shadow-lg shadow-amber-900/20"
+                            : "text-textSecondary hover:bg-surface-hover hover:text-textPrimary"
                         )}
                       >
                         <TicketSlash className="w-4 h-4" />
@@ -287,7 +287,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                   "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors mt-2",
                   isAnyActiveTellersActive && !isActiveTellersOpen
                     ? "bg-emerald-900/30 text-emerald-400"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                    : "text-textSecondary hover:bg-surface-hover hover:text-textPrimary"
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -298,7 +298,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
               </button>
 
               {isActiveTellersOpen && (
-                <div className="mt-1 ml-4 pl-4 border-l border-slate-800 space-y-1">
+                <div className="mt-1 ml-4 pl-4 border-l border-border-divider space-y-1">
                   {activeTellersItems.map((item) => {
                     const isActive = currentPage === item.id;
                     return (
@@ -308,8 +308,8 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                         className={clsx(
                           "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                           isActive
-                            ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/20"
-                            : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                            ? "bg-emerald-600 text-textPrimary shadow-lg shadow-emerald-900/20"
+                            : "text-textSecondary hover:bg-surface-hover hover:text-textPrimary"
                         )}
                       >
                         <UserCheck className="w-4 h-4" />
@@ -323,20 +323,20 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
           )}
         </nav>
 
-        <div className="mt-auto px-2 pt-4 border-t border-slate-800">
+        <div className="mt-auto px-2 pt-4 border-t border-border-divider">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-                <UserCheck className="w-4 h-4 text-slate-300" />
+              <div className="w-8 h-8 rounded-full bg-surface-hover flex items-center justify-center">
+                <UserCheck className="w-4 h-4 text-textSecondary" />
               </div>
               <div className="text-left">
-                <p className="text-sm font-medium text-white capitalize">{user?.username || 'Admin User'}</p>
-                <p className="text-xs text-slate-400">STL System</p>
+                <p className="text-sm font-medium text-textPrimary capitalize">{user?.username || 'Admin User'}</p>
+                <p className="text-xs text-textSecondary">STL System</p>
               </div>
             </div>
             <button
               onClick={logout}
-              className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
+              className="p-2 text-textSecondary hover:text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
               title="Log Out"
             >
               <LogOut className="w-5 h-5" />

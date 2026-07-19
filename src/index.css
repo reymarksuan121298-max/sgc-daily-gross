@@ -2,17 +2,46 @@
 
 @theme {
   --font-sans: 'Montserrat', sans-serif;
-  --color-appBg: #0f172a;
-  --color-cardBg: #1e293b;
+  --color-appBg: var(--app-bg);
+  --color-cardBg: var(--card-bg);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-header: var(--surface-header);
+  --color-border-divider: var(--border-divider);
+  --color-textPrimary: var(--text-primary);
+  --color-textSecondary: var(--text-secondary);
   --color-accentGreen: #10b981;
-  --color-textPrimary: #f8fafc;
-  --color-textSecondary: #94a3b8;
+}
+
+@layer base {
+  :root {
+    --app-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --surface: #ffffff;
+    --surface-hover: #f1f5f9;
+    --surface-header: #f1f5f9;
+    --border-divider: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+  }
+
+  .dark {
+    --app-bg: #0f172a;
+    --card-bg: #1e293b;
+    --surface: #111827;
+    --surface-hover: #253247;
+    --surface-header: #0a0f18; /* Used for deepest table headers, etc. */
+    --border-divider: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+  }
 }
 
 body {
-  background-color: var(--color-appBg);
-  color: var(--color-textPrimary);
+  background-color: var(--app-bg);
+  color: var(--text-primary);
   font-family: var(--font-sans);
+  transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -23,12 +52,12 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a; 
+  background: var(--app-bg); 
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155; 
+  background: var(--border-divider); 
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569; 
+  background: var(--text-secondary); 
 }

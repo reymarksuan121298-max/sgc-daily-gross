@@ -314,20 +314,20 @@ export default function VoidRequests({ currentPage }) {
   };
 
   return (
-    <div className="flex flex-col h-auto lg:h-[calc(100vh-140px)] min-h-[calc(100vh-140px)] bg-cardBg border border-slate-700/50 rounded-xl overflow-hidden shadow-2xl relative">
+    <div className="flex flex-col h-auto lg:h-[calc(100vh-140px)] min-h-[calc(100vh-140px)] bg-cardBg border border-border-divider rounded-xl overflow-hidden shadow-2xl relative">
       
       {/* Toast Notification */}
       <div className={`fixed top-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 border transition-all duration-300 transform ${
         toast.show ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-8 opacity-0 scale-95 pointer-events-none'
       } ${
-        toast.type === 'success' ? 'bg-[#111827] border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-[#111827] border-rose-500/50 shadow-[0_0_20px_rgba(243,24,96,0.3)]'
+        toast.type === 'success' ? 'bg-surface border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-surface border-rose-500/50 shadow-[0_0_20px_rgba(243,24,96,0.3)]'
       }`}>
         {toast.type === 'success' ? <CheckCircle className="w-5 h-5 text-emerald-500" /> : <AlertCircle className="w-5 h-5 text-rose-500" />}
-        <span className="font-semibold text-slate-200">{toast.message}</span>
+        <span className="font-semibold text-textPrimary">{toast.message}</span>
       </div>
 
       {/* Header & Controls */}
-      <div className="p-5 border-b border-slate-700/50 bg-slate-800/30">
+      <div className="p-5 border-b border-border-divider bg-surface-header/30">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
@@ -335,8 +335,8 @@ export default function VoidRequests({ currentPage }) {
               <CheckCircle className="w-6 h-6 text-indigo-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Void Requests</h2>
-              <p className="text-sm text-slate-400">Manage and approve teller void transactions</p>
+              <h2 className="text-xl font-bold text-textPrimary tracking-tight">Void Requests</h2>
+              <p className="text-sm text-textSecondary">Manage and approve teller void transactions</p>
             </div>
           </div>
 
@@ -345,7 +345,7 @@ export default function VoidRequests({ currentPage }) {
             <button 
               onClick={() => fetchVoidRequests(false)}
               disabled={loading}
-              className="p-2 bg-[#111827] border border-slate-700 hover:border-indigo-500/50 hover:bg-slate-800 rounded-lg text-slate-300 transition-all disabled:opacity-50 group"
+              className="p-2 bg-surface border border-border-divider hover:border-indigo-500/50 hover:bg-surface-hover rounded-lg text-textSecondary transition-all disabled:opacity-50 group"
               title="Refresh Data"
             >
               <RefreshCw className={clsx("w-5 h-5", loading && "animate-spin")} />
@@ -358,16 +358,16 @@ export default function VoidRequests({ currentPage }) {
           {/* Pending Card */}
           <button
             onClick={() => setActiveTab('pending')}
-            className={`relative flex items-center h-11 bg-[#111827] rounded-lg border ${activeTab === 'pending' ? 'border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'border-slate-700/50 hover:border-slate-600'} transition-all group`}
+            className={`relative flex items-center h-11 bg-surface rounded-lg border ${activeTab === 'pending' ? 'border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'border-border-divider hover:border-border-divider'} transition-all group`}
           >
-            <div className="flex items-center gap-2 px-4 bg-[#111827] rounded-l-lg h-full z-10">
-              <div className="bg-amber-500 rounded-full text-white p-0.5 flex items-center justify-center">
+            <div className="flex items-center gap-2 px-4 bg-surface rounded-l-lg h-full z-10">
+              <div className="bg-amber-500 rounded-full text-textPrimary p-0.5 flex items-center justify-center">
                 <Clock className="w-3.5 h-3.5" strokeWidth={3} />
               </div>
-              <span className="text-sm font-semibold text-slate-200">Pending</span>
+              <span className="text-sm font-semibold text-textPrimary">Pending</span>
             </div>
             <div className={`w-12 h-full rounded-r-lg z-0 transition-colors ${activeTab === 'pending' ? 'bg-amber-500/20' : 'bg-amber-500/5 group-hover:bg-amber-500/10'}`}></div>
-            <div className="absolute -top-2.5 -right-2 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm z-20 border-[3px] border-[#1e293b]">
+            <div className="absolute -top-2.5 -right-2 bg-rose-500 text-textPrimary text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm z-20 border-[3px] border-[#1e293b]">
               {pendingCount}
             </div>
           </button>
@@ -375,14 +375,14 @@ export default function VoidRequests({ currentPage }) {
           {/* Approved Card */}
           <button
             onClick={() => setActiveTab('approved')}
-            className={`relative flex items-center h-11 bg-[#111827] rounded-lg border ${activeTab === 'approved' ? 'border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]' : 'border-slate-700/50 hover:border-slate-600'} transition-all group`}
+            className={`relative flex items-center h-11 bg-surface rounded-lg border ${activeTab === 'approved' ? 'border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]' : 'border-border-divider hover:border-border-divider'} transition-all group`}
           >
-            <div className="flex items-center gap-2 px-4 bg-[#111827] rounded-l-lg h-full z-10">
+            <div className="flex items-center gap-2 px-4 bg-surface rounded-l-lg h-full z-10">
               <CheckCircle className="w-4 h-4 text-emerald-500" strokeWidth={2.5} />
-              <span className="text-sm font-semibold text-slate-200">Approved</span>
+              <span className="text-sm font-semibold text-textPrimary">Approved</span>
             </div>
             <div className={`w-12 h-full rounded-r-lg z-0 transition-colors ${activeTab === 'approved' ? 'bg-emerald-500/20' : 'bg-emerald-500/5 group-hover:bg-emerald-500/10'}`}></div>
-            <div className="absolute -top-2.5 -right-2 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm z-20 border-[3px] border-[#1e293b]">
+            <div className="absolute -top-2.5 -right-2 bg-rose-500 text-textPrimary text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm z-20 border-[3px] border-[#1e293b]">
               {approvedCount}
             </div>
           </button>
@@ -390,14 +390,14 @@ export default function VoidRequests({ currentPage }) {
           {/* Rejected Card */}
           <button
             onClick={() => setActiveTab('rejected')}
-            className={`relative flex items-center h-11 bg-[#111827] rounded-lg border ${activeTab === 'rejected' ? 'border-rose-500 shadow-[0_0_10px_rgba(243,24,96,0.2)]' : 'border-slate-700/50 hover:border-slate-600'} transition-all group`}
+            className={`relative flex items-center h-11 bg-surface rounded-lg border ${activeTab === 'rejected' ? 'border-rose-500 shadow-[0_0_10px_rgba(243,24,96,0.2)]' : 'border-border-divider hover:border-border-divider'} transition-all group`}
           >
-            <div className="flex items-center gap-2 px-4 bg-[#111827] rounded-l-lg h-full z-10">
+            <div className="flex items-center gap-2 px-4 bg-surface rounded-l-lg h-full z-10">
               <XCircle className="w-4 h-4 text-rose-500" strokeWidth={2.5} />
-              <span className="text-sm font-semibold text-slate-200">Rejected</span>
+              <span className="text-sm font-semibold text-textPrimary">Rejected</span>
             </div>
             <div className={`w-12 h-full rounded-r-lg z-0 transition-colors ${activeTab === 'rejected' ? 'bg-rose-500/20' : 'bg-rose-500/5 group-hover:bg-rose-500/10'}`}></div>
-            <div className="absolute -top-2.5 -right-2 bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm z-20 border-[3px] border-[#1e293b]">
+            <div className="absolute -top-2.5 -right-2 bg-rose-500 text-textPrimary text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center shadow-sm z-20 border-[3px] border-[#1e293b]">
               {rejectedCount}
             </div>
           </button>
@@ -406,25 +406,25 @@ export default function VoidRequests({ currentPage }) {
         {/* Toolbar row 2 */}
         <div className="mt-5 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-textSecondary absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search by ID, name, reason..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#111827] text-sm text-slate-200 rounded-lg pl-9 pr-4 py-2.5 border border-slate-700 focus:outline-none focus:border-indigo-500/50 transition-colors shadow-inner"
+              className="w-full bg-surface text-sm text-textPrimary rounded-lg pl-9 pr-4 py-2.5 border border-border-divider focus:outline-none focus:border-indigo-500/50 transition-colors shadow-inner"
             />
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <span className="text-sm text-slate-400 bg-[#111827] px-3 py-1.5 rounded-md border border-slate-700/50">
+            <span className="text-sm text-textSecondary bg-surface px-3 py-1.5 rounded-md border border-border-divider">
               Total Shown: <strong className="text-indigo-400">{filteredRequests.length}</strong>
             </span>
             {activeTab === 'pending' && (
               <button
                 onClick={handleBulkApprove}
                 disabled={filteredRequests.length === 0 || isApproving}
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-medium rounded-lg transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none outline-none"
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-textPrimary font-medium rounded-lg transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none outline-none"
               >
                 {isApproving ? (
                   <><RefreshCw className="w-4 h-4 animate-spin" /> Approving...</>
@@ -440,7 +440,7 @@ export default function VoidRequests({ currentPage }) {
       {/* Table Content */}
       <div className="flex-1 overflow-auto custom-scrollbar bg-[#0f172a]/50">
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-400">
+          <div className="flex flex-col items-center justify-center h-full text-textSecondary">
             <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500 mb-4 shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
             <p className="font-medium tracking-wide">Loading requests...</p>
           </div>
@@ -450,35 +450,35 @@ export default function VoidRequests({ currentPage }) {
             <p>{error}</p>
           </div>
         ) : filteredRequests.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-500 p-8 text-center">
+          <div className="flex flex-col items-center justify-center h-full text-textSecondary p-8 text-center">
             <CheckCircle className="w-16 h-16 mb-4 opacity-30" />
             <p className="text-lg font-medium">No void requests found</p>
             <p className="text-sm mt-1">Try adjusting your filters or date range</p>
           </div>
         ) : (
           <table className="w-full text-left border-collapse">
-            <thead className="sticky top-0 z-10 bg-slate-800 border-b border-slate-700 shadow-sm backdrop-blur-sm bg-opacity-90">
+            <thead className="sticky top-0 z-10 bg-surface-header border-b border-border-divider shadow-sm backdrop-blur-sm bg-opacity-90">
               <tr>
-                <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Transaction ID</th>
-                <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Teller</th>
-                <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Draw Time</th>
-                <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Reason</th>
+                <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Transaction ID</th>
+                <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Teller</th>
+                <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Draw Time</th>
+                <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Reason</th>
                 {activeTab === 'pending' && (
-                  <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Amount</th>
+                  <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Amount</th>
                 )}
-                <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider">Date/Time</th>
-                <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider text-center">Status</th>
-                <th className="py-4 px-4 font-semibold text-xs text-slate-400 uppercase tracking-wider text-center">Action</th>
+                <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Date/Time</th>
+                <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider text-center">Status</th>
+                <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/50">
+            <tbody className="divide-y divide-border-divider/50">
               {filteredRequests.map((req) => {
                 const isApproved = req.is_approve === 1;
                 
                 return (
                   <tr 
                     key={req.id} 
-                    className="transition-colors group hover:bg-slate-800/40"
+                    className="transition-colors group hover:bg-surface-hover/40"
                   >
                     <td className="py-3 px-4">
                       <div className="font-mono text-sm font-semibold text-indigo-300 bg-indigo-500/10 px-2 py-1 rounded border border-indigo-500/20 inline-block">
@@ -486,14 +486,14 @@ export default function VoidRequests({ currentPage }) {
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="text-sm font-medium text-slate-200">{req.fullName || req.username}</div>
-                      <div className="text-xs text-slate-500">ID: {req.tellerId}</div>
+                      <div className="text-sm font-medium text-textPrimary">{req.fullName || req.username}</div>
+                      <div className="text-xs text-textSecondary">ID: {req.tellerId}</div>
                     </td>
-                    <td className="py-3 px-4 text-sm text-slate-300 font-medium">
+                    <td className="py-3 px-4 text-sm text-textSecondary font-medium">
                       {formatDrawTime(req.drawTime)}
                     </td>
                     <td className="py-3 px-4">
-                      <p className="text-sm text-slate-300 max-w-xs truncate" title={req.reason}>
+                      <p className="text-sm text-textSecondary max-w-xs truncate" title={req.reason}>
                         {req.reason || '-'}
                       </p>
                     </td>
@@ -507,8 +507,8 @@ export default function VoidRequests({ currentPage }) {
                       </td>
                     )}
                     <td className="py-3 px-4">
-                      <div className="text-sm text-slate-300">{req.created_at?.split(' ')[0]}</div>
-                      <div className="text-xs text-slate-500">{req.created_at?.split(' ')[1]}</div>
+                      <div className="text-sm text-textSecondary">{req.created_at?.split(' ')[0]}</div>
+                      <div className="text-xs text-textSecondary">{req.created_at?.split(' ')[1]}</div>
                     </td>
                     <td className="py-3 px-4 text-center">
                       {isApproved ? (
@@ -528,7 +528,7 @@ export default function VoidRequests({ currentPage }) {
                     <td className="py-3 px-4 text-center">
                       <button
                         onClick={() => handleReviewClick(req)}
-                        className={`px-4 py-1.5 ${req.is_approve === 0 ? 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20' : 'bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 border-slate-600/50'} border text-sm font-medium rounded-lg transition-colors`}
+                        className={`px-4 py-1.5 ${req.is_approve === 0 ? 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20' : 'bg-surface-hover hover:bg-surface-hover text-textSecondary border-border-divider'} border text-sm font-medium rounded-lg transition-colors`}
                       >
                         {req.is_approve === 0 ? 'Review' : 'View'}
                       </button>
@@ -548,31 +548,31 @@ export default function VoidRequests({ currentPage }) {
           onClick={() => !isApproving && setSelectedReviewRequest(null)}
         >
           <div 
-            className="bg-[#1e293b] border border-slate-700/50 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]"
+            className="bg-surface-hover border border-border-divider rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-center p-5 border-b border-slate-700/50 bg-slate-800/50 shrink-0">
-              <h3 className="text-xl font-bold text-white text-center w-full">
+            <div className="flex justify-between items-center p-5 border-b border-border-divider bg-surface-header/50 shrink-0">
+              <h3 className="text-xl font-bold text-textPrimary text-center w-full">
                 Review Void Request
               </h3>
               <button 
                 onClick={() => !isApproving && setSelectedReviewRequest(null)}
                 disabled={isApproving}
-                className="text-slate-400 hover:text-white transition-colors absolute right-5"
+                className="text-textSecondary hover:text-textPrimary transition-colors absolute right-5"
               >
                 <span className="text-2xl leading-none">&times;</span>
               </button>
             </div>
             
             <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
-              <div className="space-y-1 text-sm text-slate-300 mb-6">
-                <p><span className="text-slate-400">Teller:</span> <span className="font-medium text-slate-200">{selectedReviewRequest.fullName || '-'}</span></p>
-                <p><span className="text-slate-400">Username:</span> <span className="font-medium text-slate-200">{selectedReviewRequest.username || '-'}</span></p>
-                <p><span className="text-slate-400">Transaction ID:</span> <span className="font-mono text-indigo-400 font-medium">{selectedReviewRequest.transactionId}</span></p>
-                <p><span className="text-slate-400">Draw:</span> <span className="font-medium text-slate-200">{formatDrawTime(selectedReviewRequest.drawTime)}</span></p>
-                <p><span className="text-slate-400">Bet Time:</span> <span className="font-medium text-slate-200">{reviewDetails.length > 0 ? reviewDetails[0].created_at : '-'}</span></p>
-                <p><span className="text-slate-400">Void Requested at:</span> <span className="font-medium text-slate-200">{selectedReviewRequest.created_at}</span></p>
-                <p className="mt-2"><span className="text-slate-400">Reason:</span> <span className="font-medium text-rose-300">{selectedReviewRequest.reason}</span></p>
+              <div className="space-y-1 text-sm text-textSecondary mb-6">
+                <p><span className="text-textSecondary">Teller:</span> <span className="font-medium text-textPrimary">{selectedReviewRequest.fullName || '-'}</span></p>
+                <p><span className="text-textSecondary">Username:</span> <span className="font-medium text-textPrimary">{selectedReviewRequest.username || '-'}</span></p>
+                <p><span className="text-textSecondary">Transaction ID:</span> <span className="font-mono text-indigo-400 font-medium">{selectedReviewRequest.transactionId}</span></p>
+                <p><span className="text-textSecondary">Draw:</span> <span className="font-medium text-textPrimary">{formatDrawTime(selectedReviewRequest.drawTime)}</span></p>
+                <p><span className="text-textSecondary">Bet Time:</span> <span className="font-medium text-textPrimary">{reviewDetails.length > 0 ? reviewDetails[0].created_at : '-'}</span></p>
+                <p><span className="text-textSecondary">Void Requested at:</span> <span className="font-medium text-textPrimary">{selectedReviewRequest.created_at}</span></p>
+                <p className="mt-2"><span className="text-textSecondary">Reason:</span> <span className="font-medium text-rose-300">{selectedReviewRequest.reason}</span></p>
               </div>
 
               {loadingReviewDetails ? (
@@ -583,27 +583,27 @@ export default function VoidRequests({ currentPage }) {
                 <>
                   <table className="w-full text-left text-sm border-collapse mb-6">
                     <thead>
-                      <tr className="border-b border-slate-700/50">
-                        <th className="pb-3 text-slate-400 font-semibold uppercase tracking-wider text-xs">Game</th>
-                        <th className="pb-3 text-slate-400 font-semibold uppercase tracking-wider text-xs">Number</th>
-                        <th className="pb-3 text-slate-400 font-semibold uppercase tracking-wider text-xs">Amount</th>
-                        <th className="pb-3 text-slate-400 font-semibold uppercase tracking-wider text-xs">Soldout</th>
+                      <tr className="border-b border-border-divider">
+                        <th className="pb-3 text-textSecondary font-semibold uppercase tracking-wider text-xs">Game</th>
+                        <th className="pb-3 text-textSecondary font-semibold uppercase tracking-wider text-xs">Number</th>
+                        <th className="pb-3 text-textSecondary font-semibold uppercase tracking-wider text-xs">Amount</th>
+                        <th className="pb-3 text-textSecondary font-semibold uppercase tracking-wider text-xs">Soldout</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/50">
+                    <tbody className="divide-y divide-border-divider/50">
                       {reviewDetails.map((item, i) => (
-                        <tr key={i} className="hover:bg-slate-800/30 transition-colors">
-                          <td className="py-3 text-slate-300 font-medium">{item.betCode}</td>
-                          <td className="py-3 text-white font-bold">{item.betNo}</td>
-                          <td className="py-3 text-slate-300">{Number(item.betAmount).toString()}</td>
-                          <td className="py-3 text-slate-300">No</td>
+                        <tr key={i} className="hover:bg-surface-hover transition-colors">
+                          <td className="py-3 text-textSecondary font-medium">{item.betCode}</td>
+                          <td className="py-3 text-textPrimary font-bold">{item.betNo}</td>
+                          <td className="py-3 text-textSecondary">{Number(item.betAmount).toString()}</td>
+                          <td className="py-3 text-textSecondary">No</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
 
-                  <div className="border-t border-slate-700/50 pt-4 mb-8">
-                    <p className="text-lg font-bold text-white">
+                  <div className="border-t border-border-divider pt-4 mb-8">
+                    <p className="text-lg font-bold text-textPrimary">
                       Total Amount: <span className="text-emerald-400">{reviewDetails.reduce((sum, item) => sum + Number(item.betAmount), 0).toString()}</span>
                     </p>
                   </div>
@@ -615,7 +615,7 @@ export default function VoidRequests({ currentPage }) {
                   <button
                     onClick={handleModalApprove}
                     disabled={isApproving}
-                    className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-textPrimary font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {isApproving ? <RefreshCw className="w-5 h-5 animate-spin" /> : null}
                     Approve
@@ -623,7 +623,7 @@ export default function VoidRequests({ currentPage }) {
                   <button
                     onClick={handleModalReject}
                     disabled={isApproving}
-                    className="w-full py-3 bg-rose-500 hover:bg-rose-400 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full py-3 bg-rose-500 hover:bg-rose-400 text-textPrimary font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {isApproving ? <RefreshCw className="w-5 h-5 animate-spin" /> : null}
                     Reject

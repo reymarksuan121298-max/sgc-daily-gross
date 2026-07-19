@@ -198,24 +198,24 @@ export default function WinnersList({ selectedEndDate }) {
 
         <div className="flex items-center gap-3">
           {/* Range Picker */}
-          <div className="relative flex items-center bg-cardBg hover:bg-[#253247] border border-slate-700/50 rounded-md transition-all">
+          <div className="relative flex items-center bg-cardBg hover:bg-surface-hover border border-border-divider rounded-md transition-all">
             <Calendar className="w-4 h-4 ml-4 text-textSecondary" />
             <select
               value={rangeType}
               onChange={(e) => setRangeType(e.target.value)}
-              className="bg-transparent text-textSecondary hover:text-white px-3 py-2.5 pr-8 text-sm outline-none cursor-pointer appearance-none"
+              className="bg-transparent text-textSecondary hover:text-textPrimary px-3 py-2.5 pr-8 text-sm outline-none cursor-pointer appearance-none"
             >
-              <option value="single" className="bg-[#111827]">Single Date</option>
-              <option value="7days" className="bg-[#111827]">Last 7 Days</option>
-              <option value="30days" className="bg-[#111827]">Last 30 Days</option>
-              <option value="this_year" className="bg-[#111827]">This Year</option>
+              <option value="single" className="bg-surface">Single Date</option>
+              <option value="7days" className="bg-surface">Last 7 Days</option>
+              <option value="30days" className="bg-surface">Last 30 Days</option>
+              <option value="this_year" className="bg-surface">This Year</option>
             </select>
           </div>
 
           <button
             onClick={fetchWinnersData}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-700/50 bg-[#1e293b] hover:bg-slate-800 text-slate-300 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border-divider bg-surface-hover hover:bg-surface-hover text-textSecondary transition-colors"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -235,12 +235,12 @@ export default function WinnersList({ selectedEndDate }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         
         {/* Card: Total Tellers */}
-        <div className="bg-cardBg border border-slate-800/50 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+        <div className="bg-cardBg border border-border-divider/50 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full -mr-5 -mt-5 transition-transform duration-500 group-hover:scale-125"></div>
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm font-medium text-textSecondary uppercase tracking-wider mb-1">Total Tellers</p>
-              <h3 className="text-3xl font-extrabold text-white">{filteredData.length}</h3>
+              <h3 className="text-3xl font-extrabold text-textPrimary">{filteredData.length}</h3>
             </div>
             <div className="bg-indigo-500/10 p-3 rounded-xl border border-indigo-500/20">
               <Users className="w-6 h-6 text-indigo-500" />
@@ -252,12 +252,12 @@ export default function WinnersList({ selectedEndDate }) {
         </div>
 
         {/* Card: Total Win */}
-        <div className="bg-cardBg border border-slate-800/50 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+        <div className="bg-cardBg border border-border-divider/50 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full -mr-5 -mt-5 transition-transform duration-500 group-hover:scale-125"></div>
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm font-medium text-textSecondary uppercase tracking-wider mb-1">Total Win</p>
-              <h3 className="text-3xl font-extrabold text-white">₱{totalWin.toLocaleString()}</h3>
+              <h3 className="text-3xl font-extrabold text-textPrimary">₱{totalWin.toLocaleString()}</h3>
             </div>
             <div className="bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
               <Trophy className="w-6 h-6 text-amber-500" />
@@ -269,12 +269,12 @@ export default function WinnersList({ selectedEndDate }) {
         </div>
 
         {/* Card: Total Hits */}
-        <div className="bg-cardBg border border-slate-800/50 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+        <div className="bg-cardBg border border-border-divider/50 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full -mr-5 -mt-5 transition-transform duration-500 group-hover:scale-125"></div>
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm font-medium text-textSecondary uppercase tracking-wider mb-1">Total Hits</p>
-              <h3 className="text-3xl font-extrabold text-white">{totalHits.toLocaleString()}</h3>
+              <h3 className="text-3xl font-extrabold text-textPrimary">{totalHits.toLocaleString()}</h3>
             </div>
             <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
               <Activity className="w-6 h-6 text-emerald-500" />
@@ -286,12 +286,12 @@ export default function WinnersList({ selectedEndDate }) {
         </div>
 
         {/* Card: Average Win */}
-        <div className="bg-cardBg border border-slate-800/50 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+        <div className="bg-cardBg border border-border-divider/50 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full -mr-5 -mt-5 transition-transform duration-500 group-hover:scale-125"></div>
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm font-medium text-textSecondary uppercase tracking-wider mb-1">Average Win</p>
-              <h3 className="text-3xl font-extrabold text-white">₱{Math.round(averageWin).toLocaleString()}</h3>
+              <h3 className="text-3xl font-extrabold text-textPrimary">₱{Math.round(averageWin).toLocaleString()}</h3>
             </div>
             <div className="bg-rose-500/10 p-3 rounded-xl border border-rose-500/20">
               <DollarSign className="w-6 h-6 text-rose-500" />
@@ -304,10 +304,10 @@ export default function WinnersList({ selectedEndDate }) {
       </div>
 
       {/* Main Table Card */}
-      <div className="bg-cardBg border border-slate-800/50 rounded-2xl shadow-xl overflow-hidden">
+      <div className="bg-cardBg border border-border-divider/50 rounded-2xl shadow-xl overflow-hidden">
         
         {/* Table Filters */}
-        <div className="p-6 border-b border-slate-800 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="p-6 border-b border-border-divider flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="relative w-full md:w-80">
             <Search className="w-4 h-4 absolute left-3 top-3.5 text-textSecondary" />
             <input
@@ -315,7 +315,7 @@ export default function WinnersList({ selectedEndDate }) {
               placeholder="Search teller, outlet, unit..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#111827] border border-slate-800 hover:border-slate-700/80 focus:border-indigo-500/60 rounded-lg pl-10 pr-4 py-2.5 text-sm text-textPrimary placeholder:text-textSecondary outline-none transition-all"
+              className="w-full bg-surface border border-border-divider hover:border-border-divider/80 focus:border-indigo-500/60 rounded-lg pl-10 pr-4 py-2.5 text-sm text-textPrimary placeholder:text-textSecondary outline-none transition-all"
             />
           </div>
 
@@ -324,7 +324,7 @@ export default function WinnersList({ selectedEndDate }) {
             <select
               value={selectedUnit}
               onChange={(e) => setSelectedUnit(e.target.value)}
-              className="w-full md:w-48 bg-[#111827] border border-slate-800 hover:border-slate-700/80 focus:border-indigo-500/60 text-slate-300 text-sm rounded-lg px-3 py-2.5 outline-none transition-all cursor-pointer"
+              className="w-full md:w-48 bg-surface border border-border-divider hover:border-border-divider/80 focus:border-indigo-500/60 text-textSecondary text-sm rounded-lg px-3 py-2.5 outline-none transition-all cursor-pointer"
             >
               <option value="">All Units</option>
               {units.map(unit => (
@@ -342,14 +342,14 @@ export default function WinnersList({ selectedEndDate }) {
         ) : error ? (
           <div className="p-12 text-center text-red-500">{error}</div>
         ) : filteredData.length === 0 ? (
-          <div className="p-12 text-center text-slate-400">No winners data found.</div>
+          <div className="p-12 text-center text-textSecondary">No winners data found.</div>
         ) : (
           <>
             {/* Table wrapper */}
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-800 bg-[#111827]/40">
+                  <tr className="border-b border-border-divider bg-surface/40">
                     <th className="p-4 text-xs font-semibold text-textSecondary uppercase tracking-wider">Teller Info</th>
                     <th className="p-4 text-xs font-semibold text-textSecondary uppercase tracking-wider">Outlet</th>
                     <th className="p-4 text-xs font-semibold text-textSecondary uppercase tracking-wider">Unit / Group</th>
@@ -359,21 +359,21 @@ export default function WinnersList({ selectedEndDate }) {
                     <th className="p-4 text-xs font-semibold text-textSecondary uppercase tracking-wider text-right">Hits</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/40">
+                <tbody className="divide-y divide-border-divider/40">
                   {paginatedData.map((item, idx) => (
                     <tr key={idx} className="hover:bg-white/[0.02] transition-colors group">
                       <td className="p-4">
-                        <p className="font-semibold text-white group-hover:text-amber-400 transition-colors">{item.fullName || 'Unknown Teller'}</p>
+                        <p className="font-semibold text-textPrimary group-hover:text-amber-400 transition-colors">{item.fullName || 'Unknown Teller'}</p>
                         <p className="text-xs text-textSecondary">{item.username || '-'}</p>
                       </td>
-                      <td className="p-4 text-sm text-slate-300 font-medium">{item.outlet || '-'}</td>
+                      <td className="p-4 text-sm text-textSecondary font-medium">{item.outlet || '-'}</td>
                       <td className="p-4">
-                        <span className="text-xs font-bold text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded">
+                        <span className="text-xs font-bold text-textSecondary bg-surface-header/80 px-2.5 py-1 rounded">
                           {item.name || 'N/A'}
                         </span>
                       </td>
                       <td className="p-4 text-sm text-textSecondary">{item.supervisorUsername || '-'}</td>
-                      <td className="p-4 text-sm text-slate-300 font-mono text-right">{item.drawTime || '-'}</td>
+                      <td className="p-4 text-sm text-textSecondary font-mono text-right">{item.drawTime || '-'}</td>
                       <td className="p-4 text-right">
                         <span className="font-mono font-bold text-amber-500">₱{getWinAmount(item).toLocaleString()}</span>
                       </td>
@@ -390,7 +390,7 @@ export default function WinnersList({ selectedEndDate }) {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="p-4 border-t border-slate-800 flex justify-between items-center bg-[#111827]/10">
+              <div className="p-4 border-t border-border-divider flex justify-between items-center bg-surface/10">
                 <span className="text-xs text-textSecondary">
                   Showing {(page - 1) * itemsPerPage + 1} to {Math.min(page * itemsPerPage, filteredData.length)} of {filteredData.length} tellers
                 </span>
@@ -398,14 +398,14 @@ export default function WinnersList({ selectedEndDate }) {
                   <button
                     disabled={page === 1}
                     onClick={() => setPage(p => p - 1)}
-                    className="px-3 py-1.5 text-xs font-semibold rounded bg-[#1e293b] border border-slate-700/50 text-slate-300 hover:bg-slate-800 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                    className="px-3 py-1.5 text-xs font-semibold rounded bg-surface-hover border border-border-divider text-textSecondary hover:bg-surface-hover disabled:opacity-50 disabled:pointer-events-none transition-colors"
                   >
                     Previous
                   </button>
                   <button
                     disabled={page === totalPages}
                     onClick={() => setPage(p => p + 1)}
-                    className="px-3 py-1.5 text-xs font-semibold rounded bg-[#1e293b] border border-slate-700/50 text-slate-300 hover:bg-slate-800 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                    className="px-3 py-1.5 text-xs font-semibold rounded bg-surface-hover border border-border-divider text-textSecondary hover:bg-surface-hover disabled:opacity-50 disabled:pointer-events-none transition-colors"
                   >
                     Next
                   </button>

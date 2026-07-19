@@ -5,9 +5,9 @@ import SharedTable from './SharedTable';
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-cardBg p-3 border border-slate-700 rounded shadow-lg">
+      <div className="bg-cardBg p-3 border border-border-divider rounded shadow-lg">
         <p className="text-textPrimary font-semibold mb-2">{label}</p>
-        <p className="text-slate-400 text-sm">
+        <p className="text-textSecondary text-sm">
           Previous 7 Days: ₱{payload[0].value.toLocaleString()}
         </p>
         <p className="text-indigo-400 text-sm">
@@ -154,7 +154,7 @@ export default function ComparisonTab({ apiData, selectedEndDate, currentPage })
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Card */}
-        <div className="bg-cardBg rounded-2xl p-8 border border-slate-700/50 shadow-lg flex flex-col justify-between">
+        <div className="bg-cardBg rounded-2xl p-8 border border-border-divider shadow-lg flex flex-col justify-between">
           <h3 className="text-xl font-bold tracking-wide mb-8">7-Day Weekly Comparison</h3>
           
           <div className="flex justify-between items-center mb-10">
@@ -182,7 +182,7 @@ export default function ComparisonTab({ apiData, selectedEndDate, currentPage })
         </div>
 
         {/* Right Card - Chart */}
-        <div className="bg-cardBg rounded-2xl p-6 border border-slate-700/50 shadow-lg lg:col-span-2">
+        <div className="bg-cardBg rounded-2xl p-6 border border-border-divider shadow-lg lg:col-span-2">
           <h3 className="text-lg font-bold tracking-wide mb-6">Daily Flow (Last 7 Days)</h3>
           
           <div className="h-[250px] w-full">
