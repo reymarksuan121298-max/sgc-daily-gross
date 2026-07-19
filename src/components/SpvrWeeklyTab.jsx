@@ -1,6 +1,7 @@
 import React from 'react';
 import { Download } from 'lucide-react';
 import { clsx } from 'clsx';
+import { generateSpvrWeeklyExcelReport } from '../utils/exportToExcel';
 
 export default function SpvrWeeklyTab({ apiData, currentPage }) {
   let dates = [];
@@ -76,9 +77,37 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
 
   dates = dates.length > 0 ? dates : ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
   
+  const handleDownload = async () => {
+    const excelData = spvrData.map(spvr => {
+      const daily = {};
+      current7Dates.forEach((d, i) => daily[d] = spvr.days[i]);
+      return {
+        name: spvr.name,
+        daily: daily,
+        totalCurr: spvr.current,
+        totalPrev: spvr.previous,
+        difference: spvr.shift
+      };
+    });
+
+    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+    await generateSpvrWeeklyExcelReport(excelData, current7Dates, previous7Dates, regionName);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       
+      {/* Action Bar */}
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        <button 
+          onClick={handleDownload}
+          className="flex items-center gap-2 bg-white hover:bg-slate-200 text-slate-900 font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] text-sm"
+        >
+          <Download className="w-4 h-4" />
+          Download Analysis
+        </button>
+      </div>
+
       <div className="bg-[#111827] rounded-3xl border border-slate-800 shadow-xl overflow-hidden mt-6">
         <div className="px-8 py-6 border-b border-slate-800 flex justify-between items-center bg-[#111827]">
           <h3 className="text-[15px] font-extrabold tracking-wide text-white">SPVR WEEKLY SHIFT</h3>
