@@ -101,7 +101,7 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
       <div className="flex flex-wrap items-center justify-end gap-3">
         <button 
           onClick={handleDownload}
-          className="flex items-center gap-2 bg-white hover:bg-surface-hover text-textPrimary font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] text-sm"
+          className="flex items-center gap-2 bg-white hover:bg-slate-200 text-slate-900 font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] text-sm"
         >
           <Download className="w-4 h-4" />
           Download Analysis
