@@ -149,7 +149,7 @@ export default function OverviewTab({ apiData, currentPage }) {
 
         <div className="h-[350px] w-full relative z-10">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={chartData} margin={{ top: 20, right: 30, left: 30, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
               <XAxis 
                 dataKey="name" 
@@ -160,12 +160,13 @@ export default function OverviewTab({ apiData, currentPage }) {
                 dy={10}
               />
               <YAxis 
+                width={80}
                 stroke="#94a3b8" 
                 tick={{ fill: '#94a3b8', fontSize: 12 }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => value.toLocaleString()}
-                dx={-10}
+                dx={-5}
               />
               <Tooltip content={<CustomTooltip />} />
               <Line 
