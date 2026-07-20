@@ -187,10 +187,10 @@ export default function ComparisonTab({ apiData, selectedEndDate, currentPage })
           
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={barData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+              <BarChart data={barData} margin={{ top: 5, right: 10, left: 30, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
                 <XAxis dataKey="name" stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} dy={10} />
-                <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(value) => value.toLocaleString()} dx={-10} />
+                <YAxis width={80} stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(value) => value.toLocaleString()} dx={-5} />
                 <Tooltip content={<CustomTooltip />} cursor={{fill: '#334155', opacity: 0.2}} />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }} verticalAlign="top" align="right" />
                 <Bar dataKey="prev" name="Previous 7 Days" fill="#64748b" radius={[4, 4, 0, 0]} />

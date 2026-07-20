@@ -343,28 +343,32 @@ function App() {
                 />
               </div>
 
-              <FilterDropdown
-                icon={Filter}
-                label="All Units"
-                options={units.map(u => ({ id: String(u.id), name: u.username?.toUpperCase() || u.fullName }))}
-                selectedValues={selectedUnits}
-                onSelect={(ids) => {
-                  setSelectedUnits(ids);
-                  setSelectedTellers([]); // reset tellers when unit selection changes
-                }}
-                placeholder="Search unit list..."
-                align="right"
-              />
+              {!currentPage.startsWith('unclaimed') && (
+                <>
+                  <FilterDropdown
+                    icon={Filter}
+                    label="All Units"
+                    options={units.map(u => ({ id: String(u.id), name: u.username?.toUpperCase() || u.fullName }))}
+                    selectedValues={selectedUnits}
+                    onSelect={(ids) => {
+                      setSelectedUnits(ids);
+                      setSelectedTellers([]); // reset tellers when unit selection changes
+                    }}
+                    placeholder="Search unit list..."
+                    align="right"
+                  />
 
-              <FilterDropdown
-                icon={Users}
-                label="All Tellers"
-                options={tellers.filter(t => selectedUnits.length === 0 || selectedUnits.includes(String(t.supervisor)))}
-                selectedValues={selectedTellers}
-                onSelect={setSelectedTellers}
-                placeholder="Search teller list..."
-                align="right"
-              />
+                  <FilterDropdown
+                    icon={Users}
+                    label="All Tellers"
+                    options={tellers.filter(t => selectedUnits.length === 0 || selectedUnits.includes(String(t.supervisor)))}
+                    selectedValues={selectedTellers}
+                    onSelect={setSelectedTellers}
+                    placeholder="Search teller list..."
+                    align="right"
+                  />
+                </>
+              )}
               </>
             )}
           </div>
