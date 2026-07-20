@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { RefreshCw, Search, Filter, Copy, Check } from 'lucide-react';
+import { RefreshCw, Search, Filter, Copy, Check, Users } from 'lucide-react';
 import FilterDropdown from './FilterDropdown';
 
 export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selectedTellers, spvrMap, currentPage }) {
   const [tickets, setTickets] = useState([]);
+  const [localSelectedUnits, setLocalSelectedUnits] = useState([]);
+  const [localSelectedTellers, setLocalSelectedTellers] = useState([]);
 
   // Helper to convert military hour to 12-hour AM/PM format (e.g. 14 -> 2PM)
   const formatDrawTime = (timeStr) => {
@@ -115,10 +117,41 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
   // Reset page when filters change
   useEffect(() => {
     setPage(1);
-  }, [searchTerm, selectedUnits, selectedTellers]);
+  }, [searchTerm, localSelectedUnits, localSelectedTellers]);
 
+  const unitsOptions = useMemo(() => {
+    const map = new Map();
+    // Add all from tickets
+    tickets.forEach(t => {
+      const spvrId = String(t.supervisor);
+      const spvrObj = (spvrMap || []).find(s => String(s.id) === spvrId);
+      const spvrName = (spvrObj ? (spvrObj.username || spvrObj.fullName) : t.username)?.toUpperCase() || 'UNKNOWN UNIT';
+      if (!map.has(spvrId)) {
+        map.set(spvrId, { id: spvrId, name: spvrName });
+      }
+    });
+    // Add all from spvrMap
+    (spvrMap || []).forEach(s => {
+       const spvrId = String(s.id);
+       const spvrName = (s.username || s.fullName)?.toUpperCase() || 'UNKNOWN UNIT';
+       if (!map.has(spvrId)) {
+         map.set(spvrId, { id: spvrId, name: spvrName });
+       }
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [tickets, spvrMap]);
 
-
+  const tellersOptions = useMemo(() => {
+    const map = new Map();
+    tickets.forEach(t => {
+      const tName = t.fullName || t.username;
+      const tId = t.username || t.fullName;
+      if (tName && !map.has(tId)) {
+        map.set(tId, { id: tId, name: tName, supervisor: String(t.supervisor) });
+      }
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [tickets]);
 
   const { filteredTickets, groupedTickets, sortedSpvrs } = useMemo(() => {
     const filtered = tickets.filter(t => {
@@ -137,10 +170,10 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
 
       // 2. Global Dropdown Filters
       const spvrId = String(t.supervisor);
-      if (selectedUnits && selectedUnits.length > 0 && !selectedUnits.includes(spvrId)) {
+      if (localSelectedUnits && localSelectedUnits.length > 0 && !localSelectedUnits.includes(spvrId)) {
         return false;
       }
-      if (selectedTellers && selectedTellers.length > 0 && !selectedTellers.includes(t.username) && !selectedTellers.includes(t.fullName)) {
+      if (localSelectedTellers && localSelectedTellers.length > 0 && !localSelectedTellers.includes(t.username) && !localSelectedTellers.includes(t.fullName)) {
         return false;
       }
 
@@ -164,7 +197,7 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
     // Sort supervisors alphabetically
     const sorted = Object.keys(grouped).sort();
     return { filteredTickets: filtered, groupedTickets: grouped, sortedSpvrs: sorted };
-  }, [tickets, searchTerm, selectedUnits, selectedTellers, spvrMap]);
+  }, [tickets, searchTerm, localSelectedUnits, localSelectedTellers, spvrMap]);
 
   const handleBulkCopy = () => {
     let copyText = '';
@@ -213,17 +246,38 @@ export default function UnclaimedTickets({ selectedEndDate, selectedUnits, selec
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-textSecondary" />
             <input
               type="text"
-              placeholder="Search ID, Teller, Bet No, or Code..."
+              placeholder="Search Transcode, ID, Teller, Bet No, or Code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-appBg border border-border-divider rounded-lg pl-9 pr-4 py-2.5 text-sm w-full md:w-64 focus:outline-none focus:border-blue-500 transition-colors"
             />
           </div>
+          <FilterDropdown
+            icon={Filter}
+            label="All Units"
+            options={unitsOptions}
+            selectedValues={localSelectedUnits}
+            onSelect={(ids) => {
+              setLocalSelectedUnits(ids);
+              setLocalSelectedTellers([]);
+            }}
+            placeholder="Search unit list..."
+            align="right"
+          />
+          <FilterDropdown
+            icon={Users}
+            label="All Tellers"
+            options={tellersOptions.filter(t => localSelectedUnits.length === 0 || localSelectedUnits.includes(String(t.supervisor)))}
+            selectedValues={localSelectedTellers}
+            onSelect={setLocalSelectedTellers}
+            placeholder="Search teller list..."
+            align="right"
+          />
           <button
             onClick={handleBulkCopy}
             disabled={loading || filteredTickets.length === 0}
