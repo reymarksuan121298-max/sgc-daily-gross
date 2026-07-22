@@ -241,7 +241,7 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
                 <div className={`w-2 h-2 mt-1.5 rounded-full ${teller.isActive ? 'bg-emerald-400' : 'bg-slate-500'}`} />
                 <div>
                   <div className={`font-medium text-sm ${selectedTeller?.id === teller.id ? 'text-blue-400' : 'text-textPrimary'}`}>
-                    {teller.fullName || teller.username}
+                    {teller.fullName ? `${teller.fullName} (${teller.username})` : teller.username}
                   </div>
                   <div className="text-xs text-textSecondary mt-0.5">{teller.outlet || 'No Outlet'} • {teller.location}</div>
                 </div>
@@ -259,7 +259,7 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
               <div>
                 <h2 className="text-xl font-bold text-textPrimary flex items-center gap-2">
                   <ReceiptText className="w-5 h-5 text-indigo-400" />
-                  Bets for {selectedTeller.fullName || selectedTeller.username}
+                  Bets for {selectedTeller.fullName ? `${selectedTeller.fullName} (${selectedTeller.username})` : selectedTeller.username}
                 </h2>
                 <p className="text-sm text-textSecondary mt-1">Outlet: {selectedTeller.outlet} | ID: {selectedTeller.id}</p>
               </div>
