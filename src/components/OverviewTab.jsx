@@ -91,7 +91,7 @@ export default function OverviewTab({ apiData, currentPage }) {
     <div className="space-y-6">
       {/* Summary Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-cardBg border border-border-divider rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
+        <div className="glass-card rounded-2xl p-6 flex items-center gap-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-5 text-emerald-400">
             <DollarSign className="w-20 h-20" />
           </div>
@@ -104,7 +104,7 @@ export default function OverviewTab({ apiData, currentPage }) {
           </div>
         </div>
 
-        <div className="bg-cardBg border border-border-divider rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
+        <div className="glass-card rounded-2xl p-6 flex items-center gap-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-5 text-blue-400">
             <Users className="w-20 h-20" />
           </div>
@@ -117,7 +117,7 @@ export default function OverviewTab({ apiData, currentPage }) {
           </div>
         </div>
 
-        <div className="bg-cardBg border border-border-divider rounded-2xl p-6 shadow-lg flex items-center gap-4 relative overflow-hidden">
+        <div className="glass-card rounded-2xl p-6 flex items-center gap-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-5 text-purple-400">
             <LayoutGrid className="w-20 h-20" />
           </div>
@@ -132,7 +132,7 @@ export default function OverviewTab({ apiData, currentPage }) {
       </div>
 
       {/* Chart Section */}
-      <div className="bg-cardBg rounded-2xl p-6 border border-border-divider shadow-lg relative overflow-hidden">
+      <div className="glass-card rounded-2xl p-6 relative overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accentGreen/5 rounded-full blur-3xl pointer-events-none"></div>
         
         <div className="flex justify-between items-center mb-8 relative z-10">
@@ -185,7 +185,7 @@ export default function OverviewTab({ apiData, currentPage }) {
       {/* Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {cardsData.map((card, idx) => (
-          <div key={idx} className="bg-surface rounded-xl p-6 border border-border-divider shadow-xl flex flex-col h-full hover:border-border-divider transition-colors">
+          <div key={idx} className="glass-panel rounded-xl p-6 flex flex-col h-full transition-colors">
             <div className="flex justify-between items-start mb-8">
               <h3 className="text-[11px] font-extrabold text-textPrimary uppercase tracking-wider w-3/5 leading-tight">{card.title}</h3>
               <span className="text-[#00b87c] font-extrabold text-[13px]">{card.total.replace('₱', 'P')}</span>

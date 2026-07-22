@@ -267,7 +267,7 @@ function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-appBg text-textPrimary font-sans selection:bg-indigo-500/30 overflow-x-hidden">
+    <div className="flex min-h-screen bg-appBg text-textPrimary font-sans selection:bg-accentGreen/30 overflow-x-hidden">
       <Sidebar 
         currentPage={currentPage} 
         setCurrentPage={(page) => {
@@ -290,11 +290,11 @@ function App() {
             >
               <Menu className="w-6 h-6" />
             </button>
-            <div className="bg-surface rounded-full p-2 h-10 w-10 md:h-14 md:w-14 flex items-center justify-center shadow-lg border border-border-divider transition-shadow">
-              <Crown className="text-yellow-600 h-5 w-5 md:h-8 md:w-8" />
+            <div className="glass-card rounded-full p-2 h-10 w-10 md:h-14 md:w-14 flex items-center justify-center transition-shadow">
+              <Crown className="text-accentGreen h-5 w-5 md:h-8 md:w-8" />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-textPrimary">
+              <h1 className="heading-font text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-textPrimary">
                 {currentPage === 'imp' ? 'Imperial' : 
                  currentPage === 'setb' ? 'SETB' : 
                  currentPage === 'iligan' ? 'Iligan' : 
@@ -324,7 +324,7 @@ function App() {
           <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
             <button
               onClick={toggleTheme}
-              className="p-2.5 rounded-xl bg-cardBg hover:bg-surface-hover border border-border-divider transition-all text-textSecondary hover:text-textPrimary mr-2"
+              className="p-2.5 rounded-xl glass-card hover:bg-surface-hover transition-all text-textSecondary hover:text-textPrimary mr-2"
               title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -332,7 +332,7 @@ function App() {
 
             {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && (
               <>
-                <div className="relative flex items-center bg-cardBg hover:bg-surface-hover border border-border-divider rounded-md transition-all focus-within:ring-2 focus-within:ring-indigo-500/50 cursor-pointer">
+                <div className="relative flex items-center glass-card hover:bg-surface-hover rounded-md transition-all focus-within:ring-2 focus-within:ring-accentGreen/50 cursor-pointer">
                 <Calendar className="w-4 h-4 ml-4 text-textSecondary" />
                 <input
                   type="date"
@@ -375,7 +375,7 @@ function App() {
 
           {/* Tabs */}
           {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') && (
-            <div className="flex bg-cardBg p-1 rounded-md border border-border-divider overflow-x-auto w-full xl:w-auto shadow-inner">
+            <div className="flex glass-card p-1 rounded-md overflow-x-auto w-full xl:w-auto shadow-inner">
               {TABS.filter(tab => user?.username !== 'striketeam' || tab.id === 'details').map(tab => (
                 <button
                   key={tab.id}
@@ -383,7 +383,7 @@ function App() {
                   className={clsx(
                     "flex items-center gap-2 px-4 py-2 rounded text-sm font-medium transition-all whitespace-nowrap outline-none",
                     activeTab === tab.id
-                      ? "bg-indigo-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]"
+                      ? "bg-[var(--accent-green)] text-[#020617] shadow-[0_0_15px_rgba(34,197,94,0.4)]"
                       : "text-textSecondary hover:text-textPrimary hover:bg-surface-hover"
                   )}
                 >

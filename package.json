@@ -14,7 +14,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
-    "exceljs": "^4.4.0",
+    "exceljs": "^3.4.0",
     "file-saver": "^2.0.5",
     "lucide-react": "^1.23.0",
     "node-cron": "^4.6.0",

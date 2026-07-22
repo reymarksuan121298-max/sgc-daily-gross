@@ -1,7 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Montserrat', sans-serif;
+  --font-sans: 'DM Sans', sans-serif;
+  --font-heading: 'Space Grotesk', sans-serif;
   --color-appBg: var(--app-bg);
   --color-cardBg: var(--card-bg);
   --color-surface: var(--surface);
@@ -10,30 +12,49 @@
   --color-border-divider: var(--border-divider);
   --color-textPrimary: var(--text-primary);
   --color-textSecondary: var(--text-secondary);
-  --color-accentGreen: #10b981;
+  --color-accentGreen: var(--accent-green);
 }
 
 @layer base {
   :root {
     --app-bg: #f8fafc;
-    --card-bg: #ffffff;
-    --surface: #ffffff;
-    --surface-hover: #f1f5f9;
-    --surface-header: #f1f5f9;
-    --border-divider: #e2e8f0;
+    --card-bg: rgba(255, 255, 255, 0.7);
+    --surface: rgba(255, 255, 255, 0.8);
+    --surface-hover: rgba(255, 255, 255, 0.9);
+    --surface-header: rgba(241, 245, 249, 0.9);
+    --border-divider: rgba(226, 232, 240, 0.5);
     --text-primary: #0f172a;
     --text-secondary: #64748b;
+    --accent-green: #22C55E;
   }
 
   .dark {
-    --app-bg: #0f172a;
-    --card-bg: #1e293b;
-    --surface: #111827;
-    --surface-hover: #253247;
-    --surface-header: #0a0f18; /* Used for deepest table headers, etc. */
-    --border-divider: #1e293b;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
+    --app-bg: #020617;
+    --card-bg: rgba(14, 18, 35, 0.75);
+    --surface: rgba(14, 18, 35, 0.85);
+    --surface-hover: rgba(30, 41, 59, 0.75);
+    --surface-header: rgba(2, 6, 23, 0.85);
+    --border-divider: rgba(51, 65, 85, 0.5);
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --accent-green: #22C55E;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    background-color: var(--card-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--border-divider);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .glass-panel {
+    background-color: var(--surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-divider);
   }
 }
 
@@ -44,6 +65,13 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Add subtle background pattern for depth */
+  background-image: radial-gradient(circle at top right, rgba(34, 197, 94, 0.05), transparent 40%),
+                    radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent 40%);
+}
+
+h1, h2, h3, h4, h5, h6, .heading-font {
+  font-family: var(--font-heading);
 }
 
 /* Custom Scrollbar */
@@ -52,7 +80,7 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--app-bg); 
+  background: transparent; 
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border-divider); 

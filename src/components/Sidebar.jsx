@@ -134,11 +134,11 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
       )}
 
       <div className={clsx(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-surface border-r border-border-divider p-4 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
+        "fixed inset-y-0 left-0 z-50 w-64 glass-panel p-4 flex flex-col transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="mb-8 px-2 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-textPrimary tracking-wide">STL<span className="text-blue-500">CONTROL</span></h2>
+          <h2 className="heading-font text-xl font-bold text-textPrimary tracking-wide">STL<span className="text-[var(--accent-green)]">CONTROL</span></h2>
           <button
             onClick={() => setIsOpen(false)}
             className="lg:hidden p-1.5 text-textSecondary hover:text-textPrimary rounded-md hover:bg-surface-hover transition-colors"
@@ -155,7 +155,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                 className={clsx(
                   "w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors",
                   isAnyDashboardActive && !isDashboardsOpen
-                    ? "bg-blue-900/30 text-blue-400"
+                    ? "bg-[var(--accent-green)]/10 text-[var(--accent-green)]"
                     : "text-textSecondary hover:bg-surface-hover hover:text-textPrimary"
                 )}
               >
@@ -177,7 +177,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                         className={clsx(
                           "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                           isActive
-                            ? "bg-blue-600 text-textPrimary shadow-lg shadow-blue-900/20"
+                            ? "bg-[var(--accent-green)] text-[#020617] shadow-lg shadow-[var(--accent-green)]/20"
                             : "text-textSecondary hover:bg-surface-hover hover:text-textPrimary"
                         )}
                       >
