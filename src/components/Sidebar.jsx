@@ -60,6 +60,8 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
       dashboardItems = dashboardItems.filter(item => ['iligan', 'lotto'].includes(item.id));
     } else if (user.username === 'striketeam') {
       dashboardItems = dashboardItems.filter(item => item.id === 'mag');
+    } else if (user.username === 'ldn') {
+      dashboardItems = dashboardItems.filter(item => ['baloi', 'iligan', 'lanao', 'setb', 'lotto'].includes(item.id));
     } else {
       const usernameMap = {
         'maguindanao': 'mag',

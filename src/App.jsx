@@ -68,6 +68,8 @@ function App() {
           validPages = ['iligan', 'lotto'];
         } else if (user.username === 'striketeam') {
           validPages = ['mag'];
+        } else if (user.username === 'ldn') {
+          validPages = ['baloi', 'iligan', 'lanao', 'setb', 'lotto'];
         } else {
           validPages = [usernameMap[user.username] || user.username];
         }
