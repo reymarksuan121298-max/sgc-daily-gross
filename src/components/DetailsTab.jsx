@@ -1,7 +1,7 @@
 import React from 'react';
 import { Download } from 'lucide-react';
 import { clsx } from 'clsx';
-import { generateExcelReport } from '../utils/exportToExcel';
+import { generateExcelReport, generateExcelReportWithBarangay } from '../utils/exportToExcel';
 import { useAuth } from '../context/AuthContext';
 
 export default function DetailsTab({ apiData, currentPage }) {
@@ -58,11 +58,14 @@ export default function DetailsTab({ apiData, currentPage }) {
       if (!groups[groupName][tellerName]) {
         groups[groupName][tellerName] = {
           name: tellerName,
+          barangay: item.name || item.barangay || item.address || 'UNKNOWN',
           address: item.address || 'UNKNOWN',
           daysMap: {},
           current: 0,
           previous: 0
         };
+      } else if (!groups[groupName][tellerName].barangay || groups[groupName][tellerName].barangay === 'UNKNOWN') {
+        groups[groupName][tellerName].barangay = item.name || item.barangay || item.address || 'UNKNOWN';
       }
       
       const tellerData = groups[groupName][tellerName];
@@ -93,6 +96,7 @@ export default function DetailsTab({ apiData, currentPage }) {
 
         return {
           name: t.name,
+          barangay: t.barangay || t.address || 'UNKNOWN',
           address: t.address,
           days: days,
           current: t.current,
@@ -207,6 +211,27 @@ export default function DetailsTab({ apiData, currentPage }) {
     await generateExcelReport(excelData, current7Dates, previous7Dates, regionName + ' - HIGH GROSSERS (TODAY)');
   };
 
+  const handleDownloadWithBarangay = async () => {
+    const excelData = detailsData.map(group => ({
+      spvrName: group.supervisor,
+      tellers: group.tellers.map(t => {
+        const daily = {};
+        current7Dates.forEach((d, i) => daily[d] = t.days[i]);
+        return {
+          name: t.name,
+          barangay: t.barangay || t.address || 'UNKNOWN',
+          daily: daily,
+          totalCurr: t.current,
+          totalPrev: t.previous,
+          difference: t.shift
+        };
+      })
+    }));
+
+    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : currentPage === 'mandaue' ? 'MANDAUE' : 'MAG';
+    await generateExcelReportWithBarangay(excelData, current7Dates, previous7Dates, regionName);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       
@@ -233,9 +258,12 @@ export default function DetailsTab({ apiData, currentPage }) {
           <Download className="w-4 h-4" />
           Download Analysis
         </button>
-        <button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-textPrimary font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)] text-sm">
+        <button 
+          onClick={handleDownloadWithBarangay}
+          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-textPrimary font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)] text-sm"
+        >
           <Download className="w-4 h-4" />
-          Download with Address
+          Download with Barangay
         </button>
       </div>
 
@@ -246,7 +274,7 @@ export default function DetailsTab({ apiData, currentPage }) {
             <thead className="text-xs text-textSecondary uppercase bg-surface-header border-b border-border-divider">
               <tr>
                 <th className="px-6 py-4 font-bold tracking-wider">TELLER IDENTITY</th>
-                <th className="px-6 py-4 font-bold tracking-wider">ADDRESS</th>
+                <th className="px-6 py-4 font-bold tracking-wider">BARANGAY</th>
                 {dates.map((date, i) => (
                   <th key={i} className="px-4 py-4 text-center font-bold tracking-wider">{date}</th>
                 ))}
@@ -272,7 +300,7 @@ export default function DetailsTab({ apiData, currentPage }) {
                   {section.tellers?.map((teller, tIdx) => (
                     <tr key={tIdx} className="border-b border-border-divider hover:bg-surface-hover transition-colors">
                       <td className="px-6 py-4 font-semibold text-xs tracking-wide">{teller.name}</td>
-                      <td className="px-6 py-4 text-xs text-textSecondary uppercase">{teller.address}</td>
+                      <td className="px-6 py-4 text-xs text-textSecondary uppercase">{teller.barangay || teller.address}</td>
                       {teller.days?.map((val, i) => (
                         <td key={i} className="px-4 py-4 text-center text-textSecondary text-xs">{val?.toLocaleString()}</td>
                       ))}

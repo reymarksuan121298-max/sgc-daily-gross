@@ -20,6 +20,8 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
 
 
 
+  const [supervisors, setSupervisors] = useState({});
+
   const [fromDate, setFromDate] = useState(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -30,6 +32,13 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
   });
 
   const getApiConfig = () => {
+    if (currentPage === 'active_tellers_man' || currentPage === 'active_tellers_mandaue') {
+      return {
+        authHeader: { headers: { 'Authorization': 'Bearer 2530|a931D4V9RbTLKmudxsg9AOc1HM3NiDmPOE1aChun' } },
+        baseUrl: 'https://stl-mandaue-api.com/api',
+        idParam: '2'
+      };
+    }
     if (currentPage === 'active_tellers_imp') {
       return {
         authHeader: { headers: { 'Authorization': 'Bearer 56420|m5oBfQqTl33XWmt33FzjLfYWoWEK6w3jPcOWlfz5' } },
@@ -89,10 +98,26 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
     setError(null);
     try {
       const { authHeader, baseUrl, idParam } = getApiConfig();
+
+      // Fetch active tellers
       const response = await axios.get(`${baseUrl}/accountant/ActiveTellers?id=${idParam}`, authHeader);
       if (response.data && response.data.data) {
         const activeOnly = response.data.data.filter(t => t.isActive);
         setTellers(activeOnly);
+      }
+
+      // Fetch supervisors if available
+      try {
+        const spvrResponse = await axios.get(`${baseUrl}/accountant/supervisor?id=${idParam}`, authHeader);
+        if (spvrResponse.data && spvrResponse.data.data) {
+          const spvrMap = {};
+          spvrResponse.data.data.forEach(s => {
+            spvrMap[s.id] = (s.fullName || s.username || s.name || '').toUpperCase();
+          });
+          setSupervisors(spvrMap);
+        }
+      } catch (spvrErr) {
+        console.warn('Supervisors fetch optional or unavailable:', spvrErr.message);
       }
     } catch (err) {
       console.error('Failed to fetch tellers:', err);
@@ -125,12 +150,16 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
   }, [selectedTeller, fromDate, toDate]);
 
   const filteredTellers = useMemo(() => {
-    return tellers.filter(t => 
-      t.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      t.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.outlet?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [tellers, searchQuery]);
+    return tellers.filter(t => {
+      const spvrName = supervisors[t.supervisor] || '';
+      return (
+        t.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        t.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.outlet?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        spvrName.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    });
+  }, [tellers, searchQuery, supervisors]);
 
 
 
@@ -243,7 +272,11 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
                   <div className={`font-medium text-sm ${selectedTeller?.id === teller.id ? 'text-blue-400' : 'text-textPrimary'}`}>
                     {teller.fullName || teller.username}
                   </div>
-                  <div className="text-xs text-textSecondary mt-0.5">{teller.outlet || 'No Outlet'} • {teller.location}</div>
+                  <div className="text-xs text-textSecondary mt-0.5">
+                    {teller.outlet || 'No Outlet'}
+                    {supervisors[teller.supervisor] ? ` • SPVR: ${supervisors[teller.supervisor]}` : ''}
+                    {teller.location ? ` • ${teller.location}` : ''}
+                  </div>
                 </div>
               </button>
             ))

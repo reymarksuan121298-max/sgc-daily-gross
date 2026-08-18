@@ -97,7 +97,7 @@ function App() {
   });
 
   const fetchRealData = async (startDateStr, endDateStr, page) => {
-    if (page === 'active_tellers_mag' || page === 'active_tellers_imp' || page === 'active_tellers_iligan' || page === 'active_tellers_lanao' || page === 'active_tellers_setb' || page === 'active_tellers_lotto' || page === 'active_tellers_baloi' || page === 'void_req_mag' || page === 'void_req_imp') {
+    if (page.startsWith('active_tellers_') || page.startsWith('void_req_')) {
       setApiData(null);
       setLoading(false);
       return;
@@ -317,6 +317,7 @@ function App() {
                  currentPage === 'active_tellers_setb' ? 'SETB Teller Transactions' : 
                  currentPage === 'active_tellers_lotto' ? 'Lotto Teller Transactions' : 
                  currentPage === 'active_tellers_baloi' ? 'Baloi Teller Transactions' : 
+                 currentPage === 'active_tellers_man' ? 'Man Teller Transactions' : 
                  currentPage === 'void_req_mag' ? 'Mag Void Requests' :
                  currentPage === 'void_req_imp' ? 'Imperial Void Requests' :
                  'Mag'} Dashboard
@@ -449,7 +450,7 @@ function App() {
                 {activeTab === 'monthly' && <MonthlyTab apiData={filteredApiData} selectedEndDate={selectedEndDate} currentPage={currentPage} />}
               </>
             )
-          ) : (currentPage === 'active_tellers_mag' || currentPage === 'active_tellers_imp' || currentPage === 'active_tellers_iligan' || currentPage === 'active_tellers_lanao' || currentPage === 'active_tellers_setb' || currentPage === 'active_tellers_lotto' || currentPage === 'active_tellers_baloi') ? (
+          ) : currentPage.startsWith('active_tellers_') ? (
             <ActiveTellers currentPage={currentPage} />
           ) : (currentPage === 'void_req_mag' || currentPage === 'void_req_imp') ? (
             <VoidRequests currentPage={currentPage} />

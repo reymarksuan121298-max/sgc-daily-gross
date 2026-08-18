@@ -104,12 +104,14 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     { id: 'active_tellers_setb', label: 'SETB Teller Transactions' },
     { id: 'active_tellers_lotto', label: 'Lotto Teller Transactions' },
     { id: 'active_tellers_baloi', label: 'Baloi Teller Transactions' },
+    { id: 'active_tellers_man', label: 'Man Teller Transactions' },
   ];
 
   if (user && user.username !== 'admin') {
     const activeMap = {
       'maguindanao': 'active_tellers_mag',
-      'imperial': 'active_tellers_imp'
+      'imperial': 'active_tellers_imp',
+      'mandaue': 'active_tellers_man'
     };
     const allowed = activeMap[user.username];
     if (allowed) {
