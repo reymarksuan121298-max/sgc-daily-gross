@@ -84,13 +84,19 @@ function App() {
   const [selectedUnits, setSelectedUnits] = useState([]);
   const [selectedTellers, setSelectedTellers] = useState([]);
 
-  // Default to today
+  // Default dates (From: 13 days prior for 14-day window, To: today)
+  const [selectedStartDate, setSelectedStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 13);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  });
+
   const [selectedEndDate, setSelectedEndDate] = useState(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   });
 
-  const fetchRealData = async (endDateStr, page) => {
+  const fetchRealData = async (startDateStr, endDateStr, page) => {
     if (page === 'active_tellers_mag' || page === 'active_tellers_imp' || page === 'active_tellers_iligan' || page === 'active_tellers_lanao' || page === 'active_tellers_setb' || page === 'active_tellers_lotto' || page === 'active_tellers_baloi' || page === 'void_req_mag' || page === 'void_req_imp') {
       setApiData(null);
       setLoading(false);
@@ -104,7 +110,11 @@ function App() {
       let baseUrl;
       let idParam;
 
-      if (page === 'lds') {
+      if (page === 'mandaue') {
+        authHeader = { headers: { 'Authorization': 'Bearer 2525|gYdL7vJGuSpt5xzGqYRNL5epCRj0O9k5wG0xL6rB' } };
+        baseUrl = 'https://stl-mandaue-api.com/api/accountant';
+        idParam = '2';
+      } else if (page === 'lds') {
         authHeader = { headers: { 'Authorization': 'Bearer 111012|Ag4bzY0DBPYHbQsl8QxhqpdURrT6LYmsWnQsLEif' } };
         baseUrl = 'https://stl-lds-api.com/api/accountant';
         idParam = '1';
@@ -191,11 +201,8 @@ function App() {
         [...prevSpvr.data.data, ...currSpvr.data.data].forEach(s => spvrMap.set(s.id, s));
         spvrData = Array.from(spvrMap.values());
       } else {
-        const pastDate = new Date(endDate);
-        pastDate.setDate(endDate.getDate() - 13); // 14-day window (7 prev vs 7 curr)
-        
-        const toStr = formatDate(endDate);
-        const fromStr = formatDate(pastDate);
+        const fromStr = startDateStr;
+        const toStr = endDateStr;
 
         const [grossRes, spvrRes] = await Promise.all([
           axios.get(`${baseUrl}/TellerGrossPerDateRange?id=${idParam}&from=${fromStr}&to=${toStr}`, authHeader),
@@ -218,8 +225,8 @@ function App() {
   };
 
   useEffect(() => {
-    fetchRealData(selectedEndDate, currentPage);
-  }, [selectedEndDate, activeTab, currentPage]);
+    fetchRealData(selectedStartDate, selectedEndDate, currentPage);
+  }, [selectedStartDate, selectedEndDate, activeTab, currentPage]);
 
   // Extract unique units and tellers from apiData for the dropdown options
   const units = useMemo(() => {
@@ -302,6 +309,7 @@ function App() {
                  currentPage === 'lotto' ? 'Lotto' : 
                  currentPage === 'baloi' ? 'Baloi' : 
                  currentPage === 'lds' ? 'LDS' : 
+                 currentPage === 'mandaue' ? 'Mandaue' : 
                  currentPage === 'active_tellers_mag' ? 'Mag Teller Transactions' : 
                  currentPage === 'active_tellers_imp' ? 'Imperial Teller Transactions' : 
                  currentPage === 'active_tellers_iligan' ? 'Iligan Teller Transactions' : 
@@ -332,16 +340,40 @@ function App() {
 
             {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && (
               <>
-                <div className="relative flex items-center bg-cardBg hover:bg-surface-hover border border-border-divider rounded-md transition-all focus-within:ring-2 focus-within:ring-indigo-500/50 cursor-pointer">
-                <Calendar className="w-4 h-4 ml-4 text-textSecondary" />
-                <input
-                  type="date"
-                  value={selectedEndDate}
-                  onChange={(e) => setSelectedEndDate(e.target.value)}
-                  className="bg-transparent text-textSecondary hover:text-textPrimary px-3 py-2.5 text-sm outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:invert opacity-80 hover:opacity-100 transition-opacity"
-                  title="Select End Date (Calculates 14 days prior)"
-                />
-              </div>
+                <div className="flex items-center gap-2 bg-cardBg border border-border-divider rounded-md p-1">
+                  <div className="relative flex items-center hover:bg-surface-hover rounded transition-all focus-within:ring-1 focus-within:ring-indigo-500/50">
+                    <span className="text-[11px] font-semibold uppercase text-textSecondary pl-2">From:</span>
+                    <input
+                      type="date"
+                      value={selectedStartDate}
+                      onChange={(e) => setSelectedStartDate(e.target.value)}
+                      className="bg-transparent text-textSecondary hover:text-textPrimary px-2 py-2 text-xs outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:invert opacity-80 hover:opacity-100 transition-opacity"
+                      title="Select Start Date"
+                    />
+                  </div>
+
+                  <div className="h-4 w-px bg-border-divider"></div>
+
+                  <div className="relative flex items-center hover:bg-surface-hover rounded transition-all focus-within:ring-1 focus-within:ring-indigo-500/50">
+                    <span className="text-[11px] font-semibold uppercase text-textSecondary pl-2">To:</span>
+                    <input
+                      type="date"
+                      value={selectedEndDate}
+                      onChange={(e) => setSelectedEndDate(e.target.value)}
+                      className="bg-transparent text-textSecondary hover:text-textPrimary px-2 py-2 text-xs outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:invert opacity-80 hover:opacity-100 transition-opacity"
+                      title="Select End Date"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStartDate(selectedEndDate)}
+                    className="px-2 py-1 text-[11px] font-medium bg-surface-hover hover:bg-indigo-600 hover:text-white rounded text-textSecondary transition-colors"
+                    title="Set Start Date equal to End Date (Single Day Filter)"
+                  >
+                    Single Day
+                  </button>
+                </div>
 
               {!currentPage.startsWith('unclaimed') && (
                 <>
@@ -374,7 +406,7 @@ function App() {
           </div>
 
           {/* Tabs */}
-          {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') && (
+          {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds' || currentPage === 'mandaue') && (
             <div className="flex bg-cardBg p-1 rounded-md border border-border-divider overflow-x-auto w-full xl:w-auto shadow-inner">
               {TABS.filter(tab => user?.username !== 'striketeam' || tab.id === 'details').map(tab => (
                 <button
@@ -397,7 +429,7 @@ function App() {
 
         {/* Main Content Area */}
         <main>
-          {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') ? (
+          {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds' || currentPage === 'mandaue') ? (
             loading ? (
               <div className="flex justify-center items-center h-64 text-textSecondary">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accentGreen mr-3"></div>

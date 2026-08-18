@@ -22,8 +22,15 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
     });
     
     const sortedDates = Array.from(dateSet).sort();
-    current7Dates = sortedDates.slice(-7);
-    previous7Dates = sortedDates.slice(-14, -7);
+    const isSingleDayOrCustom = sortedDates.length < 14;
+    
+    if (isSingleDayOrCustom) {
+      current7Dates = sortedDates;
+      previous7Dates = [];
+    } else {
+      current7Dates = sortedDates.slice(-7);
+      previous7Dates = sortedDates.slice(-14, -7);
+    }
 
     dates = current7Dates.map(d => {
       const [y, m, day] = d.split('-');
@@ -75,7 +82,7 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
     }).sort((a, b) => b.current - a.current);
   }
 
-  dates = dates.length > 0 ? dates : ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
+  dates = dates || [];
   
   const handleDownload = async () => {
     const excelData = spvrData.map(spvr => {
@@ -90,7 +97,7 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
       };
     });
 
-    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : currentPage === 'mandaue' ? 'MANDAUE' : 'MAG';
     await generateSpvrWeeklyExcelReport(excelData, current7Dates, previous7Dates, regionName);
   };
 
@@ -120,9 +127,13 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
                 {dates.map((date, i) => (
                   <th key={i} className="py-5 px-4 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center">{date}</th>
                 ))}
-                <th className="py-5 px-6 font-extrabold text-[10px] text-indigo-500 uppercase tracking-widest text-center bg-surface-header border-l border-border-divider">TOTAL CURRENT<br/><span className="text-[9px] text-textSecondary">(7D)</span></th>
-                <th className="py-5 px-6 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center bg-surface-header">TOTAL PREVIOUS<br/><span className="text-[9px] text-textSecondary">(7D)</span></th>
-                <th className="py-5 px-8 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-right bg-surface-header">SHIFT ANALYSIS</th>
+                <th className="py-5 px-6 font-extrabold text-[10px] text-indigo-500 uppercase tracking-widest text-center bg-surface-header border-l border-border-divider">TOTAL CURRENT<br/><span className="text-[9px] text-textSecondary">({dates.length}D)</span></th>
+                {previous7Dates.length > 0 && (
+                  <th className="py-5 px-6 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center bg-surface-header">TOTAL PREVIOUS<br/><span className="text-[9px] text-textSecondary">({previous7Dates.length}D)</span></th>
+                )}
+                {previous7Dates.length > 0 && (
+                  <th className="py-5 px-8 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-right bg-surface-header">SHIFT ANALYSIS</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-border-divider bg-surface">
@@ -133,27 +144,31 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
                     <td key={i} className="py-5 px-4 text-[11px] text-textSecondary text-center font-bold">₱{val?.toLocaleString()}</td>
                   ))}
                   <td className="py-5 px-6 text-[13px] text-textPrimary text-center font-extrabold bg-surface-header/30 border-l border-border-divider">₱{row.current?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                  <td className="py-5 px-6 text-[13px] text-textSecondary text-center font-semibold bg-surface-header/30">₱{row.previous?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                  <td className="py-5 px-8 text-[13px] text-right bg-surface-header/30">
-                    <div className="flex items-center justify-end gap-3 min-w-[140px]">
-                      {row.shift > 0 ? (
-                        <span className="text-[9px] font-extrabold tracking-widest text-[#00b87c] uppercase">INCREASED</span>
-                      ) : (
-                        <span className="text-[9px] font-extrabold tracking-widest text-[#ff4e50] uppercase">DECREASED</span>
-                      )}
-                      <span className={clsx(
-                        "font-extrabold text-sm w-20 text-right tracking-tight",
-                        row.shift > 0 ? "text-[#00b87c]" : "text-[#ff4e50]"
-                      )}>
-                        {row.shift > 0 ? "+" : ""}{row.shift < 0 ? "-" : ""}₱{Math.abs(row.shift)?.toLocaleString()}
-                      </span>
-                    </div>
-                  </td>
+                  {previous7Dates.length > 0 && (
+                    <td className="py-5 px-6 text-[13px] text-textSecondary text-center font-semibold bg-surface-header/30">₱{row.previous?.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                  )}
+                  {previous7Dates.length > 0 && (
+                    <td className="py-5 px-8 text-[13px] text-right bg-surface-header/30">
+                      <div className="flex items-center justify-end gap-3 min-w-[140px]">
+                        {row.shift > 0 ? (
+                          <span className="text-[9px] font-extrabold tracking-widest text-[#00b87c] uppercase">INCREASED</span>
+                        ) : (
+                          <span className="text-[9px] font-extrabold tracking-widest text-red-500 uppercase">DECREASED</span>
+                        )}
+                        <span className={clsx(
+                          "font-extrabold text-xs tracking-tight",
+                          row.shift > 0 ? "text-[#00b87c]" : "text-red-500"
+                        )}>
+                          {row.shift > 0 ? "+" : ""}₱{row.shift?.toLocaleString(undefined, {minimumFractionDigits: 2})}
+                        </span>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
               {spvrData.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="py-12 text-center text-textSecondary text-sm font-semibold">No data available for comparison</td>
+                  <td colSpan={2 + dates.length + (previous7Dates.length > 0 ? 3 : 1)} className="py-12 text-center text-textSecondary text-sm font-semibold">No data available for comparison</td>
                 </tr>
               )}
             </tbody>

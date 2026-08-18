@@ -24,8 +24,15 @@ export default function DetailsTab({ apiData, currentPage }) {
     });
     
     const sortedDates = Array.from(dateSet).sort();
-    current7Dates = sortedDates.slice(-7);
-    previous7Dates = sortedDates.slice(-14, -7);
+    const isSingleDayOrCustom = sortedDates.length < 14;
+    
+    if (isSingleDayOrCustom) {
+      current7Dates = sortedDates;
+      previous7Dates = [];
+    } else {
+      current7Dates = sortedDates.slice(-7);
+      previous7Dates = sortedDates.slice(-14, -7);
+    }
 
     // Format dates for display header
     dates = current7Dates.map(d => {
@@ -70,8 +77,9 @@ export default function DetailsTab({ apiData, currentPage }) {
     });
 
     // 3. Format into final array
+    const dayCount = current7Dates.length;
     detailsData = Object.keys(groups).sort().map(groupName => {
-      let subDays = Array(7).fill(0);
+      let subDays = Array(dayCount).fill(0);
       let subCurrent = 0;
       let subPrevious = 0;
 
@@ -93,12 +101,13 @@ export default function DetailsTab({ apiData, currentPage }) {
         };
       }).sort((a, b) => b.current - a.current);
 
-      // Filter for striketeam (low grossers: daily average <= 1500, which means 7-day total <= 10500)
+      // Filter for striketeam (low grossers: daily average <= 1500)
       if (user?.username === 'striketeam') {
-        tellers = tellers.filter(t => (t.current / 7) <= 1500);
+        const divisor = Math.max(1, dayCount);
+        tellers = tellers.filter(t => (t.current / divisor) <= 1500);
         
         // Recalculate subtotals for the filtered tellers
-        subDays = Array(7).fill(0);
+        subDays = Array(dayCount).fill(0);
         subCurrent = 0;
         subPrevious = 0;
         tellers.forEach(t => {
@@ -121,7 +130,7 @@ export default function DetailsTab({ apiData, currentPage }) {
     }).filter(group => group.tellers.length > 0);
   }
 
-  dates = dates || ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
+  dates = dates || [];
   detailsData = detailsData || [];
 
   const handleDownload = async () => {
@@ -140,7 +149,7 @@ export default function DetailsTab({ apiData, currentPage }) {
       })
     }));
 
-    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : currentPage === 'mandaue' ? 'MANDAUE' : 'MAG';
     await generateExcelReport(excelData, current7Dates, previous7Dates, regionName);
   };
 
@@ -164,7 +173,7 @@ export default function DetailsTab({ apiData, currentPage }) {
       };
     }).filter(Boolean);
 
-    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : currentPage === 'mandaue' ? 'MANDAUE' : 'MAG';
     await generateExcelReport(excelData, current7Dates, previous7Dates, regionName + ' - LOW GROSSERS');
   };
 
@@ -194,7 +203,7 @@ export default function DetailsTab({ apiData, currentPage }) {
       };
     }).filter(Boolean);
 
-    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+    const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : currentPage === 'mandaue' ? 'MANDAUE' : 'MAG';
     await generateExcelReport(excelData, current7Dates, previous7Dates, regionName + ' - HIGH GROSSERS (TODAY)');
   };
 
@@ -241,9 +250,13 @@ export default function DetailsTab({ apiData, currentPage }) {
                 {dates.map((date, i) => (
                   <th key={i} className="px-4 py-4 text-center font-bold tracking-wider">{date}</th>
                 ))}
-                <th className="px-4 py-4 text-center font-bold tracking-wider bg-surface-header border-l border-border-divider">TOTAL CURRENT<br/><span className="text-[10px] text-textSecondary">(7D)</span></th>
-                <th className="px-4 py-4 text-center font-bold tracking-wider bg-surface-header">TOTAL PREVIOUS<br/><span className="text-[10px] text-textSecondary">(7D)</span></th>
-                <th className="px-6 py-4 text-center font-bold tracking-wider bg-surface-header text-blue-400">SHIFT ANALYSIS</th>
+                <th className="px-4 py-4 text-center font-bold tracking-wider bg-surface-header border-l border-border-divider">TOTAL CURRENT<br/><span className="text-[10px] text-textSecondary">({dates.length}D)</span></th>
+                {previous7Dates.length > 0 && (
+                  <th className="px-4 py-4 text-center font-bold tracking-wider bg-surface-header">TOTAL PREVIOUS<br/><span className="text-[10px] text-textSecondary">({previous7Dates.length}D)</span></th>
+                )}
+                {previous7Dates.length > 0 && (
+                  <th className="px-6 py-4 text-center font-bold tracking-wider bg-surface-header text-blue-400">SHIFT ANALYSIS</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -251,7 +264,7 @@ export default function DetailsTab({ apiData, currentPage }) {
                 <React.Fragment key={sIdx}>
                   {/* Section Header */}
                   <tr className="border-b border-border-divider bg-surface-hover">
-                    <td colSpan={12} className="px-6 py-3 font-bold text-indigo-400 text-xs tracking-wider uppercase">
+                    <td colSpan={2 + dates.length + (previous7Dates.length > 0 ? 3 : 1)} className="px-6 py-3 font-bold text-indigo-400 text-xs tracking-wider uppercase">
                       {section.supervisor}
                     </td>
                   </tr>
@@ -264,20 +277,24 @@ export default function DetailsTab({ apiData, currentPage }) {
                         <td key={i} className="px-4 py-4 text-center text-textSecondary text-xs">{val?.toLocaleString()}</td>
                       ))}
                       <td className="px-4 py-4 text-center font-bold bg-surface-header/30 border-l border-border-divider text-textPrimary">{teller.current?.toLocaleString()}</td>
-                      <td className="px-4 py-4 text-center text-textSecondary bg-surface-header/30 text-xs">{teller.previous?.toLocaleString()}</td>
-                      <td className="px-6 py-4 bg-surface-header/30 flex items-center justify-end gap-4 min-w-[150px]">
-                        {teller.shift > 0 ? (
-                          <span className="text-[10px] font-bold tracking-widest text-accentGreen uppercase">INCREASED</span>
-                        ) : (
-                          <span className="text-[10px] font-bold tracking-widest text-red-500 uppercase">DECREASED</span>
-                        )}
-                        <span className={clsx(
-                          "font-bold text-sm w-16 text-right",
-                          teller.shift > 0 ? "text-accentGreen" : "text-red-500"
-                        )}>
-                          {teller.shift > 0 ? "+" : ""}{teller.shift?.toLocaleString()}
-                        </span>
-                      </td>
+                      {previous7Dates.length > 0 && (
+                        <td className="px-4 py-4 text-center text-textSecondary bg-surface-header/30 text-xs">{teller.previous?.toLocaleString()}</td>
+                      )}
+                      {previous7Dates.length > 0 && (
+                        <td className="px-6 py-4 bg-surface-header/30 flex items-center justify-end gap-4 min-w-[150px]">
+                          {teller.shift > 0 ? (
+                            <span className="text-[10px] font-bold tracking-widest text-accentGreen uppercase">INCREASED</span>
+                          ) : (
+                            <span className="text-[10px] font-bold tracking-widest text-red-500 uppercase">DECREASED</span>
+                          )}
+                          <span className={clsx(
+                            "font-bold text-sm w-16 text-right",
+                            teller.shift > 0 ? "text-accentGreen" : "text-red-500"
+                          )}>
+                            {teller.shift > 0 ? "+" : ""}{teller.shift?.toLocaleString()}
+                          </span>
+                        </td>
+                      )}
                     </tr>
                   ))}
                   {/* Subtotal Row */}
@@ -289,16 +306,20 @@ export default function DetailsTab({ apiData, currentPage }) {
                       <td key={i} className="px-4 py-4 text-center font-bold text-yellow-500 text-xs">{val?.toLocaleString()}</td>
                     ))}
                     <td className="px-4 py-4 text-center font-bold bg-surface-header/30 border-l border-border-divider text-yellow-500">{section.subtotals?.current?.toLocaleString()}</td>
-                    <td className="px-4 py-4 text-center font-bold bg-surface-header/30 text-yellow-500">{section.subtotals?.previous?.toLocaleString()}</td>
-                    <td className="px-6 py-4 bg-surface-header/30 flex items-center justify-end gap-4 min-w-[150px]">
-                      <span className="text-[10px] font-bold tracking-widest text-textSecondary uppercase">COMBINED SHIFT</span>
-                      <span className={clsx(
-                        "font-bold text-sm w-16 text-right",
-                        section.subtotals?.shift > 0 ? "text-accentGreen" : "text-red-500"
-                      )}>
-                        {section.subtotals?.shift > 0 ? "+" : ""}{section.subtotals?.shift?.toLocaleString()}
-                      </span>
-                    </td>
+                    {previous7Dates.length > 0 && (
+                      <td className="px-4 py-4 text-center font-bold bg-surface-header/30 text-yellow-500">{section.subtotals?.previous?.toLocaleString()}</td>
+                    )}
+                    {previous7Dates.length > 0 && (
+                      <td className="px-6 py-4 bg-surface-header/30 flex items-center justify-end gap-4 min-w-[150px]">
+                        <span className="text-[10px] font-bold tracking-widest text-textSecondary uppercase">COMBINED SHIFT</span>
+                        <span className={clsx(
+                          "font-bold text-sm w-16 text-right",
+                          section.subtotals?.shift > 0 ? "text-accentGreen" : "text-red-500"
+                        )}>
+                          {section.subtotals?.shift > 0 ? "+" : ""}{section.subtotals?.shift?.toLocaleString()}
+                        </span>
+                      </td>
+                    )}
                   </tr>
                 </React.Fragment>
               ))}

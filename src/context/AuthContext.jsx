@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   const login = (username, password) => {
     const validUsers = [
       'iligan', 'lanao', 'baloi', 'setb',
-      'lotto', 'maguindanao', 'imperial', 'lds', 'admin', 'unclaimed', 'iligan_lotto', 'striketeam'
+      'lotto', 'maguindanao', 'imperial', 'lds', 'mandaue', 'admin', 'unclaimed', 'iligan_lotto', 'striketeam'
     ];
 
     if (validUsers.includes(username) && password === `${username}123`) {

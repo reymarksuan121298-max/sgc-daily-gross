@@ -2,7 +2,7 @@ import React from 'react';
 import SharedTable from './SharedTable';
 
 export default function FifteenDaysTab({ apiData, selectedEndDate, currentPage }) {
-  const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+  const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : currentPage === 'mandaue' ? 'MANDAUE' : 'MAG';
   const rawData = apiData?.data || [];
   const spvrMap = {};
   if (Array.isArray(apiData?.supervisors)) {

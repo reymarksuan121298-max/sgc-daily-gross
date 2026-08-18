@@ -51,6 +51,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     { id: 'lotto', label: 'Lotto Dashboard' },
     { id: 'baloi', label: 'Baloi Dashboard' },
     { id: 'lds', label: 'LDS Dashboard' },
+    { id: 'mandaue', label: 'Mandaue Dashboard' },
   ];
 
   if (user && user.username !== 'admin') {
