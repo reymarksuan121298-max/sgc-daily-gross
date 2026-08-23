@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, Filter, Users, LayoutDashboard, List, BarChart2, CalendarDays, CalendarRange, Crown, Menu, Sun, Moon } from 'lucide-react';
+import { Filter, Users, LayoutDashboard, List, BarChart2, CalendarDays, CalendarRange, Crown, Menu, Sun, Moon } from 'lucide-react';
 import { clsx } from 'clsx';
 import axios from 'axios';
 
@@ -27,6 +27,34 @@ const TABS = [
   { id: '15days', label: '15 DAYS', icon: CalendarDays },
   { id: 'monthly', label: 'MONTHLY', icon: CalendarRange }
 ];
+
+const PAGE_TITLES = {
+  mag: 'Mag Dashboard',
+  imp: 'Imperial Dashboard',
+  setb: 'SETB Dashboard',
+  iligan: 'Iligan Dashboard',
+  lanao: 'Lanao Dashboard',
+  lotto: 'Lotto Dashboard',
+  baloi: 'Baloi Dashboard',
+  lds: 'LDS Dashboard',
+  mandaue: 'Mandaue Dashboard',
+  unclaimed: 'Mag Unclaimed Tickets',
+  unclaimed_ldn: 'LDN Unclaimed Tickets',
+  unclaimed_lds: 'LDS Unclaimed Tickets',
+  unclaimed_imp: 'Imperial Unclaimed Tickets',
+  active_tellers_mag: 'Mag Teller Transactions',
+  active_tellers_imp: 'Imperial Teller Transactions',
+  active_tellers_iligan: 'Iligan Teller Transactions',
+  active_tellers_lanao: 'Lanao Teller Transactions',
+  active_tellers_setb: 'SETB Teller Transactions',
+  active_tellers_lotto: 'Lotto Teller Transactions',
+  active_tellers_baloi: 'Baloi Teller Transactions',
+  active_tellers_man: 'Man Teller Transactions',
+  void_req_mag: 'Mag Void Requests',
+  void_req_imp: 'Imperial Void Requests',
+};
+
+const MAIN_PAGES = ['mag', 'imp', 'setb', 'iligan', 'lanao', 'lotto', 'baloi', 'lds', 'mandaue'];
 
 function App() {
   const { user } = useAuth();
@@ -66,6 +94,8 @@ function App() {
         let validPages = [];
         if (user.username === 'iligan_lotto') {
           validPages = ['iligan', 'lotto'];
+        } else if (user.username === 'ldn') {
+          validPages = ['iligan', 'lanao', 'setb', 'lotto', 'baloi'];
         } else if (user.username === 'striketeam') {
           validPages = ['mag'];
         } else {
@@ -269,6 +299,21 @@ function App() {
     return { ...apiData, data: filtered };
   }, [apiData, selectedUnits, selectedTellers]);
 
+  const isMainPage = MAIN_PAGES.includes(currentPage);
+  const isTellerPage = currentPage.startsWith('active_tellers_');
+  const isVoidReqPage = currentPage.startsWith('void_req_');
+  const isUnclaimedPage = currentPage.startsWith('unclaimed');
+
+  const handleUnitSelect = (ids) => {
+    setSelectedUnits(ids);
+    setSelectedTellers([]); // reset tellers when unit selection changes
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    setIsMobileMenuOpen(false);
+  };
+
   if (!user) {
     return <Login />;
   }
@@ -277,10 +322,7 @@ function App() {
     <div className="flex min-h-screen bg-appBg text-textPrimary font-sans selection:bg-indigo-500/30 overflow-x-hidden">
       <Sidebar 
         currentPage={currentPage} 
-        setCurrentPage={(page) => {
-          setCurrentPage(page);
-          setIsMobileMenuOpen(false);
-        }} 
+        setCurrentPage={handlePageChange} 
         isOpen={isMobileMenuOpen}
         setIsOpen={setIsMobileMenuOpen}
       />
@@ -302,25 +344,7 @@ function App() {
             </div>
             <div>
               <h1 className="text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-textPrimary">
-                {currentPage === 'imp' ? 'Imperial' : 
-                 currentPage === 'setb' ? 'SETB' : 
-                 currentPage === 'iligan' ? 'Iligan' : 
-                 currentPage === 'lanao' ? 'Lanao' : 
-                 currentPage === 'lotto' ? 'Lotto' : 
-                 currentPage === 'baloi' ? 'Baloi' : 
-                 currentPage === 'lds' ? 'LDS' : 
-                 currentPage === 'mandaue' ? 'Mandaue' : 
-                 currentPage === 'active_tellers_mag' ? 'Mag Teller Transactions' : 
-                 currentPage === 'active_tellers_imp' ? 'Imperial Teller Transactions' : 
-                 currentPage === 'active_tellers_iligan' ? 'Iligan Teller Transactions' : 
-                 currentPage === 'active_tellers_lanao' ? 'Lanao Teller Transactions' : 
-                 currentPage === 'active_tellers_setb' ? 'SETB Teller Transactions' : 
-                 currentPage === 'active_tellers_lotto' ? 'Lotto Teller Transactions' : 
-                 currentPage === 'active_tellers_baloi' ? 'Baloi Teller Transactions' : 
-                 currentPage === 'active_tellers_man' ? 'Man Teller Transactions' : 
-                 currentPage === 'void_req_mag' ? 'Mag Void Requests' :
-                 currentPage === 'void_req_imp' ? 'Imperial Void Requests' :
-                 'Mag'} Dashboard
+                {PAGE_TITLES[currentPage] || 'Mag Dashboard'}
               </h1>
               <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
                 <span>Daily Gross Tracking Control</span>
@@ -339,7 +363,7 @@ function App() {
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
-            {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && (
+            {!isTellerPage && !isVoidReqPage && (
               <>
                 <div className="flex items-center gap-2 bg-cardBg border border-border-divider rounded-md p-1">
                   <div className="relative flex items-center hover:bg-surface-hover rounded transition-all focus-within:ring-1 focus-within:ring-indigo-500/50">
@@ -376,38 +400,35 @@ function App() {
                   </button>
                 </div>
 
-              {!currentPage.startsWith('unclaimed') && (
-                <>
-                  <FilterDropdown
-                    icon={Filter}
-                    label="All Units"
-                    options={units.map(u => ({ id: String(u.id), name: u.username?.toUpperCase() || u.fullName }))}
-                    selectedValues={selectedUnits}
-                    onSelect={(ids) => {
-                      setSelectedUnits(ids);
-                      setSelectedTellers([]); // reset tellers when unit selection changes
-                    }}
-                    placeholder="Search unit list..."
-                    align="right"
-                  />
+                {!isUnclaimedPage && (
+                  <>
+                    <FilterDropdown
+                      icon={Filter}
+                      label="All Units"
+                      options={units.map(u => ({ id: String(u.id), name: u.username?.toUpperCase() || u.fullName }))}
+                      selectedValues={selectedUnits}
+                      onSelect={handleUnitSelect}
+                      placeholder="Search unit list..."
+                      align="right"
+                    />
 
-                  <FilterDropdown
-                    icon={Users}
-                    label="All Tellers"
-                    options={tellers.filter(t => selectedUnits.length === 0 || selectedUnits.includes(String(t.supervisor)))}
-                    selectedValues={selectedTellers}
-                    onSelect={setSelectedTellers}
-                    placeholder="Search teller list..."
-                    align="right"
-                  />
-                </>
-              )}
+                    <FilterDropdown
+                      icon={Users}
+                      label="All Tellers"
+                      options={tellers.filter(t => selectedUnits.length === 0 || selectedUnits.includes(String(t.supervisor)))}
+                      selectedValues={selectedTellers}
+                      onSelect={setSelectedTellers}
+                      placeholder="Search teller list..."
+                      align="right"
+                    />
+                  </>
+                )}
               </>
             )}
           </div>
 
           {/* Tabs */}
-          {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds' || currentPage === 'mandaue') && (
+          {isMainPage && (
             <div className="flex bg-cardBg p-1 rounded-md border border-border-divider overflow-x-auto w-full xl:w-auto shadow-inner">
               {TABS.filter(tab => user?.username !== 'striketeam' || tab.id === 'details').map(tab => (
                 <button
@@ -430,7 +451,7 @@ function App() {
 
         {/* Main Content Area */}
         <main>
-          {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds' || currentPage === 'mandaue') ? (
+          {isMainPage ? (
             loading ? (
               <div className="flex justify-center items-center h-64 text-textSecondary">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accentGreen mr-3"></div>
@@ -450,9 +471,9 @@ function App() {
                 {activeTab === 'monthly' && <MonthlyTab apiData={filteredApiData} selectedEndDate={selectedEndDate} currentPage={currentPage} />}
               </>
             )
-          ) : currentPage.startsWith('active_tellers_') ? (
+          ) : isTellerPage ? (
             <ActiveTellers currentPage={currentPage} />
-          ) : (currentPage === 'void_req_mag' || currentPage === 'void_req_imp') ? (
+          ) : isVoidReqPage ? (
             <VoidRequests currentPage={currentPage} />
           ) : (
             <UnclaimedTickets

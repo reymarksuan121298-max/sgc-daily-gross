@@ -59,6 +59,8 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
       dashboardItems = [];
     } else if (user.username === 'iligan_lotto') {
       dashboardItems = dashboardItems.filter(item => ['iligan', 'lotto'].includes(item.id));
+    } else if (user.username === 'ldn') {
+      dashboardItems = dashboardItems.filter(item => ['iligan', 'lanao', 'setb', 'lotto', 'baloi'].includes(item.id));
     } else if (user.username === 'striketeam') {
       dashboardItems = dashboardItems.filter(item => item.id === 'mag');
     } else {
