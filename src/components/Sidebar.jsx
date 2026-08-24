@@ -51,6 +51,8 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     { id: 'lotto', label: 'Lotto Dashboard' },
     { id: 'baloi', label: 'Baloi Dashboard' },
     { id: 'lds', label: 'LDS Dashboard' },
+    { id: 'man', label: 'MAN Dashboard' },
+    { id: 'man_commission', label: 'MAN Commission' },
   ];
 
   if (user && user.username !== 'admin') {
@@ -62,6 +64,8 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
       dashboardItems = dashboardItems.filter(item => item.id === 'mag');
     } else if (user.username === 'ldn') {
       dashboardItems = dashboardItems.filter(item => ['baloi', 'iligan', 'lanao', 'setb', 'lotto'].includes(item.id));
+    } else if (user.username === 'man' || user.username === 'mandaue') {
+      dashboardItems = dashboardItems.filter(item => ['man', 'man_commission'].includes(item.id));
     } else {
       const usernameMap = {
         'maguindanao': 'mag',
