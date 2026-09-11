@@ -91,7 +91,7 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
     });
 
     const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
-    await generateSpvrWeeklyExcelReport(excelData, current7Dates, previous7Dates, regionName);
+    await generateSpvrWeeklyExcelReport(excelData, current7Dates, previous7Dates, regionName, currentPage);
   };
 
   return (

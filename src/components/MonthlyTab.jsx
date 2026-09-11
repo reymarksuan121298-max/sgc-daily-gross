@@ -1,5 +1,7 @@
 import React from 'react';
+import { Download } from 'lucide-react';
 import SharedTable from './SharedTable';
+import { generateMonthlyAnalysisExcelReport } from '../utils/exportToExcel';
 
 export default function MonthlyTab({ apiData, selectedEndDate, currentPage }) {
   const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
@@ -57,9 +59,29 @@ export default function MonthlyTab({ apiData, selectedEndDate, currentPage }) {
   const currLabel = `${formatPaddedDate(currentYear, currentMonth, 1)} TO ${formatPaddedDate(currentYear, currentMonth, getDaysInMonth(currentYear, currentMonth))}`;
   const prevLabel = `${formatPaddedDate(prevYear, prevMonth, 1)} TO ${formatPaddedDate(prevYear, prevMonth, getDaysInMonth(prevYear, prevMonth))}`;
 
+  const handleDownload = async () => {
+    await generateMonthlyAnalysisExcelReport({
+      apiData,
+      selectedEndDate,
+      regionName,
+      currentPage
+    });
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       
+      {/* Action Bar */}
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        <button 
+          onClick={handleDownload}
+          className="flex items-center gap-2 bg-white hover:bg-slate-200 text-slate-900 font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] text-sm cursor-pointer"
+        >
+          <Download className="w-4 h-4" />
+          Download Analysis
+        </button>
+      </div>
+
       <div className="bg-surface rounded-3xl p-10 py-12 border border-border-divider shadow-xl mb-6 relative">
         <h3 className="text-[17px] font-extrabold tracking-wide text-textPrimary text-center mb-14">Monthly Performance Comparison</h3>
 
@@ -99,7 +121,9 @@ export default function MonthlyTab({ apiData, selectedEndDate, currentPage }) {
         title="Full Monthly Unit Shift" 
         exportFilename={`${regionName}_Monthly_Analysis.xlsx`}
         data={tableData} 
+        onExport={handleDownload}
       />
     </div>
   );
 }
+

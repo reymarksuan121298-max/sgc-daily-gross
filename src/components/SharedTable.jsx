@@ -3,9 +3,15 @@ import { Download } from 'lucide-react';
 import * as ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
-export default function SharedTable({ title, col1Header, col2Header, data, exportFilename }) {
+export default function SharedTable({ title, col1Header, col2Header, data, exportFilename, onExport }) {
   const handleExport = async () => {
+    if (onExport) {
+      await onExport();
+      return;
+    }
+
     const workbook = new ExcelJS.Workbook();
+
     const worksheet = workbook.addWorksheet('Analysis');
 
     worksheet.columns = [

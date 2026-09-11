@@ -335,15 +335,15 @@ function App() {
             {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && (
               <>
                 <div className="relative flex items-center glass-card hover:bg-surface-hover rounded-md transition-all focus-within:ring-2 focus-within:ring-accentGreen/50 cursor-pointer">
-                <Calendar className="w-4 h-4 ml-4 text-textSecondary" />
-                <input
-                  type="date"
-                  value={selectedEndDate}
-                  onChange={(e) => setSelectedEndDate(e.target.value)}
-                  className="bg-transparent text-textSecondary hover:text-textPrimary px-3 py-2.5 text-sm outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:invert opacity-80 hover:opacity-100 transition-opacity"
-                  title="Select End Date (Calculates 14 days prior)"
-                />
-              </div>
+                  <Calendar className="w-4 h-4 ml-4 text-textSecondary" />
+                  <input
+                    type="date"
+                    value={selectedEndDate}
+                    onChange={(e) => setSelectedEndDate(e.target.value)}
+                    className="bg-transparent text-textSecondary hover:text-textPrimary px-3 py-2.5 text-sm outline-none cursor-pointer [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert dark:[&::-webkit-calendar-picker-indicator]:invert opacity-80 hover:opacity-100 transition-opacity"
+                    title="Select End Date (Calculates 14 days prior)"
+                  />
+                </div>
 
               {!currentPage.startsWith('unclaimed') && (
                 <>
