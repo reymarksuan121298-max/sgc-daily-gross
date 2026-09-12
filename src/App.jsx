@@ -18,6 +18,7 @@ import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
 import Login from './components/Login';
 import VoidRequests from './components/VoidRequests';
+import ManCommission from './components/ManCommission';
 
 const TABS = [
   { id: 'overview', label: 'OVERVIEW', icon: LayoutDashboard },
@@ -66,6 +67,8 @@ function App() {
         let validPages = [];
         if (user.username === 'iligan_lotto') {
           validPages = ['iligan', 'lotto'];
+        } else if (user.username === 'mandaue') {
+          validPages = ['man', 'man_commission'];
         } else if (user.username === 'striketeam') {
           validPages = ['mag'];
         } else if (user.username === 'ldn') {
@@ -146,6 +149,10 @@ function App() {
         authHeader = { headers: { 'Authorization': 'Bearer 56406|I3jbYEequ4SjZPy4c3JI8QxQ7riFti5CdfKI1xN1' } };
         baseUrl = 'https://stl-cotabato-api.com/api/accountant';
         idParam = '2';
+      } else if (page === 'man' || page === 'man_commission') {
+        authHeader = { headers: { 'Authorization': 'Bearer 6481|AkxN7iWhiROztis59dWmnb6P8GDyinwibCUVkIQ7' } };
+        baseUrl = 'https://stl-mandaue-api.com/api/accountant';
+        idParam = '2';
       } else {
         authHeader = { headers: { 'Authorization': 'Bearer 142375|bgm3cNBv4knCMImS9OLYFiMr7mIV7aDirkb0msqH' } };
         baseUrl = 'https://stl-mag-api.com/api/accountant';
@@ -192,6 +199,14 @@ function App() {
         const spvrMap = new Map();
         [...prevSpvr.data.data, ...currSpvr.data.data].forEach(s => spvrMap.set(s.id, s));
         spvrData = Array.from(spvrMap.values());
+      } else if (page === 'man_commission' || page === 'unclaimed' || page.startsWith('unclaimed_')) {
+        const targetStr = formatDate(endDate);
+        const [grossRes, spvrRes] = await Promise.all([
+          axios.get(`${baseUrl}/TellerGrossPerDateRange?id=${idParam}&from=${targetStr}&to=${targetStr}`, authHeader),
+          axios.get(`${baseUrl}/AccountantSpvrWithGross?id=${idParam}&from=${targetStr}&to=${targetStr}`, authHeader)
+        ]);
+        grossData = grossRes.data.data;
+        spvrData = spvrRes.data.data;
       } else {
         const pastDate = new Date(endDate);
         pastDate.setDate(endDate.getDate() - 13); // 14-day window (7 prev vs 7 curr)
@@ -297,7 +312,9 @@ function App() {
             </div>
             <div>
               <h1 className="heading-font text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-textPrimary">
-                {currentPage === 'imp' ? 'Imperial' : 
+                {currentPage === 'man' ? 'MAN' : 
+                 currentPage === 'man_commission' ? 'MAN Commission' :
+                 currentPage === 'imp' ? 'Imperial' : 
                  currentPage === 'setb' ? 'SETB' : 
                  currentPage === 'iligan' ? 'Iligan' : 
                  currentPage === 'lanao' ? 'Lanao' : 
@@ -376,7 +393,7 @@ function App() {
           </div>
 
           {/* Tabs */}
-          {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') && (
+          {(currentPage === 'man' || currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') && (
             <div className="flex glass-card p-1 rounded-md overflow-x-auto w-full xl:w-auto shadow-inner">
               {TABS.filter(tab => user?.username !== 'striketeam' || tab.id === 'details').map(tab => (
                 <button
@@ -399,7 +416,7 @@ function App() {
 
         {/* Main Content Area */}
         <main>
-          {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') ? (
+          {(currentPage === 'man' || currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') ? (
             loading ? (
               <div className="flex justify-center items-center h-64 text-textSecondary">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accentGreen mr-3"></div>
@@ -423,6 +440,19 @@ function App() {
             <ActiveTellers currentPage={currentPage} />
           ) : (currentPage === 'void_req_mag' || currentPage === 'void_req_imp') ? (
             <VoidRequests currentPage={currentPage} />
+          ) : currentPage === 'man_commission' ? (
+            loading ? (
+              <div className="flex justify-center items-center h-64 text-textSecondary">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accentGreen mr-3"></div>
+                Loading Data...
+              </div>
+            ) : error ? (
+              <div className="flex justify-center items-center h-64 text-red-500 bg-red-500/10 rounded-xl border border-red-500/30">
+                <p>Error: {error}</p>
+              </div>
+            ) : (
+              <ManCommission apiData={apiData} selectedEndDate={selectedEndDate} />
+            )
           ) : (
             <UnclaimedTickets
               selectedEndDate={selectedEndDate}

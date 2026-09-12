@@ -4,7 +4,7 @@ import SharedTable from './SharedTable';
 import { generateMonthlyAnalysisExcelReport } from '../utils/exportToExcel';
 
 export default function MonthlyTab({ apiData, selectedEndDate, currentPage }) {
-  const regionName = currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+  const regionName = currentPage === 'man' ? 'MAN' : currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
   const rawData = apiData?.data || [];
   const spvrMap = {};
   if (Array.isArray(apiData?.supervisors)) {

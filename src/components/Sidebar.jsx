@@ -43,6 +43,8 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
   }, [isActiveTellersOpen]);
 
   let dashboardItems = [
+    { id: 'man', label: 'MAN Dashboard' },
+    { id: 'man_commission', label: 'MAN Commission' },
     { id: 'mag', label: 'Mag Dashboard' },
     { id: 'imp', label: 'Imp Dashboard' },
     { id: 'setb', label: 'SETB Dashboard' },
@@ -64,11 +66,17 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
       dashboardItems = dashboardItems.filter(item => ['baloi', 'iligan', 'lanao', 'setb', 'lotto'].includes(item.id));
     } else {
       const usernameMap = {
+        'mandaue': 'man',
         'maguindanao': 'mag',
         'imperial': 'imp'
       };
       const userDashId = usernameMap[user.username] || user.username;
-      dashboardItems = dashboardItems.filter(item => item.id === userDashId);
+      
+      if (user.username === 'mandaue') {
+         dashboardItems = dashboardItems.filter(item => item.id === 'man' || item.id === 'man_commission');
+      } else {
+         dashboardItems = dashboardItems.filter(item => item.id === userDashId);
+      }
     }
   }
 
