@@ -50,6 +50,8 @@ export const manCommissionGroups = {
     'ABNER I. FRANCISCO',
     'RODEL B. ORIONDO',
     'NARYL MAE TUÑACAO',
+    'LIEZL L. PUNSALAN',
+    'MARK ROSAL TIBON',
     'JENEFER B. CHAVEZ',
     'JENELY A. SIATON',
     'ALEXIS GARCIA',
