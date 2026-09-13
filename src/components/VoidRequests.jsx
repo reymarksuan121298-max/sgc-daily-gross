@@ -194,6 +194,33 @@ export default function VoidRequests({ currentPage }) {
     }
   }, [filteredRequests, activeTab]);
 
+  const formatDrawTime = (timeStr) => {
+    if (!timeStr) return '';
+    const str = String(timeStr).trim();
+    if (str === '10:30' || str === '10:30:00' || str === '10.30') return '10:30AM';
+    if (str === '14' || str === '14:00' || str === '2' || str === '2PM') return '2:00PM';
+    if (str === '15' || str === '15:00' || str === '3' || str === '3PM') return '3:00PM';
+    if (str === '17' || str === '17:00' || str === '5' || str === '5PM') return '5:00PM';
+    if (str === '19' || str === '19:00' || str === '7' || str === '7PM') return '7:00PM';
+    if (str === '21' || str === '21:00' || str === '9' || str === '9PM') return '9:00PM';
+    
+    if (str.includes(':')) {
+      const parts = str.split(':');
+      const hour = parseInt(parts[0], 10);
+      const min = parts[1];
+      if (!isNaN(hour)) {
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour % 12 || 12;
+        return `${hour12}:${min}${ampm}`;
+      }
+    }
+    const hour = parseInt(str, 10);
+    if (isNaN(hour)) return str;
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}${ampm}`;
+  };
+
   const handleBulkApprove = async () => {
     if (filteredRequests.length === 0) return;
     
@@ -202,27 +229,25 @@ export default function VoidRequests({ currentPage }) {
     
     try {
       let successCount = 0;
+      let failedCount = 0;
+
       // Process sequentially to completely avoid overwhelming the server
       for (const req of filteredRequests) {
         try {
-          // Approve the void request
+          // Approve the void request in teller/void_request
           await axios.put(`${baseUrl}/teller/void_request/${req.id}`, { status: 1, is_approve: 1 }, authHeader);
-          // Automatically void the transaction ticket
-          try {
-            await axios.put(`${baseUrl}/admin/void/${req.transactionId}`, { isVoid: 1 }, authHeader);
-          } catch (voidErr) {
-            console.error(`Failed to void ticket ${req.transactionId}:`, voidErr);
-          }
           successCount++;
+          
           // Small delay between requests to prevent rate limiting/server overload
           await new Promise(resolve => setTimeout(resolve, 250));
         } catch (reqErr) {
           console.error(`Failed to approve request ${req.id}:`, reqErr);
+          failedCount++;
         }
       }
       
       // Additional small delay before fetching fresh data to let the server recover
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       // Refresh the data after approval
       await fetchVoidRequests();
@@ -261,26 +286,21 @@ export default function VoidRequests({ currentPage }) {
 
   const handleModalApprove = async () => {
     if (!selectedReviewRequest) return;
-    const id = selectedReviewRequest.id;
+    const req = selectedReviewRequest;
+    const id = req.id;
     setIsApproving(true);
     const { authHeader, baseUrl } = getApiConfig();
     try {
-      // Approve the void request
+      // Approve the void request status
       await axios.put(`${baseUrl}/teller/void_request/${id}`, { status: 1, is_approve: 1 }, authHeader);
       
-      // Automatically void the transaction ticket
-      try {
-        await axios.put(`${baseUrl}/admin/void/${selectedReviewRequest.transactionId}`, { isVoid: 1 }, authHeader);
-      } catch (voidErr) {
-        console.error(`Failed to void ticket ${selectedReviewRequest.transactionId}:`, voidErr);
-      }
-
       await fetchVoidRequests();
       setSelectedReviewRequest(null);
       showToast('Void request successfully approved!');
     } catch (err) {
       console.error(`Failed to approve ${id}`, err);
-      showToast('An error occurred while approving the request.', 'error');
+      const errMsg = err?.response?.data?.message || err?.message || 'An error occurred while approving.';
+      showToast(errMsg, 'error');
     } finally {
       setIsApproving(false);
     }
@@ -302,15 +322,6 @@ export default function VoidRequests({ currentPage }) {
     } finally {
       setIsApproving(false);
     }
-  };
-
-  const formatDrawTime = (timeStr) => {
-    if (!timeStr) return '';
-    const hour = parseInt(timeStr, 10);
-    if (isNaN(hour)) return timeStr;
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const hour12 = hour % 12 || 12;
-    return `${hour12}${ampm}`;
   };
 
   return (
@@ -341,14 +352,50 @@ export default function VoidRequests({ currentPage }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {/* Date Range Inputs */}
+            <div className="flex items-center bg-surface border border-border-divider rounded-lg px-2.5 py-1.5 gap-2 shadow-sm">
+              <Calendar className="w-4 h-4 text-textSecondary" />
+              <input 
+                type="date" 
+                value={fromDate} 
+                onChange={(e) => setFromDate(e.target.value)} 
+                className="bg-transparent text-xs text-textPrimary outline-none cursor-pointer"
+                title="From Date"
+              />
+              <span className="text-textSecondary text-xs">to</span>
+              <input 
+                type="date" 
+                value={toDate} 
+                onChange={(e) => setToDate(e.target.value)} 
+                className="bg-transparent text-xs text-textPrimary outline-none cursor-pointer"
+                title="To Date"
+              />
+            </div>
+
+            {/* Draw Time Filter Selector */}
+            <select
+              value={drawTimeFilter}
+              onChange={(e) => setDrawTimeFilter(e.target.value)}
+              className="bg-surface border border-border-divider rounded-lg px-3 py-1.5 text-xs text-textPrimary outline-none cursor-pointer hover:border-indigo-500/50 shadow-sm"
+              title="Filter by Draw Time"
+            >
+              <option value="ALL">All Draws</option>
+              <option value="10:30">10:30 AM</option>
+              <option value="14:00">2:00 PM</option>
+              <option value="15:00">3:00 PM</option>
+              <option value="17:00">5:00 PM</option>
+              <option value="19:00">7:00 PM</option>
+              <option value="21:00">9:00 PM</option>
+            </select>
+
             {/* Refresh Button */}
             <button 
               onClick={() => fetchVoidRequests(false)}
               disabled={loading}
-              className="p-2 bg-surface border border-border-divider hover:border-indigo-500/50 hover:bg-surface-hover rounded-lg text-textSecondary transition-all disabled:opacity-50 group"
+              className="p-2 bg-surface border border-border-divider hover:border-indigo-500/50 hover:bg-surface-hover rounded-lg text-textSecondary transition-all disabled:opacity-50 group shadow-sm"
               title="Refresh Data"
             >
-              <RefreshCw className={clsx("w-5 h-5", loading && "animate-spin")} />
+              <RefreshCw className={clsx("w-4 h-4", loading && "animate-spin")} />
             </button>
           </div>
         </div>
