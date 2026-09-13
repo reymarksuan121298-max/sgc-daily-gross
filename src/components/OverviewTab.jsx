@@ -143,7 +143,7 @@ export default function OverviewTab({ apiData, currentPage }) {
           
           <div className="flex items-center gap-2 text-sm text-textSecondary">
             <span className="w-3 h-3 rounded-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
-            {currentPage === 'imp' ? 'Imperial' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'Iligan' : currentPage === 'lanao' ? 'Lanao' : currentPage === 'lotto' ? 'Lotto' : currentPage === 'baloi' ? 'Baloi' : currentPage === 'lds' ? 'LDS' : 'Mag'} Aggregate Trend
+            {currentPage === 'man' ? 'MAN' : currentPage === 'imp' ? 'Imperial' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'Iligan' : currentPage === 'lanao' ? 'Lanao' : currentPage === 'lotto' ? 'Lotto' : currentPage === 'baloi' ? 'Baloi' : currentPage === 'lds' ? 'LDS' : 'Mag'} Aggregate Trend
           </div>
         </div>
 
