@@ -10,7 +10,7 @@ export default function VoidRequests({ currentPage }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isApproving, setIsApproving] = useState(false);
   const [approvingId, setApprovingId] = useState(null);
-  const [activeTab, setActiveTab] = useState('pending'); // 'pending', 'approved', 'rejected'
+  const [activeTab, setActiveTab] = useState('rejected'); // 'pending', 'approved', 'rejected'
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   const showToast = (message, type = 'success') => {
@@ -24,15 +24,37 @@ export default function VoidRequests({ currentPage }) {
   const [selectedReviewRequest, setSelectedReviewRequest] = useState(null);
   const [reviewDetails, setReviewDetails] = useState([]);
   const [loadingReviewDetails, setLoadingReviewDetails] = useState(false);
-  const [fromDate, setFromDate] = useState(() => {
-    const d = new Date();
+  const formatDateStr = (d) => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  });
-  const [toDate, setToDate] = useState(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  });
+  };
+
+  const [fromDate, setFromDate] = useState(() => formatDateStr(new Date()));
+  const [toDate, setToDate] = useState(() => formatDateStr(new Date()));
   const [drawTimeFilter, setDrawTimeFilter] = useState('ALL');
+
+  const handleDatePreset = (preset) => {
+    const today = new Date();
+    if (preset === 'today') {
+      const dateStr = formatDateStr(today);
+      setFromDate(dateStr);
+      setToDate(dateStr);
+    } else if (preset === 'yesterday') {
+      const y = new Date();
+      y.setDate(today.getDate() - 1);
+      const dateStr = formatDateStr(y);
+      setFromDate(dateStr);
+      setToDate(dateStr);
+    } else if (preset === 'last7') {
+      const past = new Date();
+      past.setDate(today.getDate() - 6);
+      setFromDate(formatDateStr(past));
+      setToDate(formatDateStr(today));
+    } else if (preset === 'thisMonth') {
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      setFromDate(formatDateStr(firstDay));
+      setToDate(formatDateStr(today));
+    }
+  };
 
   const getApiConfig = () => {
     // Determine API based on current page or default to Cotabato/Imperial
@@ -57,7 +79,7 @@ export default function VoidRequests({ currentPage }) {
     try {
       const { authHeader, baseUrl, idParam } = getApiConfig();
       const response = await axios.get(
-        `${baseUrl}/teller/void_request?id=${idParam}&from=${fromDate}&to=${toDate}&drawTimeFilter=${drawTimeFilter}`, 
+        `${baseUrl}/teller/void_request?id=${idParam}&from=${fromDate}&to=${toDate}&drawTimeFilter=${drawTimeFilter}`,
         authHeader
       );
       if (response.data && Array.isArray(response.data.data)) {
@@ -78,19 +100,22 @@ export default function VoidRequests({ currentPage }) {
   useEffect(() => {
     fetchVoidRequests(false);
 
-    // Set up live monitoring polling every 10 seconds
-    const intervalId = setInterval(() => {
-      fetchVoidRequests(true);
-    }, 10000);
-
-    return () => clearInterval(intervalId);
-  }, [fromDate, toDate, drawTimeFilter, currentPage]);
+    // Only set up live monitoring polling if on pending tab (to avoid 429 rate limit on historical lookup)
+    if (activeTab === 'pending') {
+      const intervalId = setInterval(() => {
+        fetchVoidRequests(true);
+      }, 30000);
+      return () => clearInterval(intervalId);
+    }
+  }, [fromDate, toDate, drawTimeFilter, currentPage, activeTab]);
 
   const [amounts, setAmounts] = useState({});
+  const betDetailsCache = useRef({});
   const fetchingAmountsRef = useRef(new Set());
   const requestQueue = useRef([]);
   const isFetchingRef = useRef(false);
   const unmountedRef = useRef(false);
+  const [modalError, setModalError] = useState(null);
 
 
   const pendingCount = voidRequests.filter(req => req.is_approve === 0).length;
@@ -102,15 +127,15 @@ export default function VoidRequests({ currentPage }) {
     if (activeTab === 'approved') targetApproveStatus = 1;
     if (activeTab === 'rejected') targetApproveStatus = 2;
 
-    let filtered = voidRequests.filter(req => 
+    let filtered = voidRequests.filter(req =>
       req.is_approve === targetApproveStatus && (
-        req.transactionId?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        req.transactionId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         req.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         req.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         req.reason?.toLowerCase().includes(searchQuery.toLowerCase())
       )
     );
-    
+
     // Sort FIFO (First In First Out) - Oldest first
     filtered.sort((a, b) => {
       const dateA = new Date(a.created_at || 0).getTime();
@@ -120,9 +145,9 @@ export default function VoidRequests({ currentPage }) {
       }
       return dateA - dateB;
     });
-    
+
     return filtered;
-  }, [voidRequests, searchQuery, activeTab, amounts]);
+  }, [voidRequests, searchQuery, activeTab]);
 
   useEffect(() => {
     unmountedRef.current = false;
@@ -134,56 +159,53 @@ export default function VoidRequests({ currentPage }) {
     isFetchingRef.current = true;
 
     const { authHeader, baseUrl } = getApiConfig();
-    
+
     while (requestQueue.current.length > 0) {
       if (unmountedRef.current) break;
-      const batch = requestQueue.current.splice(0, 20);
-      
-      const batchResults = await Promise.all(batch.map(async (req) => {
-        try {
-          const response = await axios.get(`${baseUrl}/teller/bet/${req.transactionId}`, authHeader);
-          let betItems = [];
-          if (response.data && Array.isArray(response.data.data)) {
-            betItems = response.data.data;
-          } else if (response.data && Array.isArray(response.data)) {
-            betItems = response.data;
-          }
-          
-          if (betItems.length > 0) {
-            const totalAmount = betItems.reduce((sum, item) => sum + Number(item.betAmount || 0), 0);
-            return { id: req.transactionId, amount: totalAmount };
-          }
-          return { id: req.transactionId, amount: 0 };
-        } catch (err) {
-          return { id: req.transactionId, amount: null };
+      const req = requestQueue.current.shift();
+      if (!req) continue;
+
+      try {
+        const response = await axios.get(`${baseUrl}/teller/bet/${req.transactionId}`, authHeader);
+        let betItems = [];
+        if (response.data && Array.isArray(response.data.data)) {
+          betItems = response.data.data;
+        } else if (response.data && Array.isArray(response.data)) {
+          betItems = response.data;
         }
-      }));
 
-      if (unmountedRef.current) break;
+        betDetailsCache.current[req.transactionId] = betItems;
+        const totalAmount = betItems.reduce((sum, item) => sum + Number(item.betAmount || 0), 0);
 
-      setAmounts(prev => {
-        const next = { ...prev };
-        let hasChanges = false;
-        batchResults.forEach(res => {
-          if (res) {
-            next[res.id] = res.amount;
-            hasChanges = true;
-          }
-        });
-        return hasChanges ? next : prev;
-      });
+        if (!unmountedRef.current) {
+          setAmounts(prev => ({ ...prev, [req.transactionId]: totalAmount }));
+        }
+        // Polite delay between requests to never trigger Laravel 429 rate limit
+        await new Promise(resolve => setTimeout(resolve, 200));
+      } catch (err) {
+        if (err?.response?.status === 429) {
+          // If rate limited, wait 5 seconds before attempting next
+          fetchingAmountsRef.current.delete(req.transactionId);
+          await new Promise(resolve => setTimeout(resolve, 5000));
+        } else {
+          setAmounts(prev => ({ ...prev, [req.transactionId]: null }));
+        }
+      }
     }
 
     isFetchingRef.current = false;
   };
 
   useEffect(() => {
+    // Only auto-fetch amounts for pending void requests (max 30 items) so server 429 rate limit is never triggered
     if (activeTab !== 'pending') return;
 
-    const newRequests = filteredRequests.filter(req => 
-      amounts[req.transactionId] === undefined && 
-      !fetchingAmountsRef.current.has(req.transactionId)
-    );
+    const newRequests = filteredRequests
+      .slice(0, 30)
+      .filter(req =>
+        amounts[req.transactionId] === undefined &&
+        !fetchingAmountsRef.current.has(req.transactionId)
+      );
 
     if (newRequests.length > 0) {
       newRequests.forEach(req => {
@@ -203,7 +225,7 @@ export default function VoidRequests({ currentPage }) {
     if (str === '17' || str === '17:00' || str === '5' || str === '5PM') return '5:00PM';
     if (str === '19' || str === '19:00' || str === '7' || str === '7PM') return '7:00PM';
     if (str === '21' || str === '21:00' || str === '9' || str === '9PM') return '9:00PM';
-    
+
     if (str.includes(':')) {
       const parts = str.split(':');
       const hour = parseInt(parts[0], 10);
@@ -223,10 +245,10 @@ export default function VoidRequests({ currentPage }) {
 
   const handleBulkApprove = async () => {
     if (filteredRequests.length === 0) return;
-    
+
     setIsApproving(true);
     const { authHeader, baseUrl } = getApiConfig();
-    
+
     try {
       let successCount = 0;
       let failedCount = 0;
@@ -237,7 +259,7 @@ export default function VoidRequests({ currentPage }) {
           // Approve the void request in teller/void_request
           await axios.put(`${baseUrl}/teller/void_request/${req.id}`, { status: 1, is_approve: 1 }, authHeader);
           successCount++;
-          
+
           // Small delay between requests to prevent rate limiting/server overload
           await new Promise(resolve => setTimeout(resolve, 250));
         } catch (reqErr) {
@@ -245,13 +267,13 @@ export default function VoidRequests({ currentPage }) {
           failedCount++;
         }
       }
-      
+
       // Additional small delay before fetching fresh data to let the server recover
       await new Promise(resolve => setTimeout(resolve, 800));
-      
+
       // Refresh the data after approval
       await fetchVoidRequests();
-      
+
       if (successCount > 0) {
         showToast(`Successfully bulk approved ${successCount} void requests!`);
       } else {
@@ -267,18 +289,37 @@ export default function VoidRequests({ currentPage }) {
 
   const handleReviewClick = async (req) => {
     setSelectedReviewRequest(req);
+    setModalError(null);
+
+    // Use cached details if already fetched
+    if (betDetailsCache.current[req.transactionId]) {
+      setReviewDetails(betDetailsCache.current[req.transactionId]);
+      setLoadingReviewDetails(false);
+      return;
+    }
+
     setLoadingReviewDetails(true);
     setReviewDetails([]);
     try {
       const { authHeader, baseUrl } = getApiConfig();
       const response = await axios.get(`${baseUrl}/teller/bet/${req.transactionId}`, authHeader);
+      let betItems = [];
       if (response.data && Array.isArray(response.data.data)) {
-        setReviewDetails(response.data.data);
+        betItems = response.data.data;
       } else if (response.data && Array.isArray(response.data)) {
-        setReviewDetails(response.data);
+        betItems = response.data;
       }
+      betDetailsCache.current[req.transactionId] = betItems;
+      setReviewDetails(betItems);
+      const totalAmount = betItems.reduce((sum, item) => sum + Number(item.betAmount || 0), 0);
+      setAmounts(prev => ({ ...prev, [req.transactionId]: totalAmount }));
     } catch (err) {
       console.error('Failed to fetch transaction details:', err);
+      if (err?.response?.status === 429) {
+        setModalError('Server is currently rate-limited. Please wait a few seconds and click Retry.');
+      } else {
+        setModalError('Failed to fetch transaction details. Please try again.');
+      }
     } finally {
       setLoadingReviewDetails(false);
     }
@@ -293,7 +334,7 @@ export default function VoidRequests({ currentPage }) {
     try {
       // Approve the void request status
       await axios.put(`${baseUrl}/teller/void_request/${id}`, { status: 1, is_approve: 1 }, authHeader);
-      
+
       await fetchVoidRequests();
       setSelectedReviewRequest(null);
       showToast('Void request successfully approved!');
@@ -326,13 +367,11 @@ export default function VoidRequests({ currentPage }) {
 
   return (
     <div className="flex flex-col h-auto lg:h-[calc(100vh-140px)] min-h-[calc(100vh-140px)] bg-cardBg border border-border-divider rounded-xl overflow-hidden shadow-2xl relative">
-      
+
       {/* Toast Notification */}
-      <div className={`fixed top-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 border transition-all duration-300 transform ${
-        toast.show ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-8 opacity-0 scale-95 pointer-events-none'
-      } ${
-        toast.type === 'success' ? 'bg-surface border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-surface border-rose-500/50 shadow-[0_0_20px_rgba(243,24,96,0.3)]'
-      }`}>
+      <div className={`fixed top-8 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3 border transition-all duration-300 transform ${toast.show ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-8 opacity-0 scale-95 pointer-events-none'
+        } ${toast.type === 'success' ? 'bg-surface border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-surface border-rose-500/50 shadow-[0_0_20px_rgba(243,24,96,0.3)]'
+        }`}>
         {toast.type === 'success' ? <CheckCircle className="w-5 h-5 text-emerald-500" /> : <AlertCircle className="w-5 h-5 text-rose-500" />}
         <span className="font-semibold text-textPrimary">{toast.message}</span>
       </div>
@@ -340,7 +379,7 @@ export default function VoidRequests({ currentPage }) {
       {/* Header & Controls */}
       <div className="p-5 border-b border-border-divider bg-surface-header/30">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          
+
           <div className="flex items-center gap-3">
             <div className="bg-indigo-500/20 p-2 rounded-lg">
               <CheckCircle className="w-6 h-6 text-indigo-400" />
@@ -352,21 +391,90 @@ export default function VoidRequests({ currentPage }) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {/* Quick Date Presets */}
+            <div className="flex items-center bg-surface border border-border-divider rounded-lg p-1 gap-1 shadow-sm text-xs">
+              <button
+                type="button"
+                onClick={() => handleDatePreset('today')}
+                className={clsx(
+                  "px-2.5 py-1 rounded transition-colors font-medium",
+                  fromDate === formatDateStr(new Date()) && toDate === formatDateStr(new Date())
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "text-textSecondary hover:text-textPrimary hover:bg-surface-hover"
+                )}
+                title="View Today's Void Requests"
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDatePreset('yesterday')}
+                className={clsx(
+                  "px-2.5 py-1 rounded transition-colors font-medium",
+                  (() => {
+                    const y = new Date();
+                    y.setDate(y.getDate() - 1);
+                    const yStr = formatDateStr(y);
+                    return fromDate === yStr && toDate === yStr;
+                  })()
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "text-textSecondary hover:text-textPrimary hover:bg-surface-hover"
+                )}
+                title="View Yesterday's Void Requests"
+              >
+                Yesterday
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDatePreset('last7')}
+                className={clsx(
+                  "px-2.5 py-1 rounded transition-colors font-medium hidden sm:inline-block",
+                  (() => {
+                    const past = new Date();
+                    past.setDate(past.getDate() - 6);
+                    return fromDate === formatDateStr(past) && toDate === formatDateStr(new Date());
+                  })()
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "text-textSecondary hover:text-textPrimary hover:bg-surface-hover"
+                )}
+                title="View Last 7 Days Void Requests"
+              >
+                Last 7 Days
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDatePreset('thisMonth')}
+                className={clsx(
+                  "px-2.5 py-1 rounded transition-colors font-medium hidden md:inline-block",
+                  (() => {
+                    const now = new Date();
+                    const first = new Date(now.getFullYear(), now.getMonth(), 1);
+                    return fromDate === formatDateStr(first) && toDate === formatDateStr(now);
+                  })()
+                    ? "bg-indigo-600 text-white shadow-sm"
+                    : "text-textSecondary hover:text-textPrimary hover:bg-surface-hover"
+                )}
+                title="View This Month's Void Requests"
+              >
+                This Month
+              </button>
+            </div>
+
             {/* Date Range Inputs */}
             <div className="flex items-center bg-surface border border-border-divider rounded-lg px-2.5 py-1.5 gap-2 shadow-sm">
               <Calendar className="w-4 h-4 text-textSecondary" />
-              <input 
-                type="date" 
-                value={fromDate} 
-                onChange={(e) => setFromDate(e.target.value)} 
+              <input
+                type="date"
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
                 className="bg-transparent text-xs text-textPrimary outline-none cursor-pointer"
                 title="From Date"
               />
               <span className="text-textSecondary text-xs">to</span>
-              <input 
-                type="date" 
-                value={toDate} 
-                onChange={(e) => setToDate(e.target.value)} 
+              <input
+                type="date"
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
                 className="bg-transparent text-xs text-textPrimary outline-none cursor-pointer"
                 title="To Date"
               />
@@ -389,7 +497,7 @@ export default function VoidRequests({ currentPage }) {
             </select>
 
             {/* Refresh Button */}
-            <button 
+            <button
               onClick={() => fetchVoidRequests(false)}
               disabled={loading}
               className="p-2 bg-surface border border-border-divider hover:border-indigo-500/50 hover:bg-surface-hover rounded-lg text-textSecondary transition-all disabled:opacity-50 group shadow-sm"
@@ -467,6 +575,17 @@ export default function VoidRequests({ currentPage }) {
             <span className="text-sm text-textSecondary bg-surface px-3 py-1.5 rounded-md border border-border-divider">
               Total Shown: <strong className="text-indigo-400">{filteredRequests.length}</strong>
             </span>
+            {(() => {
+              const totalAmountSum = filteredRequests.reduce((sum, req) => {
+                const amt = amounts[req.transactionId];
+                return sum + (typeof amt === 'number' ? amt : 0);
+              }, 0);
+              return (
+                <span className="text-sm text-textSecondary bg-surface px-3 py-1.5 rounded-md border border-border-divider">
+                  Total Amount: <strong className="text-emerald-400">₱{totalAmountSum.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>
+                </span>
+              );
+            })()}
             {activeTab === 'pending' && (
               <button
                 onClick={handleBulkApprove}
@@ -510,9 +629,7 @@ export default function VoidRequests({ currentPage }) {
                 <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Teller</th>
                 <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Draw Time</th>
                 <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Reason</th>
-                {activeTab === 'pending' && (
-                  <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Amount</th>
-                )}
+                <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Amount</th>
                 <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Date/Time</th>
                 <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider text-center">Status</th>
                 <th className="py-4 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider text-center">Action</th>
@@ -521,10 +638,10 @@ export default function VoidRequests({ currentPage }) {
             <tbody className="divide-y divide-border-divider/50">
               {filteredRequests.map((req) => {
                 const isApproved = req.is_approve === 1;
-                
+
                 return (
-                  <tr 
-                    key={req.id} 
+                  <tr
+                    key={req.id}
                     className="transition-colors group hover:bg-surface-hover/40"
                   >
                     <td className="py-3 px-4">
@@ -544,15 +661,13 @@ export default function VoidRequests({ currentPage }) {
                         {req.reason || '-'}
                       </p>
                     </td>
-                    {activeTab === 'pending' && (
-                      <td className="py-3 px-4">
-                        <div className="text-sm font-medium text-emerald-400">
-                          {amounts[req.transactionId] !== undefined && amounts[req.transactionId] !== null ? 
-                            `₱${Number(amounts[req.transactionId]).toLocaleString(undefined, { minimumFractionDigits: 2 })}` 
-                            : (amounts[req.transactionId] === null ? '-' : '')}
-                        </div>
-                      </td>
-                    )}
+                    <td className="py-3 px-4">
+                      <div className="text-sm font-medium text-emerald-400">
+                        {amounts[req.transactionId] !== undefined && amounts[req.transactionId] !== null ?
+                          `₱${Number(amounts[req.transactionId]).toLocaleString(undefined, { minimumFractionDigits: 2 })}`
+                          : (amounts[req.transactionId] === null ? '-' : <span className="text-xs text-textSecondary opacity-60">...</span>)}
+                      </div>
+                    </td>
                     <td className="py-3 px-4">
                       <div className="text-sm text-textSecondary">{req.created_at?.split(' ')[0]}</div>
                       <div className="text-xs text-textSecondary">{req.created_at?.split(' ')[1]}</div>
@@ -587,14 +702,14 @@ export default function VoidRequests({ currentPage }) {
           </table>
         )}
       </div>
-      
+
       {/* Review Modal */}
       {selectedReviewRequest && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           onClick={() => !isApproving && setSelectedReviewRequest(null)}
         >
-          <div 
+          <div
             className="bg-surface-hover border border-border-divider rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
@@ -602,7 +717,7 @@ export default function VoidRequests({ currentPage }) {
               <h3 className="text-xl font-bold text-textPrimary text-center w-full">
                 Review Void Request
               </h3>
-              <button 
+              <button
                 onClick={() => !isApproving && setSelectedReviewRequest(null)}
                 disabled={isApproving}
                 className="text-textSecondary hover:text-textPrimary transition-colors absolute right-5"
@@ -610,7 +725,7 @@ export default function VoidRequests({ currentPage }) {
                 <span className="text-2xl leading-none">&times;</span>
               </button>
             </div>
-            
+
             <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
               <div className="space-y-1 text-sm text-textSecondary mb-6">
                 <p><span className="text-textSecondary">Teller:</span> <span className="font-medium text-textPrimary">{selectedReviewRequest.fullName || '-'}</span></p>
@@ -625,6 +740,23 @@ export default function VoidRequests({ currentPage }) {
               {loadingReviewDetails ? (
                 <div className="flex justify-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+                </div>
+              ) : modalError ? (
+                <div className="p-4 rounded-lg bg-rose-500/10 border border-rose-500/20 text-center mb-6">
+                  <p className="text-sm text-rose-400 mb-3">{modalError}</p>
+                  <button
+                    type="button"
+                    onClick={() => handleReviewClick(selectedReviewRequest)}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" /> Retry Fetch Details
+                  </button>
+                </div>
+              ) : reviewDetails.length === 0 ? (
+                <div className="p-6 text-center border border-dashed border-border-divider rounded-xl my-4 bg-surface/50">
+                  <AlertCircle className="w-8 h-8 text-amber-400/60 mx-auto mb-2" />
+                  <p className="text-sm font-semibold text-textPrimary">No bet records found for this transaction</p>
+                  <p className="text-xs text-textSecondary mt-1">Bet details for this past transaction may have been cleared or archived by the server.</p>
                 </div>
               ) : (
                 <>

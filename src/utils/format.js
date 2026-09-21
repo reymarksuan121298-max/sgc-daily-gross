@@ -67,6 +67,7 @@ export const manCommissionGroups = {
     'ENY PONGASE',
     'LORY ANN RABADON',
     'CARMEL MATUNOG',
+    'KISHA FAITH FRANCISCO',
     'ROBINALDO SINOGBUHAN'
   ],
   'COORDINATOR: LONGWIND': [
