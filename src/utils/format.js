@@ -74,7 +74,7 @@ export const manCommissionGroups = {
     'JOANE DUMALAGAN'
   ],
   'COORDINATOR: KAPITAN': [
-    'GAVIOLA, REYMARK'
+    'BEA ANTONETTE MENDOZA'
   ],
   'COORDINATOR: GROUP D': [
     'JUDY ANN FUENTES'
