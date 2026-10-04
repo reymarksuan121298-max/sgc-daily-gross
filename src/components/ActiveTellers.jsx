@@ -133,7 +133,24 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
       const { authHeader, baseUrl } = getApiConfig();
       const response = await axios.get(`${baseUrl}/teller/bet?tellerId=${tellerId}&from=${fromDate}&to=${toDate}`, authHeader);
       if (response.data && response.data.data) {
-        setBets(response.data.data);
+        const fetchedBets = response.data.data;
+        
+        // Fetch details for voided bets to retrieve their voidDate
+        const voidedBets = fetchedBets.filter(b => b.isVoid === 1);
+        if (voidedBets.length > 0) {
+          await Promise.all(voidedBets.map(async (bet) => {
+            try {
+              const detailRes = await axios.get(`${baseUrl}/teller/bet/${bet.transactionId}`, authHeader);
+              if (detailRes.data && detailRes.data.data && detailRes.data.data.length > 0) {
+                bet.voidDate = detailRes.data.data[0].voidDate;
+              }
+            } catch (err) {
+              console.error(`Failed to fetch details for voided bet ${bet.transactionId}:`, err);
+            }
+          }));
+        }
+        
+        setBets(fetchedBets);
       }
     } catch (err) {
       console.error('Failed to fetch bets:', err);
@@ -180,7 +197,7 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
       worksheet.addRow([`Exported: ${new Date().toLocaleString()}`]);
       worksheet.addRow([]);
 
-      worksheet.addRow(['#', 'Transaction ID', 'Draw Time', 'Date & Time', 'Bet Amount (₱)', 'Status']);
+      worksheet.addRow(['#', 'Transaction ID', 'Draw Time', 'Date & Time', 'Void Date', 'Bet Amount (₱)', 'Status']);
 
       filteredBets.forEach((b, index) => {
         worksheet.addRow([
@@ -188,6 +205,7 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
           b.transactionId,
           formatDrawTime(b.drawTime),
           b.created_at,
+          b.isVoid === 1 ? (b.voidDate || b.updated_at ? formatDateTime12Hour(b.voidDate || b.updated_at) : '-') : '-',
           Number(b.totalBetAmount || 0),
           b.isVoid === 1 ? 'VOID' : 'ACTIVE'
         ]);
@@ -199,6 +217,7 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
         { width: 8 },
         { width: 25 },
         { width: 15 },
+        { width: 22 },
         { width: 22 },
         { width: 18 },
         { width: 12 }
@@ -238,6 +257,23 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const hour12 = hour % 12 || 12;
     return `${hour12}${ampm}`;
+  };
+
+  const formatDateTime12Hour = (dateStr) => {
+    if (!dateStr) return '';
+    const parts = dateStr.split(' ');
+    if (parts.length !== 2) return dateStr;
+    const [datePart, timePart] = parts;
+    const timeParts = timePart.split(':');
+    if (timeParts.length !== 3) return dateStr;
+    let hour = parseInt(timeParts[0], 10);
+    const minute = timeParts[1];
+    const second = timeParts[2];
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    hour = hour ? hour : 12;
+    const formattedHour = hour.toString().padStart(2, '0');
+    return `${datePart} ${formattedHour}:${minute}:${second} ${ampm}`;
   };
 
 
@@ -545,6 +581,7 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
                         <th className="py-3 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Transaction ID</th>
                         <th className="py-3 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Draw</th>
                         <th className="py-3 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Time</th>
+                        <th className="py-3 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider">Void Date</th>
                         <th className="py-3 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider text-right">Amount</th>
                         <th className="py-3 px-4 font-semibold text-xs text-textSecondary uppercase tracking-wider text-center">Status</th>
                       </tr>
@@ -576,6 +613,9 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
                             </td>
                             <td className="py-3 px-4 text-xs text-textSecondary">
                               {bet.created_at}
+                            </td>
+                            <td className="py-3 px-4 text-xs text-rose-400">
+                              {isVoidBet ? (bet.voidDate || bet.updated_at ? formatDateTime12Hour(bet.voidDate || bet.updated_at) : '-') : '-'}
                             </td>
                             <td className={clsx("py-3 px-4 text-right font-bold", isVoidBet ? "text-rose-400 line-through opacity-80" : "text-textPrimary")}>
                               ₱{Number(bet.totalBetAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
@@ -656,6 +696,9 @@ export default function ActiveTellers({ currentPage, selectedEndDate }) {
                       <p><span className="text-textSecondary block mb-1">Total Amount:</span> <span className={clsx("font-bold text-base", isVoidTransaction ? "text-rose-400" : "text-emerald-400")}>₱{transactionDetails.reduce((sum, item) => sum + Number(item.betAmount), 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</span></p>
                       <p><span className="text-textSecondary block mb-1">Draw Time:</span> <span className="text-textPrimary">{transactionDetails.length > 0 ? formatDrawTime(transactionDetails[0].drawTime) : ''}</span></p>
                       <p><span className="text-textSecondary block mb-1">Bet Time:</span> <span className="text-textPrimary">{transactionDetails.length > 0 ? transactionDetails[0].created_at : ''}</span></p>
+                      {isVoidTransaction && (
+                        <p><span className="text-textSecondary block mb-1">Void Date:</span> <span className="text-rose-400 font-medium">{transactionDetails.length > 0 && transactionDetails[0].voidDate ? formatDateTime12Hour(transactionDetails[0].voidDate) : 'N/A'}</span></p>
+                      )}
                     </div>
                     
                     <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
