@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Ticket, TicketSlash, UserCheck, ChevronDown, ChevronRight, BarChart3, LogOut, X } from 'lucide-react';
+import { LayoutDashboard, Ticket, TicketSlash, UserCheck, ChevronDown, ChevronRight, BarChart3, TrendingUp, LogOut, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuth } from '../context/AuthContext';
 
@@ -43,8 +43,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
   }, [isActiveTellersOpen]);
 
   let dashboardItems = [
-    { id: 'man', label: 'MAN Dashboard' },
-    { id: 'man_commission', label: 'MAN Commission' },
+    { id: 'ldn_overview', label: 'LDN Daily Overview' },
     { id: 'mag', label: 'Mag Dashboard' },
     { id: 'imp', label: 'Imp Dashboard' },
     { id: 'setb', label: 'SETB Dashboard' },
@@ -53,17 +52,21 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     { id: 'lotto', label: 'Lotto Dashboard' },
     { id: 'baloi', label: 'Baloi Dashboard' },
     { id: 'lds', label: 'LDS Dashboard' },
+    { id: 'man', label: 'MAN Dashboard' },
+    { id: 'man_commission', label: 'MAN Commission' },
   ];
 
   if (user && user.username !== 'admin') {
-    if (user.username === 'unclaimed') {
+    if (user.username === 'unclaimed' || user.username === 'jcstechsupport') {
       dashboardItems = [];
     } else if (user.username === 'iligan_lotto') {
       dashboardItems = dashboardItems.filter(item => ['iligan', 'lotto'].includes(item.id));
     } else if (user.username === 'striketeam') {
       dashboardItems = dashboardItems.filter(item => item.id === 'mag');
     } else if (user.username === 'ldn') {
-      dashboardItems = dashboardItems.filter(item => ['baloi', 'iligan', 'lanao', 'setb', 'lotto'].includes(item.id));
+      dashboardItems = dashboardItems.filter(item => ['ldn_overview', 'baloi', 'iligan', 'lanao', 'setb', 'lotto'].includes(item.id));
+    } else if (user.username === 'man' || user.username === 'mandaue') {
+      dashboardItems = dashboardItems.filter(item => ['man', 'man_commission'].includes(item.id));
     } else {
       const usernameMap = {
         'mandaue': 'man',
@@ -158,6 +161,62 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
         </div>
 
         <nav className="flex-1 space-y-2">
+          {/* Daily Sales Analysis Section */}
+          {user?.username !== 'unclaimed' && (
+            <div className="mb-2">
+              <button
+                onClick={() => setCurrentPage('daily_analysis')}
+                className={clsx(
+                  "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-all",
+                  currentPage === 'daily_analysis'
+                    ? "bg-[var(--accent-green)] text-[#020617] shadow-lg shadow-[var(--accent-green)]/30"
+                    : "glass-card text-textPrimary hover:bg-surface-hover border border-border-divider/50 hover:border-accentGreen/30"
+                )}
+              >
+                <div className="flex items-center gap-2.5">
+                  <TrendingUp className={clsx("w-4 h-4", currentPage === 'daily_analysis' ? "text-[#020617]" : "text-accentGreen")} />
+                  <span>Daily Sales Analysis</span>
+                </div>
+                <span className={clsx(
+                  "text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider",
+                  currentPage === 'daily_analysis'
+                    ? "bg-black/20 text-[#020617]"
+                    : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                )}>
+                  {user?.username === 'admin' || user?.username === 'jcstechsupport' ? '9 Branches' : 'Report'}
+                </span>
+              </button>
+            </div>
+          )}
+
+          {/* LDN Daily Overview Section */}
+          {(user?.username === 'admin' || user?.username === 'ldn') && (
+            <div className="mb-3">
+              <button
+                onClick={() => setCurrentPage('ldn_overview')}
+                className={clsx(
+                  "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-all",
+                  currentPage === 'ldn_overview'
+                    ? "bg-[var(--accent-green)] text-[#020617] shadow-lg shadow-[var(--accent-green)]/30"
+                    : "glass-card text-textPrimary hover:bg-surface-hover border border-border-divider/50 hover:border-accentGreen/30"
+                )}
+              >
+                <div className="flex items-center gap-2.5">
+                  <BarChart3 className={clsx("w-4 h-4", currentPage === 'ldn_overview' ? "text-[#020617]" : "text-accentGreen")} />
+                  <span>LDN Daily Overview</span>
+                </div>
+                <span className={clsx(
+                  "text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider",
+                  currentPage === 'ldn_overview'
+                    ? "bg-black/20 text-[#020617]"
+                    : "bg-accentGreen/10 text-accentGreen border border-accentGreen/20"
+                )}>
+                  5 Branches
+                </span>
+              </button>
+            </div>
+          )}
+
           {dashboardItems.length > 0 && (
             <div>
               <button

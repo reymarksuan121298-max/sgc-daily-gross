@@ -19,9 +19,14 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   const login = (username, password) => {
+    if (username === 'jcstechsupport' && password === 'sgc123') {
+      setUser({ username: 'jcstechsupport' });
+      return true;
+    }
+
     const validUsers = [
       'iligan', 'lanao', 'baloi', 'setb',
-      'lotto', 'maguindanao', 'mandaue', 'imperial', 'lds', 'admin', 'unclaimed', 'iligan_lotto', 'striketeam', 'ldn'
+      'lotto', 'maguindanao', 'imperial', 'lds', 'man', 'mandaue', 'admin', 'unclaimed', 'iligan_lotto', 'striketeam', 'ldn'
     ];
 
     if (validUsers.includes(username) && password === `${username}123`) {

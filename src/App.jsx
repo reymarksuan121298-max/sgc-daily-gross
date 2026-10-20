@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, Filter, Users, LayoutDashboard, List, BarChart2, CalendarDays, CalendarRange, Crown, Menu, Sun, Moon } from 'lucide-react';
+import { Calendar, Filter, Users, LayoutDashboard, List, BarChart2, CalendarDays, CalendarRange, Crown, Menu, Sun, Moon, FileSpreadsheet } from 'lucide-react';
 import { clsx } from 'clsx';
 import axios from 'axios';
 
@@ -14,15 +14,18 @@ import FilterDropdown from './components/FilterDropdown';
 import Sidebar from './components/Sidebar';
 import UnclaimedTickets from './components/UnclaimedTickets';
 import ActiveTellers from './components/ActiveTellers';
+import ManCommission from './components/ManCommission';
 import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
 import Login from './components/Login';
 import VoidRequests from './components/VoidRequests';
-import ManCommission from './components/ManCommission';
+import LdnDailyOverview from './components/LdnDailyOverview';
+import DailySalesAnalysis from './components/DailySalesAnalysis';
 
 const TABS = [
   { id: 'overview', label: 'OVERVIEW', icon: LayoutDashboard },
   { id: 'details', label: 'DETAILS', icon: List },
+  { id: 'commission', label: 'COMMISSION', icon: FileSpreadsheet, manOnly: true },
   { id: 'spvrweekly', label: 'SPVR WEEKLY', icon: CalendarDays },
   { id: 'comparison', label: 'COMPARISON', icon: BarChart2 },
   { id: '15days', label: '15 DAYS', icon: CalendarDays },
@@ -54,7 +57,11 @@ function App() {
 
   React.useEffect(() => {
     if (user && user.username !== 'admin') {
-      if (user.username === 'unclaimed') {
+      if (user.username === 'jcstechsupport') {
+        if (currentPage !== 'daily_analysis') {
+          setCurrentPage('daily_analysis');
+        }
+      } else if (user.username === 'unclaimed') {
         const validUnclaimed = ['unclaimed', 'unclaimed_ldn', 'unclaimed_lds', 'unclaimed_imp'];
         if (!validUnclaimed.includes(currentPage)) {
           setCurrentPage('unclaimed');
@@ -62,19 +69,21 @@ function App() {
       } else {
         const usernameMap = {
           'maguindanao': 'mag',
-          'imperial': 'imp'
+          'imperial': 'imp',
+          'mandaue': 'man',
+          'man': 'man'
         };
         let validPages = [];
         if (user.username === 'iligan_lotto') {
-          validPages = ['iligan', 'lotto'];
-        } else if (user.username === 'mandaue') {
-          validPages = ['man', 'man_commission'];
+          validPages = ['iligan', 'lotto', 'daily_analysis'];
         } else if (user.username === 'striketeam') {
-          validPages = ['mag'];
+          validPages = ['mag', 'daily_analysis'];
         } else if (user.username === 'ldn') {
-          validPages = ['baloi', 'iligan', 'lanao', 'setb', 'lotto'];
+          validPages = ['ldn_overview', 'baloi', 'iligan', 'lanao', 'setb', 'lotto', 'daily_analysis'];
+        } else if (user.username === 'man' || user.username === 'mandaue') {
+          validPages = ['man', 'man_commission', 'daily_analysis'];
         } else {
-          validPages = [usernameMap[user.username] || user.username];
+          validPages = [usernameMap[user.username] || user.username, 'daily_analysis'];
         }
         
         if (!validPages.includes(currentPage)) {
@@ -96,7 +105,7 @@ function App() {
   });
 
   const fetchRealData = async (endDateStr, page) => {
-    if (page === 'active_tellers_mag' || page === 'active_tellers_imp' || page === 'active_tellers_iligan' || page === 'active_tellers_lanao' || page === 'active_tellers_setb' || page === 'active_tellers_lotto' || page === 'active_tellers_baloi' || page === 'void_req_mag' || page === 'void_req_imp') {
+    if (page === 'daily_analysis' || page === 'ldn_overview' || page === 'man_commission' || page === 'active_tellers_mag' || page === 'active_tellers_imp' || page === 'active_tellers_iligan' || page === 'active_tellers_lanao' || page === 'active_tellers_setb' || page === 'active_tellers_lotto' || page === 'active_tellers_baloi' || page === 'void_req_mag' || page === 'void_req_imp') {
       setApiData(null);
       setLoading(false);
       return;
@@ -109,7 +118,11 @@ function App() {
       let baseUrl;
       let idParam;
 
-      if (page === 'lds') {
+      if (page === 'man') {
+        authHeader = { headers: { 'Authorization': 'Bearer 3670|1Q5zbXZYKfjTcftKMKuz0oAtJXMwaeIZT0LI73fa' } };
+        baseUrl = 'https://stl-mandaue-api.com/api/accountant';
+        idParam = '2';
+      } else if (page === 'lds') {
         authHeader = { headers: { 'Authorization': 'Bearer 111012|Ag4bzY0DBPYHbQsl8QxhqpdURrT6LYmsWnQsLEif' } };
         baseUrl = 'https://stl-lds-api.com/api/accountant';
         idParam = '1';
@@ -312,8 +325,10 @@ function App() {
             </div>
             <div>
               <h1 className="heading-font text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-textPrimary">
-                {currentPage === 'man' ? 'MAN' : 
+                {currentPage === 'daily_analysis' ? 'Daily Sales Analysis' :
+                 currentPage === 'ldn_overview' ? 'LDN Daily Gross Overview' :
                  currentPage === 'man_commission' ? 'MAN Commission' :
+                 currentPage === 'man' ? 'MAN' :
                  currentPage === 'imp' ? 'Imperial' : 
                  currentPage === 'setb' ? 'SETB' : 
                  currentPage === 'iligan' ? 'Iligan' : 
@@ -332,10 +347,22 @@ function App() {
                  currentPage === 'void_req_imp' ? 'Imperial Void Requests' :
                  'Mag'} Dashboard
               </h1>
-              <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
-                <span>Daily Gross Tracking Control</span>
-                <span className="text-blue-500 font-bold text-[10px] tracking-widest uppercase bg-blue-500/10 px-2 py-0.5 rounded">Regional Unit</span>
-              </div>
+              {currentPage === 'daily_analysis' ? (
+                <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
+                  <span>Executive Performance & Profit Monitoring</span>
+                  <span className="text-emerald-500 font-bold text-[10px] tracking-widest uppercase bg-emerald-500/10 px-2 py-0.5 rounded">All Branches</span>
+                </div>
+              ) : currentPage === 'ldn_overview' ? (
+                <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
+                  <span>SETB • Iligan • Lanao • Baloi • Lotto</span>
+                  <span className="text-emerald-500 font-bold text-[10px] tracking-widest uppercase bg-emerald-500/10 px-2 py-0.5 rounded">All Branches Overview</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
+                  <span>Daily Gross Tracking Control</span>
+                  <span className="text-blue-500 font-bold text-[10px] tracking-widest uppercase bg-blue-500/10 px-2 py-0.5 rounded">Regional Unit</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -349,7 +376,7 @@ function App() {
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
-            {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && (
+            {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && currentPage !== 'man_commission' && currentPage !== 'daily_analysis' && (
               <>
                 <div className="relative flex items-center glass-card hover:bg-surface-hover rounded-md transition-all focus-within:ring-2 focus-within:ring-accentGreen/50 cursor-pointer">
                   <Calendar className="w-4 h-4 ml-4 text-textSecondary" />
@@ -362,7 +389,7 @@ function App() {
                   />
                 </div>
 
-              {!currentPage.startsWith('unclaimed') && (
+              {!currentPage.startsWith('unclaimed') && currentPage !== 'ldn_overview' && activeTab !== 'commission' && (
                 <>
                   <FilterDropdown
                     icon={Filter}
@@ -393,9 +420,9 @@ function App() {
           </div>
 
           {/* Tabs */}
-          {(currentPage === 'man' || currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') && (
+          {(currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds' || currentPage === 'man') && (
             <div className="flex glass-card p-1 rounded-md overflow-x-auto w-full xl:w-auto shadow-inner">
-              {TABS.filter(tab => user?.username !== 'striketeam' || tab.id === 'details').map(tab => (
+              {TABS.filter(tab => (!tab.manOnly || currentPage === 'man') && (user?.username !== 'striketeam' || tab.id === 'details')).map(tab => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
@@ -416,8 +443,16 @@ function App() {
 
         {/* Main Content Area */}
         <main>
-          {(currentPage === 'man' || currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds') ? (
-            loading ? (
+          {currentPage === 'daily_analysis' ? (
+            <DailySalesAnalysis />
+          ) : currentPage === 'ldn_overview' ? (
+            <LdnDailyOverview selectedEndDate={selectedEndDate} setSelectedEndDate={setSelectedEndDate} />
+          ) : currentPage === 'man_commission' ? (
+            <ManCommission selectedDate={selectedEndDate} setSelectedDate={setSelectedEndDate} />
+          ) : (currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds' || currentPage === 'man') ? (
+            activeTab === 'commission' && currentPage === 'man' ? (
+              <ManCommission selectedDate={selectedEndDate} setSelectedDate={setSelectedEndDate} />
+            ) : loading ? (
               <div className="flex justify-center items-center h-64 text-textSecondary">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accentGreen mr-3"></div>
                 Loading Data...
