@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Ticket, TicketSlash, UserCheck, ChevronDown, ChevronRight, BarChart3, LogOut, X } from 'lucide-react';
+import { LayoutDashboard, Ticket, TicketSlash, UserCheck, ChevronDown, ChevronRight, BarChart3, TrendingUp, LogOut, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useAuth } from '../context/AuthContext';
 
@@ -57,7 +57,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
   ];
 
   if (user && user.username !== 'admin') {
-    if (user.username === 'unclaimed') {
+    if (user.username === 'unclaimed' || user.username === 'jcstechsupport') {
       dashboardItems = [];
     } else if (user.username === 'iligan_lotto') {
       dashboardItems = dashboardItems.filter(item => ['iligan', 'lotto'].includes(item.id));
@@ -155,6 +155,34 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
         </div>
 
         <nav className="flex-1 space-y-2">
+          {/* Daily Sales Analysis Section */}
+          {user?.username !== 'unclaimed' && (
+            <div className="mb-2">
+              <button
+                onClick={() => setCurrentPage('daily_analysis')}
+                className={clsx(
+                  "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-all",
+                  currentPage === 'daily_analysis'
+                    ? "bg-[var(--accent-green)] text-[#020617] shadow-lg shadow-[var(--accent-green)]/30"
+                    : "glass-card text-textPrimary hover:bg-surface-hover border border-border-divider/50 hover:border-accentGreen/30"
+                )}
+              >
+                <div className="flex items-center gap-2.5">
+                  <TrendingUp className={clsx("w-4 h-4", currentPage === 'daily_analysis' ? "text-[#020617]" : "text-accentGreen")} />
+                  <span>Daily Sales Analysis</span>
+                </div>
+                <span className={clsx(
+                  "text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider",
+                  currentPage === 'daily_analysis'
+                    ? "bg-black/20 text-[#020617]"
+                    : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                )}>
+                  {user?.username === 'admin' || user?.username === 'jcstechsupport' ? '9 Branches' : 'Report'}
+                </span>
+              </button>
+            </div>
+          )}
+
           {/* LDN Daily Overview Section */}
           {(user?.username === 'admin' || user?.username === 'ldn') && (
             <div className="mb-3">

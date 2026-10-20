@@ -20,6 +20,7 @@ import { useTheme } from './context/ThemeContext';
 import Login from './components/Login';
 import VoidRequests from './components/VoidRequests';
 import LdnDailyOverview from './components/LdnDailyOverview';
+import DailySalesAnalysis from './components/DailySalesAnalysis';
 
 const TABS = [
   { id: 'overview', label: 'OVERVIEW', icon: LayoutDashboard },
@@ -56,7 +57,11 @@ function App() {
 
   React.useEffect(() => {
     if (user && user.username !== 'admin') {
-      if (user.username === 'unclaimed') {
+      if (user.username === 'jcstechsupport') {
+        if (currentPage !== 'daily_analysis') {
+          setCurrentPage('daily_analysis');
+        }
+      } else if (user.username === 'unclaimed') {
         const validUnclaimed = ['unclaimed', 'unclaimed_ldn', 'unclaimed_lds', 'unclaimed_imp'];
         if (!validUnclaimed.includes(currentPage)) {
           setCurrentPage('unclaimed');
@@ -70,15 +75,15 @@ function App() {
         };
         let validPages = [];
         if (user.username === 'iligan_lotto') {
-          validPages = ['iligan', 'lotto'];
+          validPages = ['iligan', 'lotto', 'daily_analysis'];
         } else if (user.username === 'striketeam') {
-          validPages = ['mag'];
+          validPages = ['mag', 'daily_analysis'];
         } else if (user.username === 'ldn') {
-          validPages = ['ldn_overview', 'baloi', 'iligan', 'lanao', 'setb', 'lotto'];
+          validPages = ['ldn_overview', 'baloi', 'iligan', 'lanao', 'setb', 'lotto', 'daily_analysis'];
         } else if (user.username === 'man' || user.username === 'mandaue') {
-          validPages = ['man', 'man_commission'];
+          validPages = ['man', 'man_commission', 'daily_analysis'];
         } else {
-          validPages = [usernameMap[user.username] || user.username];
+          validPages = [usernameMap[user.username] || user.username, 'daily_analysis'];
         }
         
         if (!validPages.includes(currentPage)) {
@@ -100,7 +105,7 @@ function App() {
   });
 
   const fetchRealData = async (endDateStr, page) => {
-    if (page === 'ldn_overview' || page === 'man_commission' || page === 'active_tellers_mag' || page === 'active_tellers_imp' || page === 'active_tellers_iligan' || page === 'active_tellers_lanao' || page === 'active_tellers_setb' || page === 'active_tellers_lotto' || page === 'active_tellers_baloi' || page === 'void_req_mag' || page === 'void_req_imp') {
+    if (page === 'daily_analysis' || page === 'ldn_overview' || page === 'man_commission' || page === 'active_tellers_mag' || page === 'active_tellers_imp' || page === 'active_tellers_iligan' || page === 'active_tellers_lanao' || page === 'active_tellers_setb' || page === 'active_tellers_lotto' || page === 'active_tellers_baloi' || page === 'void_req_mag' || page === 'void_req_imp') {
       setApiData(null);
       setLoading(false);
       return;
@@ -308,7 +313,8 @@ function App() {
             </div>
             <div>
               <h1 className="heading-font text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-textPrimary">
-                {currentPage === 'ldn_overview' ? 'LDN Daily Gross Overview' :
+                {currentPage === 'daily_analysis' ? 'Daily Sales Analysis' :
+                 currentPage === 'ldn_overview' ? 'LDN Daily Gross Overview' :
                  currentPage === 'man_commission' ? 'MAN Commission' :
                  currentPage === 'man' ? 'MAN' :
                  currentPage === 'imp' ? 'Imperial' : 
@@ -329,7 +335,12 @@ function App() {
                  currentPage === 'void_req_imp' ? 'Imperial Void Requests' :
                  'Mag'} Dashboard
               </h1>
-              {currentPage === 'ldn_overview' ? (
+              {currentPage === 'daily_analysis' ? (
+                <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
+                  <span>Executive Performance & Profit Monitoring</span>
+                  <span className="text-emerald-500 font-bold text-[10px] tracking-widest uppercase bg-emerald-500/10 px-2 py-0.5 rounded">All Branches</span>
+                </div>
+              ) : currentPage === 'ldn_overview' ? (
                 <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
                   <span>SETB • Iligan • Lanao • Baloi • Lotto</span>
                   <span className="text-emerald-500 font-bold text-[10px] tracking-widest uppercase bg-emerald-500/10 px-2 py-0.5 rounded">All Branches Overview</span>
@@ -353,7 +364,7 @@ function App() {
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
-            {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && currentPage !== 'man_commission' && (
+            {!currentPage.startsWith('active_tellers_') && !currentPage.startsWith('void_req_') && currentPage !== 'man_commission' && currentPage !== 'daily_analysis' && (
               <>
                 <div className="relative flex items-center glass-card hover:bg-surface-hover rounded-md transition-all focus-within:ring-2 focus-within:ring-accentGreen/50 cursor-pointer">
                 <Calendar className="w-4 h-4 ml-4 text-textSecondary" />
@@ -420,7 +431,9 @@ function App() {
 
         {/* Main Content Area */}
         <main>
-          {currentPage === 'ldn_overview' ? (
+          {currentPage === 'daily_analysis' ? (
+            <DailySalesAnalysis />
+          ) : currentPage === 'ldn_overview' ? (
             <LdnDailyOverview selectedEndDate={selectedEndDate} setSelectedEndDate={setSelectedEndDate} />
           ) : currentPage === 'man_commission' ? (
             <ManCommission selectedDate={selectedEndDate} setSelectedDate={setSelectedEndDate} />
