@@ -16,6 +16,7 @@
     "dotenv": "^17.4.2",
     "exceljs": "^3.4.0",
     "file-saver": "^2.0.5",
+    "html-to-image": "^1.11.13",
     "lucide-react": "^1.23.0",
     "node-cron": "^4.6.0",
     "react": "^19.2.7",

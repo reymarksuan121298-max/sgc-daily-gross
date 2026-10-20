@@ -43,6 +43,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
   }, [isActiveTellersOpen]);
 
   let dashboardItems = [
+    { id: 'ldn_overview', label: 'LDN Daily Overview' },
     { id: 'mag', label: 'Mag Dashboard' },
     { id: 'imp', label: 'Imp Dashboard' },
     { id: 'setb', label: 'SETB Dashboard' },
@@ -63,7 +64,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     } else if (user.username === 'striketeam') {
       dashboardItems = dashboardItems.filter(item => item.id === 'mag');
     } else if (user.username === 'ldn') {
-      dashboardItems = dashboardItems.filter(item => ['baloi', 'iligan', 'lanao', 'setb', 'lotto'].includes(item.id));
+      dashboardItems = dashboardItems.filter(item => ['ldn_overview', 'baloi', 'iligan', 'lanao', 'setb', 'lotto'].includes(item.id));
     } else if (user.username === 'man' || user.username === 'mandaue') {
       dashboardItems = dashboardItems.filter(item => ['man', 'man_commission'].includes(item.id));
     } else {
@@ -154,6 +155,34 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
         </div>
 
         <nav className="flex-1 space-y-2">
+          {/* LDN Daily Overview Section */}
+          {(user?.username === 'admin' || user?.username === 'ldn') && (
+            <div className="mb-3">
+              <button
+                onClick={() => setCurrentPage('ldn_overview')}
+                className={clsx(
+                  "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-all",
+                  currentPage === 'ldn_overview'
+                    ? "bg-[var(--accent-green)] text-[#020617] shadow-lg shadow-[var(--accent-green)]/30"
+                    : "glass-card text-textPrimary hover:bg-surface-hover border border-border-divider/50 hover:border-accentGreen/30"
+                )}
+              >
+                <div className="flex items-center gap-2.5">
+                  <BarChart3 className={clsx("w-4 h-4", currentPage === 'ldn_overview' ? "text-[#020617]" : "text-accentGreen")} />
+                  <span>LDN Daily Overview</span>
+                </div>
+                <span className={clsx(
+                  "text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider",
+                  currentPage === 'ldn_overview'
+                    ? "bg-black/20 text-[#020617]"
+                    : "bg-accentGreen/10 text-accentGreen border border-accentGreen/20"
+                )}>
+                  5 Branches
+                </span>
+              </button>
+            </div>
+          )}
+
           {dashboardItems.length > 0 && (
             <div>
               <button

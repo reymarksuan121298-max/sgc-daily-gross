@@ -19,6 +19,7 @@ import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
 import Login from './components/Login';
 import VoidRequests from './components/VoidRequests';
+import LdnDailyOverview from './components/LdnDailyOverview';
 
 const TABS = [
   { id: 'overview', label: 'OVERVIEW', icon: LayoutDashboard },
@@ -73,7 +74,7 @@ function App() {
         } else if (user.username === 'striketeam') {
           validPages = ['mag'];
         } else if (user.username === 'ldn') {
-          validPages = ['baloi', 'iligan', 'lanao', 'setb', 'lotto'];
+          validPages = ['ldn_overview', 'baloi', 'iligan', 'lanao', 'setb', 'lotto'];
         } else if (user.username === 'man' || user.username === 'mandaue') {
           validPages = ['man', 'man_commission'];
         } else {
@@ -99,7 +100,7 @@ function App() {
   });
 
   const fetchRealData = async (endDateStr, page) => {
-    if (page === 'man_commission' || page === 'active_tellers_mag' || page === 'active_tellers_imp' || page === 'active_tellers_iligan' || page === 'active_tellers_lanao' || page === 'active_tellers_setb' || page === 'active_tellers_lotto' || page === 'active_tellers_baloi' || page === 'void_req_mag' || page === 'void_req_imp') {
+    if (page === 'ldn_overview' || page === 'man_commission' || page === 'active_tellers_mag' || page === 'active_tellers_imp' || page === 'active_tellers_iligan' || page === 'active_tellers_lanao' || page === 'active_tellers_setb' || page === 'active_tellers_lotto' || page === 'active_tellers_baloi' || page === 'void_req_mag' || page === 'void_req_imp') {
       setApiData(null);
       setLoading(false);
       return;
@@ -307,7 +308,8 @@ function App() {
             </div>
             <div>
               <h1 className="heading-font text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-textPrimary">
-                {currentPage === 'man_commission' ? 'MAN Commission' :
+                {currentPage === 'ldn_overview' ? 'LDN Daily Gross Overview' :
+                 currentPage === 'man_commission' ? 'MAN Commission' :
                  currentPage === 'man' ? 'MAN' :
                  currentPage === 'imp' ? 'Imperial' : 
                  currentPage === 'setb' ? 'SETB' : 
@@ -327,10 +329,17 @@ function App() {
                  currentPage === 'void_req_imp' ? 'Imperial Void Requests' :
                  'Mag'} Dashboard
               </h1>
-              <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
-                <span>Daily Gross Tracking Control</span>
-                <span className="text-blue-500 font-bold text-[10px] tracking-widest uppercase bg-blue-500/10 px-2 py-0.5 rounded">Regional Unit</span>
-              </div>
+              {currentPage === 'ldn_overview' ? (
+                <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
+                  <span>SETB • Iligan • Lanao • Baloi • Lotto</span>
+                  <span className="text-emerald-500 font-bold text-[10px] tracking-widest uppercase bg-emerald-500/10 px-2 py-0.5 rounded">All Branches Overview</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
+                  <span>Daily Gross Tracking Control</span>
+                  <span className="text-blue-500 font-bold text-[10px] tracking-widest uppercase bg-blue-500/10 px-2 py-0.5 rounded">Regional Unit</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -357,7 +366,7 @@ function App() {
                 />
               </div>
 
-              {!currentPage.startsWith('unclaimed') && activeTab !== 'commission' && (
+              {!currentPage.startsWith('unclaimed') && currentPage !== 'ldn_overview' && activeTab !== 'commission' && (
                 <>
                   <FilterDropdown
                     icon={Filter}
@@ -411,7 +420,9 @@ function App() {
 
         {/* Main Content Area */}
         <main>
-          {currentPage === 'man_commission' ? (
+          {currentPage === 'ldn_overview' ? (
+            <LdnDailyOverview selectedEndDate={selectedEndDate} setSelectedEndDate={setSelectedEndDate} />
+          ) : currentPage === 'man_commission' ? (
             <ManCommission selectedDate={selectedEndDate} setSelectedDate={setSelectedEndDate} />
           ) : (currentPage === 'mag' || currentPage === 'imp' || currentPage === 'setb' || currentPage === 'iligan' || currentPage === 'lanao' || currentPage === 'lotto' || currentPage === 'baloi' || currentPage === 'lds' || currentPage === 'man') ? (
             activeTab === 'commission' && currentPage === 'man' ? (
