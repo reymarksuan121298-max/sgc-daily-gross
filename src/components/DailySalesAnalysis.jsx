@@ -47,6 +47,9 @@ export default function DailySalesAnalysis() {
     if (user.username === 'imperial') {
       return BRANCH_CONFIGS.filter(b => b.id === 'imp');
     }
+    if (user.username === 'setb' || user.username === 'setb_overview' || user.username === 'setboverview') {
+      return BRANCH_CONFIGS.filter(b => b.id === 'setb');
+    }
     return BRANCH_CONFIGS;
   }, [user]);
 
@@ -57,6 +60,7 @@ export default function DailySalesAnalysis() {
       if (user.username === 'maguindanao' || user.username === 'striketeam') return 'mag';
       if (user.username === 'imperial') return 'imp';
       if (user.username === 'ldn') return 'setb';
+      if (user.username === 'setb' || user.username === 'setb_overview' || user.username === 'setboverview') return 'setb';
     }
     return 'man'; // Default to Mandaue City to match user's screenshot
   });

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
@@ -320,6 +321,15 @@ const BranchChartCard = React.memo(function BranchChartCard({ branch, onCopy, is
 });
 
 export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }) {
+  const { user } = useAuth();
+  const isSetbOnly = user?.username === 'setb_overview' || user?.username === 'setboverview' || user?.username === 'setb';
+
+  const branches = useMemo(() => {
+    if (isSetbOnly) {
+      return BRANCHES.filter(b => b.id === 'setb');
+    }
+    return BRANCHES;
+  }, [isSetbOnly]);
   // Preset ranges matching the dashboard (14-day window: 7 prev vs 7 curr)
   const [rangePreset, setRangePreset] = useState('14d'); // '14d', 'curr7d', 'prev7d', 'custom'
 
@@ -365,13 +375,24 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
   const [chartMode, setChartMode] = useState('grouped');
 
   // Active branches on the master chart
-  const [visibleBranches, setVisibleBranches] = useState({
-    setb: true,
-    iligan: true,
-    lanao: true,
-    baloi: true,
-    lotto: true
+  const [visibleBranches, setVisibleBranches] = useState(() => {
+    if (isSetbOnly) {
+      return { setb: true };
+    }
+    return {
+      setb: true,
+      iligan: true,
+      lanao: true,
+      baloi: true,
+      lotto: true
+    };
   });
+
+  useEffect(() => {
+    if (isSetbOnly) {
+      setVisibleBranches({ setb: true });
+    }
+  }, [isSetbOnly]);
 
   // Data state: pre-aggregated daily totals per branch to minimize memory and eliminate lag
   const [branchDailyData, setBranchDailyData] = useState({});
@@ -438,7 +459,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
     setError(null);
 
     try {
-      const requests = BRANCHES.map(b =>
+      const requests = branches.map(b =>
         axios.get(`${BASE_URL}/TellerGrossPerDateRange?id=${b.idParam}&from=${dateRange.from}&to=${dateRange.to}`, {
           headers: { 'Authorization': `Bearer ${b.token}` }
         }).then(res => {
@@ -476,7 +497,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
 
       setBranchDailyData(dataMap);
 
-      if (failureCount === BRANCHES.length) {
+      if (failureCount === branches.length) {
         setError("Unable to connect to LDN API services. Please verify connection and try again.");
       }
     } catch (err) {
@@ -484,7 +505,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
     } finally {
       setLoading(false);
     }
-  }, [dateRange.from, dateRange.to]);
+  }, [dateRange.from, dateRange.to, branches]);
 
   useEffect(() => {
     fetchAllBranches();
@@ -514,8 +535,8 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
         total: 0
       };
 
-      for (let i = 0; i < BRANCHES.length; i++) {
-        const bId = BRANCHES[i].id;
+      for (let i = 0; i < branches.length; i++) {
+        const bId = branches[i].id;
         const branchAmount = branchDailyData[bId]?.[iso] || 0;
         dayEntry[bId] = branchAmount;
         dayTotal += branchAmount;
@@ -530,7 +551,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
     const sortedDates = Object.keys(dateMap).sort().map(iso => dateMap[iso]);
     const grandTotal = Object.values(branchTotals).reduce((a, b) => a + b, 0);
 
-    const branchCharts = BRANCHES.map(b => {
+    const branchCharts = branches.map(b => {
       const chartPoints = sortedDates.map(d => ({
         date: d.date,
         name: d.shortName,
@@ -568,7 +589,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
       peakDay,
       combinedDailyAvg
     };
-  }, [branchDailyData, dateRange.from, dateRange.to]);
+  }, [branchDailyData, dateRange.from, dateRange.to, branches]);
 
   // Handle Preset Clicks
   const handlePresetChange = (preset) => {
@@ -583,9 +604,14 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
     try {
       setIsExporting(true);
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('LDN Daily Gross Overview');
+      const worksheet = workbook.addWorksheet(isSetbOnly ? 'SETB Daily Gross Overview' : 'LDN Daily Gross Overview');
 
-      worksheet.columns = [
+      worksheet.columns = isSetbOnly ? [
+        { header: 'Date', key: 'date', width: 15 },
+        { header: 'Day', key: 'day', width: 10 },
+        { header: 'SETB (₱)', key: 'setb', width: 18 },
+        { header: 'Daily Total (₱)', key: 'total', width: 22 }
+      ] : [
         { header: 'Date', key: 'date', width: 15 },
         { header: 'Day', key: 'day', width: 10 },
         { header: 'SETB (₱)', key: 'setb', width: 18 },
@@ -597,17 +623,18 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
       ];
 
       // Title rows
+      const lastCol = isSetbOnly ? 'D' : 'H';
       worksheet.spliceRows(1, 0,
-        ['LDN BRANCHES DAILY GROSS PERFORMANCE OVERVIEW'],
-        [`Date Range: ${dateRange.from} to ${dateRange.to} (SETB, Iligan, Lanao, Baloi, Lotto)`],
+        [isSetbOnly ? 'SETB DAILY GROSS PERFORMANCE OVERVIEW' : 'LDN BRANCHES DAILY GROSS PERFORMANCE OVERVIEW'],
+        [`Date Range: ${dateRange.from} to ${dateRange.to} (${isSetbOnly ? 'SETB' : 'SETB, Iligan, Lanao, Baloi, Lotto'})`],
         []
       );
 
-      worksheet.mergeCells('A1:H1');
+      worksheet.mergeCells(`A1:${lastCol}1`);
       worksheet.getCell('A1').font = { bold: true, size: 14, color: { argb: 'FF1E293B' } };
       worksheet.getCell('A1').alignment = { horizontal: 'center' };
 
-      worksheet.mergeCells('A2:H2');
+      worksheet.mergeCells(`A2:${lastCol}2`);
       worksheet.getCell('A2').font = { italic: true, size: 11, color: { argb: 'FF64748B' } };
       worksheet.getCell('A2').alignment = { horizontal: 'center' };
 
@@ -631,7 +658,12 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
 
       // Data rows
       aggregated.dailyList.forEach(row => {
-        const added = worksheet.addRow({
+        const rowData = isSetbOnly ? {
+          date: row.date,
+          day: row.dayName,
+          setb: row.setb,
+          total: row.setb
+        } : {
           date: row.date,
           day: row.dayName,
           setb: row.setb,
@@ -640,17 +672,23 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
           baloi: row.baloi,
           lotto: row.lotto,
           total: row.total
-        });
+        };
+        const added = worksheet.addRow(rowData);
 
         // Numeric currency formatting
-        ['setb', 'iligan', 'lanao', 'baloi', 'lotto', 'total'].forEach(col => {
+        (isSetbOnly ? ['setb', 'total'] : ['setb', 'iligan', 'lanao', 'baloi', 'lotto', 'total']).forEach(col => {
           added.getCell(col).numFmt = '#,##0.00';
           added.getCell(col).alignment = { horizontal: 'right' };
         });
       });
 
       // Summary Total Row
-      const totalsRow = worksheet.addRow({
+      const totalsRowData = isSetbOnly ? {
+        date: 'GRAND TOTAL',
+        day: `${aggregated.dailyList.length} Days`,
+        setb: aggregated.branchTotals.setb || 0,
+        total: aggregated.branchTotals.setb || 0
+      } : {
         date: 'GRAND TOTAL',
         day: `${aggregated.dailyList.length} Days`,
         setb: aggregated.branchTotals.setb,
@@ -659,7 +697,8 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
         baloi: aggregated.branchTotals.baloi,
         lotto: aggregated.branchTotals.lotto,
         total: aggregated.grandTotal
-      });
+      };
+      const totalsRow = worksheet.addRow(totalsRowData);
 
       totalsRow.font = { bold: true };
       totalsRow.eachCell((cell, colNumber) => {
@@ -680,7 +719,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
 
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      saveAs(blob, `LDN_Branches_Daily_Gross_${dateRange.from}_to_${dateRange.to}.xlsx`);
+      saveAs(blob, isSetbOnly ? `SETB_Daily_Gross_${dateRange.from}_to_${dateRange.to}.xlsx` : `LDN_Branches_Daily_Gross_${dateRange.from}_to_${dateRange.to}.xlsx`);
     } catch (e) {
       console.error("Export error", e);
     } finally {
@@ -700,10 +739,10 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
               </span>
               <div>
                 <h2 className="text-xl font-extrabold tracking-tight text-textPrimary">
-                  LDN Branches Daily Overview
+                  {isSetbOnly ? 'SETB Daily Overview' : 'LDN Branches Daily Overview'}
                 </h2>
                 <p className="text-xs text-textSecondary">
-                  SETB • Iligan • Lanao • Baloi • Lotto — Comparative Daily Gross Analysis
+                  {isSetbOnly ? 'SETB Daily Gross Analysis & Performance Tracking' : 'SETB • Iligan • Lanao • Baloi • Lotto — Comparative Daily Gross Analysis'}
                 </p>
               </div>
             </div>
@@ -817,7 +856,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
           </div>
           <div className="flex items-center justify-between mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-textSecondary">
-              Combined Total Gross
+              {isSetbOnly ? 'SETB Total Gross' : 'Combined Total Gross'}
             </span>
             <span className="p-2 rounded-xl bg-accentGreen/10 border border-accentGreen/20 text-accentGreen">
               <DollarSign className="w-4 h-4" />
@@ -828,7 +867,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
               ₱{aggregated.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <div className="flex items-center gap-1.5 text-xs text-textSecondary mt-1">
-              <span>Across 5 Branches</span>
+              <span>{isSetbOnly ? 'SETB Branch' : 'Across 5 Branches'}</span>
               <span className="w-1 h-1 rounded-full bg-textSecondary" />
               <span className="text-accentGreen font-semibold">{aggregated.dailyList.length} Days</span>
             </div>
@@ -853,7 +892,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
               ₱{aggregated.combinedDailyAvg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
             <div className="text-xs text-textSecondary mt-1">
-              Mean daily performance
+              {isSetbOnly ? 'SETB daily average' : 'Mean daily performance'}
             </div>
           </div>
         </div>
@@ -865,7 +904,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
           </div>
           <div className="flex items-center justify-between mb-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-textSecondary">
-              Leading Branch
+              {isSetbOnly ? 'Branch' : 'Leading Branch'}
             </span>
             <span className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
               <Award className="w-4 h-4" />
@@ -874,16 +913,16 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
           <div>
             <div className="flex items-center gap-2">
               <span className="text-2xl lg:text-3xl font-extrabold tracking-tight text-textPrimary">
-                {aggregated.topBranch?.name || '—'}
+                {isSetbOnly ? 'SETB' : (aggregated.topBranch?.name || '—')}
               </span>
               {aggregated.topBranch && (
                 <span className="text-[11px] px-2 py-0.5 rounded-full font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  {aggregated.topBranch.percentOfGrand.toFixed(1)}% Share
+                  {isSetbOnly ? 'Active Branch' : `${aggregated.topBranch.percentOfGrand.toFixed(1)}% Share`}
                 </span>
               )}
             </div>
             <div className="text-xs text-textSecondary mt-1">
-              ₱{(aggregated.topBranch?.total || 0).toLocaleString()} period total
+              ₱{(isSetbOnly ? (aggregated.branchTotals.setb || 0) : (aggregated.topBranch?.total || 0)).toLocaleString()} period total
             </div>
           </div>
         </div>
@@ -913,6 +952,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
       </div>
 
       {/* Branch Share Bar */}
+      {!isSetbOnly && (
       <div className="glass-card rounded-2xl p-4 border border-border-divider">
         <div className="flex justify-between items-center text-xs font-bold text-textSecondary mb-2">
           <span>BRANCH REVENUE DISTRIBUTION</span>
@@ -941,6 +981,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
           ))}
         </div>
       </div>
+      )}
 
       {/* MASTER COMBINED DAILY BAR CHART */}
       <div ref={masterChartRef} className="glass-card rounded-2xl p-6 border border-border-divider relative overflow-hidden shadow-xl bg-cardBg">
@@ -949,11 +990,11 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-6 bg-accentGreen rounded-full" />
               <h3 className="text-lg font-extrabold tracking-wide text-textPrimary">
-                COMPARATIVE DAILY GROSS (ALL 5 BRANCHES)
+                {isSetbOnly ? 'SETB DAILY GROSS ANALYSIS' : 'COMPARATIVE DAILY GROSS (ALL 5 BRANCHES)'}
               </h3>
             </div>
             <p className="text-xs text-textSecondary mt-1">
-              Daily revenue comparison across SETB, Iligan, Lanao, Baloi, and Lotto
+              {isSetbOnly ? 'Daily revenue trend and performance for SETB' : 'Daily revenue comparison across SETB, Iligan, Lanao, Baloi, and Lotto'}
             </p>
           </div>
 
@@ -1040,9 +1081,10 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
         </div>
 
         {/* Branch Filters (Interactive Pills) */}
+        {!isSetbOnly && (
         <div className="flex flex-wrap items-center gap-2 mb-6 no-export">
           <span className="text-xs text-textSecondary font-semibold mr-1">Toggle Branches:</span>
-          {BRANCHES.map(b => {
+          {branches.map(b => {
             const isActive = visibleBranches[b.id];
             return (
               <button
@@ -1068,6 +1110,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
             );
           })}
         </div>
+        )}
 
         {/* The Master Bar Chart with Debounce and Animation Disabled */}
         <div className="h-[380px] w-full">
@@ -1112,7 +1155,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
                   wrapperStyle={{ fontSize: '12px', paddingBottom: '12px' }}
                 />
 
-                {BRANCHES.filter(b => visibleBranches[b.id]).map(b => (
+                {branches.filter(b => visibleBranches[b.id]).map(b => (
                   <Bar
                     key={b.id}
                     dataKey={b.id}
@@ -1131,6 +1174,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
       </div>
 
       {/* INDIVIDUAL BRANCH DAILY BAR GRAPHS (5 CARDS GRID) */}
+      {!isSetbOnly && (
       <div>
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
@@ -1156,6 +1200,7 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
           ))}
         </div>
       </div>
+      )}
 
       {/* DAILY PERFORMANCE BREAKDOWN TABLE */}
       <div className="bg-surface rounded-3xl border border-border-divider shadow-xl overflow-hidden">
@@ -1185,12 +1230,16 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
                 <th className="py-4 px-6">Date</th>
                 <th className="py-4 px-4 text-center">Day</th>
                 <th className="py-4 px-4 text-right text-blue-400">SETB</th>
-                <th className="py-4 px-4 text-right text-emerald-400">Iligan</th>
-                <th className="py-4 px-4 text-right text-purple-400">Lanao</th>
-                <th className="py-4 px-4 text-right text-amber-400">Baloi</th>
-                <th className="py-4 px-4 text-right text-pink-400">Lotto</th>
+                {!isSetbOnly && (
+                  <>
+                    <th className="py-4 px-4 text-right text-emerald-400">Iligan</th>
+                    <th className="py-4 px-4 text-right text-purple-400">Lanao</th>
+                    <th className="py-4 px-4 text-right text-amber-400">Baloi</th>
+                    <th className="py-4 px-4 text-right text-pink-400">Lotto</th>
+                  </>
+                )}
                 <th className="py-4 px-6 text-right text-accentGreen bg-surface-header border-l border-border-divider">
-                  Daily Combined
+                  {isSetbOnly ? 'SETB Total' : 'Daily Combined'}
                 </th>
               </tr>
             </thead>
@@ -1202,27 +1251,31 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
                   <td className="py-3.5 px-4 text-right font-semibold text-textSecondary">
                     ₱{row.setb.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </td>
-                  <td className="py-3.5 px-4 text-right font-semibold text-textSecondary">
-                    ₱{row.iligan.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="py-3.5 px-4 text-right font-semibold text-textSecondary">
-                    ₱{row.lanao.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="py-3.5 px-4 text-right font-semibold text-textSecondary">
-                    ₱{row.baloi.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="py-3.5 px-4 text-right font-semibold text-textSecondary">
-                    ₱{row.lotto.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </td>
+                  {!isSetbOnly && (
+                    <>
+                      <td className="py-3.5 px-4 text-right font-semibold text-textSecondary">
+                        ₱{row.iligan.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-semibold text-textSecondary">
+                        ₱{row.lanao.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-semibold text-textSecondary">
+                        ₱{row.baloi.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-semibold text-textSecondary">
+                        ₱{row.lotto.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </td>
+                    </>
+                  )}
                   <td className="py-3.5 px-6 text-right font-extrabold text-textPrimary bg-surface-header/30 border-l border-border-divider">
-                    ₱{row.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    ₱{(isSetbOnly ? row.setb : row.total).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </td>
                 </tr>
               ))}
 
               {aggregated.dailyList.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-textSecondary text-sm font-semibold">
+                  <td colSpan={isSetbOnly ? 4 : 8} className="py-12 text-center text-textSecondary text-sm font-semibold">
                     No data found for the selected date range.
                   </td>
                 </tr>
@@ -1236,20 +1289,24 @@ export default function LdnDailyOverview({ selectedEndDate, setSelectedEndDate }
                   <td className="py-4 px-4 text-right text-blue-400">
                     ₱{aggregated.branchTotals.setb.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </td>
-                  <td className="py-4 px-4 text-right text-emerald-400">
-                    ₱{aggregated.branchTotals.iligan.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="py-4 px-4 text-right text-purple-400">
-                    ₱{aggregated.branchTotals.lanao.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="py-4 px-4 text-right text-amber-400">
-                    ₱{aggregated.branchTotals.baloi.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="py-4 px-4 text-right text-pink-400">
-                    ₱{aggregated.branchTotals.lotto.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </td>
+                  {!isSetbOnly && (
+                    <>
+                      <td className="py-4 px-4 text-right text-emerald-400">
+                        ₱{aggregated.branchTotals.iligan.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="py-4 px-4 text-right text-purple-400">
+                        ₱{aggregated.branchTotals.lanao.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="py-4 px-4 text-right text-amber-400">
+                        ₱{aggregated.branchTotals.baloi.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="py-4 px-4 text-right text-pink-400">
+                        ₱{aggregated.branchTotals.lotto.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </td>
+                    </>
+                  )}
                   <td className="py-4 px-6 text-right text-accentGreen text-sm bg-surface-header border-l border-border-divider">
-                    ₱{aggregated.grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    ₱{(isSetbOnly ? aggregated.branchTotals.setb : aggregated.grandTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </td>
                 </tr>
               </tfoot>

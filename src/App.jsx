@@ -82,6 +82,8 @@ function App() {
           validPages = ['ldn_overview', 'baloi', 'iligan', 'lanao', 'setb', 'lotto', 'daily_analysis'];
         } else if (user.username === 'man' || user.username === 'mandaue') {
           validPages = ['man', 'man_commission', 'daily_analysis'];
+        } else if (user.username === 'setb_overview' || user.username === 'setboverview') {
+          validPages = ['ldn_overview', 'setb', 'daily_analysis'];
         } else {
           validPages = [usernameMap[user.username] || user.username, 'daily_analysis'];
         }
@@ -326,26 +328,26 @@ function App() {
             <div>
               <h1 className="heading-font text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-textPrimary">
                 {currentPage === 'daily_analysis' ? 'Daily Sales Analysis' :
-                 currentPage === 'ldn_overview' ? 'LDN Daily Gross Overview' :
+                 currentPage === 'ldn_overview' ? ((user?.username === 'setb_overview' || user?.username === 'setboverview' || user?.username === 'setb') ? 'SETB Daily Gross Overview' : 'LDN Daily Gross Overview') :
                  currentPage === 'man_commission' ? 'MAN Commission' :
-                 currentPage === 'man' ? 'MAN' :
-                 currentPage === 'imp' ? 'Imperial' : 
-                 currentPage === 'setb' ? 'SETB' : 
-                 currentPage === 'iligan' ? 'Iligan' : 
-                 currentPage === 'lanao' ? 'Lanao' : 
-                 currentPage === 'lotto' ? 'Lotto' : 
-                 currentPage === 'baloi' ? 'Baloi' : 
-                 currentPage === 'lds' ? 'LDS' : 
-                 currentPage === 'active_tellers_mag' ? 'Mag Teller Transactions' : 
-                 currentPage === 'active_tellers_imp' ? 'Imperial Teller Transactions' : 
-                 currentPage === 'active_tellers_iligan' ? 'Iligan Teller Transactions' : 
-                 currentPage === 'active_tellers_lanao' ? 'Lanao Teller Transactions' : 
-                 currentPage === 'active_tellers_setb' ? 'SETB Teller Transactions' : 
-                 currentPage === 'active_tellers_lotto' ? 'Lotto Teller Transactions' : 
-                 currentPage === 'active_tellers_baloi' ? 'Baloi Teller Transactions' : 
-                 currentPage === 'void_req_mag' ? 'Mag Void Requests' :
-                 currentPage === 'void_req_imp' ? 'Imperial Void Requests' :
-                 'Mag'} Dashboard
+                 `${currentPage === 'man' ? 'MAN' :
+                    currentPage === 'imp' ? 'Imperial' : 
+                    currentPage === 'setb' ? 'SETB' : 
+                    currentPage === 'iligan' ? 'Iligan' : 
+                    currentPage === 'lanao' ? 'Lanao' : 
+                    currentPage === 'lotto' ? 'Lotto' : 
+                    currentPage === 'baloi' ? 'Baloi' : 
+                    currentPage === 'lds' ? 'LDS' : 
+                    currentPage === 'active_tellers_mag' ? 'Mag Teller Transactions' : 
+                    currentPage === 'active_tellers_imp' ? 'Imperial Teller Transactions' : 
+                    currentPage === 'active_tellers_iligan' ? 'Iligan Teller Transactions' : 
+                    currentPage === 'active_tellers_lanao' ? 'Lanao Teller Transactions' : 
+                    currentPage === 'active_tellers_setb' ? 'SETB Teller Transactions' : 
+                    currentPage === 'active_tellers_lotto' ? 'Lotto Teller Transactions' : 
+                    currentPage === 'active_tellers_baloi' ? 'Baloi Teller Transactions' : 
+                    currentPage === 'void_req_mag' ? 'Mag Void Requests' :
+                    currentPage === 'void_req_imp' ? 'Imperial Void Requests' :
+                    'Mag'} Dashboard`}
               </h1>
               {currentPage === 'daily_analysis' ? (
                 <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
@@ -354,8 +356,10 @@ function App() {
                 </div>
               ) : currentPage === 'ldn_overview' ? (
                 <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">
-                  <span>SETB • Iligan • Lanao • Baloi • Lotto</span>
-                  <span className="text-emerald-500 font-bold text-[10px] tracking-widest uppercase bg-emerald-500/10 px-2 py-0.5 rounded">All Branches Overview</span>
+                  <span>{(user?.username === 'setb_overview' || user?.username === 'setboverview' || user?.username === 'setb') ? 'Branch Performance Monitoring' : 'SETB • Iligan • Lanao • Baloi • Lotto'}</span>
+                  <span className="text-emerald-500 font-bold text-[10px] tracking-widest uppercase bg-emerald-500/10 px-2 py-0.5 rounded">
+                    {(user?.username === 'setb_overview' || user?.username === 'setboverview' || user?.username === 'setb') ? 'SETB Overview' : 'All Branches Overview'}
+                  </span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-sm text-textSecondary mt-1">

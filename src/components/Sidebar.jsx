@@ -43,7 +43,6 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
   }, [isActiveTellersOpen]);
 
   let dashboardItems = [
-    { id: 'ldn_overview', label: 'LDN Daily Overview' },
     { id: 'mag', label: 'Mag Dashboard' },
     { id: 'imp', label: 'Imp Dashboard' },
     { id: 'setb', label: 'SETB Dashboard' },
@@ -64,9 +63,11 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
     } else if (user.username === 'striketeam') {
       dashboardItems = dashboardItems.filter(item => item.id === 'mag');
     } else if (user.username === 'ldn') {
-      dashboardItems = dashboardItems.filter(item => ['ldn_overview', 'baloi', 'iligan', 'lanao', 'setb', 'lotto'].includes(item.id));
+      dashboardItems = dashboardItems.filter(item => ['baloi', 'iligan', 'lanao', 'setb', 'lotto'].includes(item.id));
     } else if (user.username === 'man' || user.username === 'mandaue') {
       dashboardItems = dashboardItems.filter(item => ['man', 'man_commission'].includes(item.id));
+    } else if (user.username === 'setb_overview' || user.username === 'setboverview') {
+      dashboardItems = dashboardItems.filter(item => item.id === 'setb');
     } else {
       const usernameMap = {
         'mandaue': 'man',
@@ -190,7 +191,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
           )}
 
           {/* LDN Daily Overview Section */}
-          {(user?.username === 'admin' || user?.username === 'ldn') && (
+          {(user?.username === 'admin' || user?.username === 'ldn' || user?.username === 'setb_overview' || user?.username === 'setboverview') && (
             <div className="mb-3">
               <button
                 onClick={() => setCurrentPage('ldn_overview')}
@@ -203,7 +204,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
               >
                 <div className="flex items-center gap-2.5">
                   <BarChart3 className={clsx("w-4 h-4", currentPage === 'ldn_overview' ? "text-[#020617]" : "text-accentGreen")} />
-                  <span>LDN Daily Overview</span>
+                  <span>{(user?.username === 'setb_overview' || user?.username === 'setboverview' || user?.username === 'setb') ? 'SETB Daily Overview' : 'LDN Daily Overview'}</span>
                 </div>
                 <span className={clsx(
                   "text-[9px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider",
@@ -211,7 +212,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, setIsOpen
                     ? "bg-black/20 text-[#020617]"
                     : "bg-accentGreen/10 text-accentGreen border border-accentGreen/20"
                 )}>
-                  5 Branches
+                  {(user?.username === 'setb_overview' || user?.username === 'setboverview' || user?.username === 'setb') ? 'SETB' : '5 Branches'}
                 </span>
               </button>
             </div>
