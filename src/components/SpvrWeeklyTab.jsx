@@ -104,24 +104,61 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
 
     const copyText = `${headerLine}\n${rowsText}`;
 
+    // Rich HTML format for Excel and Google Sheets to preserve navy blue header background (#1f497d) & white bold text
+    const rowsHtml = spvrData
+      .map(row => {
+        const valStr = (row.current || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        return `<tr><td style="text-align: right; mso-number-format:'#,##0.00'; padding: 4px 8px; border: 1px solid #d9d9d9;">${valStr}</td></tr>`;
+      })
+      .join('');
+
+    const htmlTable = `<table><thead><tr><th style="background-color: #1f497d; color: #ffffff; font-weight: bold; font-family: Calibri, Arial, sans-serif; text-align: center; padding: 6px 12px; border: 1px solid #1f497d;">${headerLine}</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+
     try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(copyText);
+      if (typeof ClipboardItem !== 'undefined' && navigator?.clipboard?.write) {
+        const htmlBlob = new Blob([htmlTable], { type: 'text/html' });
+        const textBlob = new Blob([copyText], { type: 'text/plain' });
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': htmlBlob,
+            'text/plain': textBlob
+          })
+        ]);
       } else {
-        const textArea = document.createElement('textarea');
-        textArea.value = copyText;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-9999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
+        const listener = (e) => {
+          e.preventDefault();
+          if (e.clipboardData) {
+            e.clipboardData.setData('text/html', htmlTable);
+            e.clipboardData.setData('text/plain', copyText);
+          }
+        };
+        document.addEventListener('copy', listener);
         document.execCommand('copy');
-        document.body.removeChild(textArea);
+        document.removeEventListener('copy', listener);
       }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy to clipboard', err);
+      console.warn('ClipboardItem write failed, trying text fallback', err);
+      try {
+        if (navigator?.clipboard?.writeText) {
+          await navigator.clipboard.writeText(copyText);
+        } else {
+          const textArea = document.createElement('textarea');
+          textArea.value = copyText;
+          textArea.style.position = 'fixed';
+          textArea.style.left = '-9999px';
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (fallbackErr) {
+        console.error('Failed to copy to clipboard', fallbackErr);
+      }
     }
   };
 
@@ -154,9 +191,9 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
             "flex items-center gap-2 font-semibold px-4 py-2.5 rounded-lg transition-all text-sm shadow-md",
             copied
               ? "bg-emerald-600 text-white shadow-emerald-600/30"
-              : "glass-card text-textPrimary hover:bg-surface-hover border border-border-divider/50 hover:border-accentGreen/50 cursor-pointer"
+              : "glass-card text-textPrimary hover:bg-surface-hover border border-border-divider/50 hover:border-[#1f497d] cursor-pointer"
           )}
-          title={`Copy column with header (${currDateLabel || '7D'}) for spreadsheet (Excel / Google Sheets)`}
+          title={`Copy column with navy blue header (${currDateLabel || '7D'}) for spreadsheet (Excel / Google Sheets)`}
         >
           {copied ? (
             <>
@@ -166,7 +203,10 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
           ) : (
             <>
               <Copy className="w-4 h-4 text-accentGreen" />
-              <span>Copy {currDateLabel || 'Current 7D'}</span>
+              <span>Copy</span>
+              <span className="px-2 py-0.5 rounded bg-[#1f497d] text-white text-xs font-bold shadow-sm">
+                {currDateLabel || 'Current 7D'}
+              </span>
             </>
           )}
         </button>
@@ -192,10 +232,13 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
                 {dates.map((date, i) => (
                   <th key={i} className="py-5 px-4 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center">{date}</th>
                 ))}
-                <th className="py-4 px-6 font-extrabold text-[10px] text-indigo-400 uppercase tracking-widest text-center bg-surface-header border-l border-border-divider">
+                <th className="py-4 px-6 font-extrabold text-[10px] uppercase tracking-widest text-center bg-[#1f497d]/20 border-l border-border-divider">
                   <div className="flex items-center justify-center gap-1.5">
                     <div>
-                      TOTAL CURRENT<br/><span className="text-[9px] text-textSecondary">{currDateLabel ? `(${currDateLabel})` : '(7D)'}</span>
+                      <span className="text-textSecondary text-[10px] font-extrabold uppercase">TOTAL CURRENT</span><br/>
+                      <span className="inline-block mt-0.5 px-2.5 py-0.5 rounded bg-[#1f497d] text-white text-[10px] font-bold tracking-normal shadow-sm">
+                        {currDateLabel || '7D'}
+                      </span>
                     </div>
                     <button
                       onClick={handleCopyCurrent7D}
@@ -204,9 +247,9 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
                         "p-1.5 rounded-md transition-all hover:scale-105 cursor-pointer ml-0.5",
                         copied
                           ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                          : "hover:bg-surface-hover text-indigo-400 hover:text-indigo-300"
+                          : "bg-[#1f497d]/40 hover:bg-[#1f497d] text-white border border-[#1f497d]/60 shadow-sm"
                       )}
-                      title={`Copy column with header (${currDateLabel || '7D'}) for spreadsheet (Excel / Google Sheets)`}
+                      title={`Copy column with navy blue header (${currDateLabel || '7D'}) for spreadsheet (Excel / Google Sheets)`}
                     >
                       {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     </button>
