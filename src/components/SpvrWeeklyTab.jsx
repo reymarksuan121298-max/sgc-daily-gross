@@ -108,11 +108,11 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
     const rowsHtml = spvrData
       .map(row => {
         const valStr = (row.current || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        return `<tr><td style="text-align: right; mso-number-format:'#,##0.00'; padding: 4px 8px; border: 1px solid #d9d9d9;">${valStr}</td></tr>`;
+        return `<tr><td style="text-align: right; font-family: Arial, sans-serif; mso-number-format:'#,##0.00'; padding: 4px 8px; border: 1px solid #d9d9d9;">${valStr}</td></tr>`;
       })
       .join('');
 
-    const htmlTable = `<table><thead><tr><th style="background-color: #1f497d; color: #ffffff; font-weight: bold; font-family: Calibri, Arial, sans-serif; text-align: center; padding: 6px 12px; border: 1px solid #1f497d;">${headerLine}</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+    const htmlTable = `<table><thead><tr><th style="background-color: #1f497d; color: #ffffff; font-weight: bold; font-family: Arial, sans-serif; font-size: 12pt; text-align: center; padding: 6px 12px; border: 1px solid #1f497d;">${headerLine}</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
 
     try {
       if (typeof ClipboardItem !== 'undefined' && navigator?.clipboard?.write) {
@@ -204,7 +204,7 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
             <>
               <Copy className="w-4 h-4 text-accentGreen" />
               <span>Copy</span>
-              <span className="px-2 py-0.5 rounded bg-[#1f497d] text-white text-xs font-bold shadow-sm">
+              <span style={{ fontFamily: 'Arial, sans-serif', fontSize: '12px' }} className="px-2 py-0.5 rounded bg-[#1f497d] text-white font-bold shadow-sm">
                 {currDateLabel || 'Current 7D'}
               </span>
             </>
@@ -236,7 +236,7 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
                   <div className="flex items-center justify-center gap-1.5">
                     <div>
                       <span className="text-textSecondary text-[10px] font-extrabold uppercase">TOTAL CURRENT</span><br/>
-                      <span className="inline-block mt-0.5 px-2.5 py-0.5 rounded bg-[#1f497d] text-white text-[10px] font-bold tracking-normal shadow-sm">
+                      <span style={{ fontFamily: 'Arial, sans-serif', fontSize: '12px' }} className="inline-block mt-0.5 px-2.5 py-0.5 rounded bg-[#1f497d] text-white font-bold tracking-normal shadow-sm">
                         {currDateLabel || '7D'}
                       </span>
                     </div>

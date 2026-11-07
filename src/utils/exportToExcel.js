@@ -312,7 +312,7 @@ export const generateSpvrWeeklyExcelReport = async (data, currentDates, previous
 
     headerRow.eachCell((cell, colNumber) => {
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1F497D' } };
-      cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.font = { name: 'Arial', size: 12, bold: true, color: { argb: 'FFFFFFFF' } };
       cell.alignment = { horizontal: colNumber === 1 ? 'center' : 'right', vertical: 'middle' };
       if (colNumber === 1) cell.alignment = { horizontal: 'left', vertical: 'middle' };
       cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
