@@ -1,9 +1,10 @@
-import React from 'react';
-import { Download } from 'lucide-react';
+import React, { useState } from 'react';
+import { Download, Copy, Check } from 'lucide-react';
 import { clsx } from 'clsx';
 import { generateSpvrWeeklyExcelReport } from '../utils/exportToExcel';
 
 export default function SpvrWeeklyTab({ apiData, currentPage }) {
+  const [copied, setCopied] = useState(false);
   let dates = [];
   let current7Dates = [];
   let previous7Dates = [];
@@ -76,7 +77,54 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
   }
 
   dates = dates.length > 0 ? dates : ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'];
-  
+
+  const getShortDateRange = (dateList) => {
+    if (!dateList || dateList.length === 0) return '';
+    const getLabel = (isoStr) => {
+      if (!isoStr) return '';
+      const [y, m, d] = isoStr.split('-').map(Number);
+      const dateObj = new Date(y, m - 1, d);
+      const month = dateObj.toLocaleString('en-US', { month: 'short' });
+      return `${month}${d}`;
+    };
+    return `${getLabel(dateList[0])} - ${getLabel(dateList[dateList.length - 1])}`;
+  };
+
+  const currDateLabel = getShortDateRange(current7Dates);
+  const prevDateLabel = getShortDateRange(previous7Dates);
+
+  const handleCopyCurrent7D = async () => {
+    if (!spvrData || spvrData.length === 0) return;
+    
+    // Format header and numbers with 2 decimals, separated by newlines for spreadsheet column pasting
+    const headerLine = currDateLabel || 'TOTAL CURRENT (7D)';
+    const rowsText = spvrData
+      .map(row => (row.current || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
+      .join('\n');
+
+    const copyText = `${headerLine}\n${rowsText}`;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(copyText);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = copyText;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy to clipboard', err);
+    }
+  };
+
   const handleDownload = async () => {
     const excelData = spvrData.map(spvr => {
       const daily = {};
@@ -100,8 +148,32 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
       {/* Action Bar */}
       <div className="flex flex-wrap items-center justify-end gap-3">
         <button 
+          onClick={handleCopyCurrent7D}
+          disabled={spvrData.length === 0}
+          className={clsx(
+            "flex items-center gap-2 font-semibold px-4 py-2.5 rounded-lg transition-all text-sm shadow-md",
+            copied
+              ? "bg-emerald-600 text-white shadow-emerald-600/30"
+              : "glass-card text-textPrimary hover:bg-surface-hover border border-border-divider/50 hover:border-accentGreen/50 cursor-pointer"
+          )}
+          title={`Copy column with header (${currDateLabel || '7D'}) for spreadsheet (Excel / Google Sheets)`}
+        >
+          {copied ? (
+            <>
+              <Check className="w-4 h-4 text-white" />
+              <span>Copied {currDateLabel || '7D'}!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-4 h-4 text-accentGreen" />
+              <span>Copy {currDateLabel || 'Current 7D'}</span>
+            </>
+          )}
+        </button>
+
+        <button 
           onClick={handleDownload}
-          className="flex items-center gap-2 bg-white hover:bg-slate-200 text-slate-900 font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] text-sm"
+          className="flex items-center gap-2 bg-white hover:bg-slate-200 text-slate-900 font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] text-sm cursor-pointer"
         >
           <Download className="w-4 h-4" />
           Download Analysis
@@ -120,8 +192,29 @@ export default function SpvrWeeklyTab({ apiData, currentPage }) {
                 {dates.map((date, i) => (
                   <th key={i} className="py-5 px-4 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center">{date}</th>
                 ))}
-                <th className="py-5 px-6 font-extrabold text-[10px] text-indigo-500 uppercase tracking-widest text-center bg-surface-header border-l border-border-divider">TOTAL CURRENT<br/><span className="text-[9px] text-textSecondary">(7D)</span></th>
-                <th className="py-5 px-6 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center bg-surface-header">TOTAL PREVIOUS<br/><span className="text-[9px] text-textSecondary">(7D)</span></th>
+                <th className="py-4 px-6 font-extrabold text-[10px] text-indigo-400 uppercase tracking-widest text-center bg-surface-header border-l border-border-divider">
+                  <div className="flex items-center justify-center gap-1.5">
+                    <div>
+                      TOTAL CURRENT<br/><span className="text-[9px] text-textSecondary">{currDateLabel ? `(${currDateLabel})` : '(7D)'}</span>
+                    </div>
+                    <button
+                      onClick={handleCopyCurrent7D}
+                      disabled={spvrData.length === 0}
+                      className={clsx(
+                        "p-1.5 rounded-md transition-all hover:scale-105 cursor-pointer ml-0.5",
+                        copied
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "hover:bg-surface-hover text-indigo-400 hover:text-indigo-300"
+                      )}
+                      title={`Copy column with header (${currDateLabel || '7D'}) for spreadsheet (Excel / Google Sheets)`}
+                    >
+                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </th>
+                <th className="py-5 px-6 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-center bg-surface-header">
+                  TOTAL PREVIOUS<br/><span className="text-[9px] text-textSecondary">{prevDateLabel ? `(${prevDateLabel})` : '(7D)'}</span>
+                </th>
                 <th className="py-5 px-8 font-extrabold text-[10px] text-textSecondary uppercase tracking-widest text-right bg-surface-header">SHIFT ANALYSIS</th>
               </tr>
             </thead>
