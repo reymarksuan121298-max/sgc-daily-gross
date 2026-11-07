@@ -14,7 +14,7 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
     return `${monthStr} ${String(d1.getDate()).padStart(2, '0')}-${String(d2.getDate()).padStart(2, '0')} ${d1.getFullYear()}`;
   };
 
-  const currentDatesTitle = formatDateTitle(currentDates);
+  const _currentDatesTitle = formatDateTitle(currentDates);
   const prevDateRangeStr = formatDateTitle(previousDates).split(' ')[1] || ''; // e.g. "04-10"
   const prevMonthStr = previousDates.length > 0 ? new Date(previousDates[0]).toLocaleString('default', { month: 'short' }) : '';
 
@@ -210,7 +210,7 @@ export const generateSpvrWeeklyExcelReport = async (data, currentDates, previous
     return `${d1.toLocaleString('default', { month: 'short' })}${d1.getDate()} - ${d2.toLocaleString('default', { month: 'short' })}${d2.getDate()}`;
   };
 
-  const currentDatesTitle = formatDateTitle(currentDates);
+  const _currentDatesTitle = formatDateTitle(currentDates);
   const prevDateLabel = formatShortDateRange(previousDates);
   const currDateLabel = formatShortDateRange(currentDates);
 
@@ -222,7 +222,7 @@ export const generateSpvrWeeklyExcelReport = async (data, currentDates, previous
     if (nameLower.includes('southupi') || nameLower.includes('south upi') || nameLower.includes('south-upi')) return 'SOUTH UPI';
     if (nameLower.includes('dos') || nameLower.includes('awang') || nameLower.includes('dalican')) return 'AWANG';
     if (nameLower.includes('nkabuntalan') || nameLower.includes('north kabuntalan') || nameLower.includes('kabuntalan')) return 'NORTH KABUNTALAN';
-    if (nameLower.includes('upi') || nameLower.includes('dbs')) return 'NORTH UPI';
+    if (nameLower.includes('upi') || nameLower.includes('dbs') || nameLower.includes('datupiang') || nameLower.includes('datu piang')) return 'NORTH UPI';
     
     if (currentPage === 'mag' || regionName === 'MAG' || regionName === 'MAGUINDANAO' || regionName === 'IMPERIAL') {
       return 'MAG SUR';
@@ -364,7 +364,9 @@ export const generateSpvrWeeklyExcelReport = async (data, currentDates, previous
       }
 
       for (let col = 1; col <= numCols; col++) {
-        dataRow.getCell(col).border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        const cell = dataRow.getCell(col);
+        cell.font = { name: 'Arial', size: 12, ...(cell.font || {}) };
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
       }
 
       currentRow++;
