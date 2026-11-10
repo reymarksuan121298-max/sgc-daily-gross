@@ -1,9 +1,11 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
-export const generateExcelReport = async (data, currentDates, previousDates, regionName = 'MAGUINDANAO') => {
+export const generateExcelReport = async (data, currentDates, previousDates, regionName = 'MAGUINDANAO', options = {}) => {
+  const includeAddress = !!options.includeAddress;
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Daily Report');
+  const sheetName = `${regionName} Daily Report`.replace(/[:\\/?*[\]]/g, ' ').slice(0, 31).trim() || 'Daily Report';
+  const worksheet = workbook.addWorksheet(sheetName);
 
   // Format dates for title (e.g. "Jul 01-14 2026")
   const formatDateTitle = (dates) => {
@@ -18,38 +20,44 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
   const prevDateRangeStr = formatDateTitle(previousDates).split(' ')[1] || ''; // e.g. "04-10"
   const prevMonthStr = previousDates.length > 0 ? new Date(previousDates[0]).toLocaleString('default', { month: 'short' }) : '';
 
+  const lastColLetter = includeAddress ? 'N' : 'M';
+  const numCols = includeAddress ? 14 : 13;
+
   // Title Rows
-  worksheet.mergeCells('A1:M1');
+  worksheet.mergeCells(`A1:${lastColLetter}1`);
   worksheet.getCell('A1').value = `Daily Report of ${currentDatesTitle} ${regionName}`;
   worksheet.getCell('A1').font = { bold: true, size: 14 };
   worksheet.getCell('A1').alignment = { horizontal: 'center', vertical: 'middle' };
 
-  worksheet.mergeCells('A2:M2');
+  worksheet.mergeCells(`A2:${lastColLetter}2`);
   worksheet.getCell('A2').value = `Agent Sales Per Day`;
   worksheet.getCell('A2').font = { size: 12 };
   worksheet.getCell('A2').alignment = { horizontal: 'center', vertical: 'middle' };
 
   // Set Column Widths
-  worksheet.columns = [
+  const columns = [
     { key: 'spvr', width: 25 },
-    { key: 'teller', width: 30 },
-    { key: 'day1', width: 10 },
-    { key: 'day2', width: 10 },
-    { key: 'day3', width: 10 },
-    { key: 'day4', width: 10 },
-    { key: 'day5', width: 10 },
-    { key: 'day6', width: 10 },
-    { key: 'day7', width: 10 },
+    { key: 'teller', width: 30 }
+  ];
+  if (includeAddress) {
+    columns.push({ key: 'address', width: 35 });
+  }
+  for (let i = 1; i <= 7; i++) {
+    columns.push({ key: `day${i}`, width: 10 });
+  }
+  columns.push(
     { key: 'totalCurr', width: 15 },
     { key: 'totalPrev', width: 15 },
     { key: 'analysis', width: 12 },
     { key: 'difference', width: 15 }
-  ];
+  );
+  worksheet.columns = columns;
 
   // Header Row 1 (Row 3)
   const headerRow1 = worksheet.getRow(3);
   headerRow1.values = [
     'SPVR', 'Date', 
+    ...(includeAddress ? [''] : []),
     ...currentDates.map(d => {
       const dd = new Date(d);
       return `${dd.toLocaleString('default', { month: 'short' })}${dd.getDate()}`;
@@ -61,6 +69,7 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
   const headerRow2 = worksheet.getRow(4);
   headerRow2.values = [
     '', 'Teller', 
+    ...(includeAddress ? ['Address'] : []),
     'Gross', 'Gross', 'Gross', 'Gross', 'Gross', 'Gross', 'Gross',
     '', `${prevMonthStr}${prevDateRangeStr}`, '', ''
   ];
@@ -75,6 +84,10 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
     };
   });
 
+  const daysStartCol = includeAddress ? 4 : 3;
+  const daysEndCol = includeAddress ? 10 : 9;
+  const diffCol = numCols;
+
   // Styling Header Row 2
   headerRow2.eachCell((cell, colNumber) => {
     cell.font = { bold: true };
@@ -83,11 +96,11 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
       top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' }
     };
     
-    // Days columns (C-I, i.e., 3-9) are Red
-    if (colNumber >= 3 && colNumber <= 9) {
+    // Days columns are Red
+    if (colNumber >= daysStartCol && colNumber <= daysEndCol) {
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFF0000' } }; // Red
       cell.font = { bold: true, color: { argb: 'FFFFFFFF' } }; // White text on red looks better, or leave black if required
-    } else if (colNumber === 2) { // Teller cell is cyan
+    } else if (colNumber === 2 || (includeAddress && colNumber === 3)) { // Teller and Address cells are cyan
       cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF00FFFF' } }; // Cyan
     }
   });
@@ -113,27 +126,34 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
       
       const dayValues = currentDates.map(d => teller.daily[d] || 0);
       
-      tRow.getCell(2).value = teller.name;
-      tRow.getCell(3).value = dayValues[0];
-      tRow.getCell(4).value = dayValues[1];
-      tRow.getCell(5).value = dayValues[2];
-      tRow.getCell(6).value = dayValues[3];
-      tRow.getCell(7).value = dayValues[4];
-      tRow.getCell(8).value = dayValues[5];
-      tRow.getCell(9).value = dayValues[6];
-      tRow.getCell(10).value = teller.totalCurr;
-      tRow.getCell(11).value = teller.totalPrev;
+      let cIdx = 2;
+      tRow.getCell(cIdx++).value = teller.name;
+      if (includeAddress) {
+        const addrCell = tRow.getCell(cIdx++);
+        addrCell.value = teller.address || 'UNKNOWN';
+        addrCell.alignment = { horizontal: 'left', vertical: 'middle' };
+      }
+
+      tRow.getCell(cIdx++).value = dayValues[0];
+      tRow.getCell(cIdx++).value = dayValues[1];
+      tRow.getCell(cIdx++).value = dayValues[2];
+      tRow.getCell(cIdx++).value = dayValues[3];
+      tRow.getCell(cIdx++).value = dayValues[4];
+      tRow.getCell(cIdx++).value = dayValues[5];
+      tRow.getCell(cIdx++).value = dayValues[6];
+      tRow.getCell(cIdx++).value = teller.totalCurr;
+      tRow.getCell(cIdx++).value = teller.totalPrev;
       
-      const analysisCell = tRow.getCell(12);
+      const analysisCell = tRow.getCell(cIdx++);
       analysisCell.value = teller.totalCurr > teller.totalPrev ? 'Increased' : 'Decreased';
       analysisCell.font = { color: { argb: teller.totalCurr > teller.totalPrev ? 'FF0000FF' : 'FFFF0000' }, bold: true }; // Blue for increase
       
-      const diffCell = tRow.getCell(13);
+      const diffCell = tRow.getCell(cIdx++);
       diffCell.value = teller.difference;
       diffCell.font = { color: { argb: teller.difference < 0 ? 'FFFF0000' : 'FF0000FF' }, bold: true };
 
       // Number formatting
-      for (let c = 3; c <= 11; c++) {
+      for (let c = daysStartCol; c <= daysEndCol + 2; c++) {
         tRow.getCell(c).numFmt = '#,##0';
       }
       diffCell.numFmt = '#,##0';
@@ -162,6 +182,7 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
     const totalRow = worksheet.getRow(currentRow);
     totalRow.values = [
       'Total :', '',
+      ...(includeAddress ? [''] : []),
       unitTotals.day1, unitTotals.day2, unitTotals.day3, unitTotals.day4, 
       unitTotals.day5, unitTotals.day6, unitTotals.day7,
       unitTotals.totalCurr, unitTotals.totalPrev, '', unitTotals.difference
@@ -175,7 +196,7 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
       if (typeof cell.value === 'number') {
         cell.numFmt = '#,##0';
       }
-      if (colNumber === 13) {
+      if (colNumber === diffCol) {
         cell.font = { bold: true, color: { argb: unitTotals.difference < 0 ? 'FFFF0000' : 'FF0000FF' } };
       }
     });
@@ -188,7 +209,8 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
   // Write file
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  saveAs(blob, `${regionName.replace(/ /g, '_')}_Weekly_Gross_Sales_${currentDatesTitle.replace(/ /g, '_')}.xlsx`);
+  const fileSuffix = includeAddress ? 'With_Address_' : '';
+  saveAs(blob, `${regionName.replace(/ /g, '_')}_Weekly_Gross_Sales_${fileSuffix}${currentDatesTitle.replace(/ /g, '_')}.xlsx`);
 };
 
 export const generateSpvrWeeklyExcelReport = async (data, currentDates, previousDates, regionName = 'MAGUINDANAO', currentPage = 'mag') => {

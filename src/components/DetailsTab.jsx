@@ -4,6 +4,20 @@ import { clsx } from 'clsx';
 import { generateExcelReport } from '../utils/exportToExcel';
 import { useAuth } from '../context/AuthContext';
 
+const getDashboardRegionName = (page) => {
+  const p = (page || '').toLowerCase();
+  if (p === 'man' || p === 'mandaue') return 'MAN';
+  if (p === 'imp' || p === 'imperial') return 'IMPERIAL';
+  if (p === 'setb') return 'SETB';
+  if (p === 'iligan') return 'ILIGAN';
+  if (p === 'lanao') return 'LANAO';
+  if (p === 'lotto') return 'LOTTO';
+  if (p === 'baloi') return 'BALOI';
+  if (p === 'lds') return 'LDS';
+  if (p === 'mag' || p === 'maguindanao') return 'MAG';
+  return (page || 'MAG').toUpperCase();
+};
+
 export default function DetailsTab({ apiData, currentPage }) {
   const { user } = useAuth();
   let detailsData = apiData?.detailsData;
@@ -42,20 +56,23 @@ export default function DetailsTab({ apiData, currentPage }) {
 
     rawData.forEach(item => {
       if (!item.drawMonth) return;
-      const groupName = spvrMap[item.supervisor] || item.location || 'UNKNOWN AREA';
+      const groupName = spvrMap[item.supervisor] || (typeof item.supervisor === 'string' && isNaN(Number(item.supervisor)) ? item.supervisor : null) || item.location || 'UNKNOWN AREA';
       const tellerName = item.fullName || item.username;
       
       const sortableDate = `${item.drawYear}-${String(item.drawMonth).padStart(2, '0')}-${String(item.drawDay).padStart(2, '0')}`;
+      const resolvedAddress = item.address || item.location || item.outlet || 'UNKNOWN';
       
       if (!groups[groupName]) groups[groupName] = {};
       if (!groups[groupName][tellerName]) {
         groups[groupName][tellerName] = {
           name: tellerName,
-          address: item.address || 'UNKNOWN',
+          address: resolvedAddress,
           daysMap: {},
           current: 0,
           previous: 0
         };
+      } else if (groups[groupName][tellerName].address === 'UNKNOWN' && resolvedAddress !== 'UNKNOWN') {
+        groups[groupName][tellerName].address = resolvedAddress;
       }
       
       const tellerData = groups[groupName][tellerName];
@@ -132,6 +149,7 @@ export default function DetailsTab({ apiData, currentPage }) {
         current7Dates.forEach((d, i) => daily[d] = t.days[i]);
         return {
           name: t.name,
+          address: t.address || 'UNKNOWN',
           daily: daily,
           totalCurr: t.current,
           totalPrev: t.previous,
@@ -140,8 +158,29 @@ export default function DetailsTab({ apiData, currentPage }) {
       })
     }));
 
-    const regionName = currentPage === 'man' ? 'MAN' : currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+    const regionName = getDashboardRegionName(currentPage);
     await generateExcelReport(excelData, current7Dates, previous7Dates, regionName);
+  };
+
+  const handleDownloadWithAddress = async () => {
+    const excelData = detailsData.map(group => ({
+      spvrName: group.supervisor,
+      tellers: group.tellers.map(t => {
+        const daily = {};
+        current7Dates.forEach((d, i) => daily[d] = t.days[i]);
+        return {
+          name: t.name,
+          address: t.address || 'UNKNOWN',
+          daily: daily,
+          totalCurr: t.current,
+          totalPrev: t.previous,
+          difference: t.shift
+        };
+      })
+    }));
+
+    const regionName = getDashboardRegionName(currentPage);
+    await generateExcelReport(excelData, current7Dates, previous7Dates, regionName, { includeAddress: true });
   };
 
   const handleDownloadLowGrossers = async () => {
@@ -155,6 +194,7 @@ export default function DetailsTab({ apiData, currentPage }) {
           current7Dates.forEach((d, i) => daily[d] = t.days[i]);
           return {
             name: t.name,
+            address: t.address || 'UNKNOWN',
             daily: daily,
             totalCurr: t.current,
             totalPrev: t.previous,
@@ -164,7 +204,7 @@ export default function DetailsTab({ apiData, currentPage }) {
       };
     }).filter(Boolean);
 
-    const regionName = currentPage === 'man' ? 'MAN' : currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+    const regionName = getDashboardRegionName(currentPage);
     await generateExcelReport(excelData, current7Dates, previous7Dates, regionName + ' - LOW GROSSERS');
   };
 
@@ -185,6 +225,7 @@ export default function DetailsTab({ apiData, currentPage }) {
           current7Dates.forEach((d, i) => daily[d] = t.days[i]);
           return {
             name: t.name,
+            address: t.address || 'UNKNOWN',
             daily: daily,
             totalCurr: t.current,
             totalPrev: t.previous,
@@ -194,7 +235,7 @@ export default function DetailsTab({ apiData, currentPage }) {
       };
     }).filter(Boolean);
 
-    const regionName = currentPage === 'man' ? 'MAN' : currentPage === 'imp' ? 'IMPERIAL' : currentPage === 'setb' ? 'SETB' : currentPage === 'iligan' ? 'ILIGAN' : currentPage === 'lanao' ? 'LANAO' : currentPage === 'lotto' ? 'LOTTO' : currentPage === 'baloi' ? 'BALOI' : currentPage === 'lds' ? 'LDS' : 'MAG';
+    const regionName = getDashboardRegionName(currentPage);
     await generateExcelReport(excelData, current7Dates, previous7Dates, regionName + ' - HIGH GROSSERS (TODAY)');
   };
 
@@ -224,7 +265,10 @@ export default function DetailsTab({ apiData, currentPage }) {
           <Download className="w-4 h-4" />
           Download Analysis
         </button>
-        <button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-textPrimary font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)] text-sm">
+        <button 
+          onClick={handleDownloadWithAddress}
+          className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-textPrimary font-semibold px-4 py-2.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)] text-sm"
+        >
           <Download className="w-4 h-4" />
           Download with Address
         </button>
