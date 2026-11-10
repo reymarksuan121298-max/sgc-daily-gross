@@ -14,7 +14,7 @@ export const generateExcelReport = async (data, currentDates, previousDates, reg
     return `${monthStr} ${String(d1.getDate()).padStart(2, '0')}-${String(d2.getDate()).padStart(2, '0')} ${d1.getFullYear()}`;
   };
 
-  const _currentDatesTitle = formatDateTitle(currentDates);
+  const currentDatesTitle = formatDateTitle(currentDates);
   const prevDateRangeStr = formatDateTitle(previousDates).split(' ')[1] || ''; // e.g. "04-10"
   const prevMonthStr = previousDates.length > 0 ? new Date(previousDates[0]).toLocaleString('default', { month: 'short' }) : '';
 
@@ -195,14 +195,6 @@ export const generateSpvrWeeklyExcelReport = async (data, currentDates, previous
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('SPVR Weekly Report');
 
-  const formatDateTitle = (dates) => {
-    if (!dates || dates.length === 0) return '';
-    const d1 = new Date(dates[0]);
-    const d2 = new Date(dates[dates.length - 1]);
-    const monthStr = d1.toLocaleString('default', { month: 'short' });
-    return `${monthStr} ${String(d1.getDate()).padStart(2, '0')}-${String(d2.getDate()).padStart(2, '0')} ${d1.getFullYear()}`;
-  };
-
   const formatShortDateRange = (dates) => {
     if (!dates || dates.length === 0) return '';
     const d1 = new Date(dates[0]);
@@ -210,7 +202,6 @@ export const generateSpvrWeeklyExcelReport = async (data, currentDates, previous
     return `${d1.toLocaleString('default', { month: 'short' })}${d1.getDate()} - ${d2.toLocaleString('default', { month: 'short' })}${d2.getDate()}`;
   };
 
-  const _currentDatesTitle = formatDateTitle(currentDates);
   const prevDateLabel = formatShortDateRange(previousDates);
   const currDateLabel = formatShortDateRange(currentDates);
 

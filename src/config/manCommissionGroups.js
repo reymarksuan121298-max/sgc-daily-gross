@@ -19,7 +19,8 @@ export const MAN_COMMISSION_GROUPS = [
       'Rodelyn L Seno',
       'SILVA, MARILOU',
       'TORREFRANCA, JOCEVIL',
-      'TORREGOSA, JUCEL'
+      'TORREGOSA, JUCEL',
+      'MYRNA CAMPILAN'
     ]
   },
   {
