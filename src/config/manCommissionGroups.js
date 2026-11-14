@@ -20,6 +20,7 @@ export const MAN_COMMISSION_GROUPS = [
       'SILVA, MARILOU',
       'TORREFRANCA, JOCEVIL',
       'TORREGOSA, JUCEL',
+      'OLIVER ALILIN',
       'MYRNA CAMPILAN'
     ]
   },
