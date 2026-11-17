@@ -82,8 +82,14 @@ export default function ManCommission({ selectedDate, setSelectedDate }) {
 
           // If not exact match, try matching substrings for common alias variants
           if (gross === undefined) {
+            const tellerWords = tellerName.toUpperCase().replace(/[^A-Z0-9\s]/g, '').split(/\s+/).filter((w) => w.length >= 3);
             for (const [apiKey, apiGross] of tellerGrossMap.entries()) {
               if (apiKey.includes(norm) || norm.includes(apiKey)) {
+                gross = apiGross;
+                break;
+              }
+              // If at least 2 significant words match (handles first + last name matching across middle names/initials and inverted order)
+              if (tellerWords.length >= 2 && tellerWords.filter((w) => apiKey.includes(w)).length >= 2) {
                 gross = apiGross;
                 break;
               }

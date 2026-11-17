@@ -69,6 +69,13 @@ export const MAN_COMMISSION_GROUPS = [
     ]
   },
   {
+    id: 'kapitan',
+    title: 'COORDINATOR: KAPITAN',
+    tellers: [
+      'BEA MENDOZA'
+    ]
+  },
+  {
     id: 'spvr_apple',
     title: 'SPVR-APPLE',
     tellers: [
